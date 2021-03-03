@@ -10,6 +10,7 @@
   "devDependencies": {
     "@commitlint/config-conventional": "^12.0.1",
     "@poi/plugin-typescript": "^12.3.1",
+    "@types/lodash": "^4.14.168",
     "@types/node": "^14.14.31",
     "@types/poi": "^12.5.0",
     "@typescript-eslint/eslint-plugin": "^4.16.1",
@@ -29,6 +30,8 @@
     "@c4605/toolconfs": "^5.2.2",
     "@types/react": "^17.0.2",
     "@types/react-dom": "^17.0.1",
+    "immer": "^8.0.1",
+    "lodash": "^4.17.21",
     "react": "^17.0.1",
     "react-dom": "^17.0.1"
   },

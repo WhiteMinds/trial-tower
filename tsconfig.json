@@ -1,6 +1,7 @@
 {
   "extends": "@c4605/toolconfs/tsconfig",
   "compilerOptions": {
-    "jsx": "react"
+    "jsx": "react",
+    "allowSyntheticDefaultImports": true
   }
 }
