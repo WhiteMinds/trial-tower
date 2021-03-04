@@ -1,5 +1,5 @@
-import { CombatSystem } from '..'
+import { Engine } from '..';
 
-export interface CombatSystemModule {
-  init: (system: CombatSystem) => void
+export interface EngineModule {
+  init: (engine: Engine) => void
 }

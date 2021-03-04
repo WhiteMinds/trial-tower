@@ -1,9 +1,9 @@
-import produce from 'immer'
-import { CombatSystem } from '.'
-import { AttrType, Entity } from './model/entity'
-import { EquipStore } from './store'
+import { Engine } from '.'
+import { AttrType } from './model/entity'
 
-let player: Entity = {
+const engine = new Engine()
+
+const player = engine.createEntity({
   id: 1,
   name: 'Player',
   strength: {
@@ -32,9 +32,9 @@ let player: Entity = {
     modifiers: []
   },
   equips: [0, 1],
-}
+})
 
-let monster: Entity = {
+const monster = engine.createEntity({
   id: 10,
   name: 'Monster',
   strength: {
@@ -63,22 +63,10 @@ let monster: Entity = {
     modifiers: []
   },
   equips: [],
-}
+})
 
-function onEntityInit(entity: Entity) {
-  return produce(entity, entity => {
-    entity.equips.map(id => EquipStore[id]).forEach(equip => {
-      entity.maxHP.modifiers.push(equip.maxHP)
-      entity.atk.modifiers.push(equip.atk)
-    })
-  })
-}
-player = onEntityInit(player)
-console.log(player)
-
-const state = new CombatSystem(
+const combatState = engine.combat(
   { members: [player] },
   { members: [monster] }
-).start()
-
-console.log(JSON.stringify(state, null, 2))
+)
+console.log(JSON.stringify(combatState, null, 2))
