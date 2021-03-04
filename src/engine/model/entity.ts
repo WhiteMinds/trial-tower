@@ -1,3 +1,4 @@
+import { UniqueId } from '../types'
 import { Equip } from './equip'
 
 // 如果 hp 的计算受体质属性影响，那在体质变化后，currentHp 怎样更新
@@ -6,7 +7,7 @@ import { Equip } from './equip'
 export interface Entity {
   id: number
   name: string
-  
+
   // 基础属性
   strength: AttrDescriptor
   constitution: AttrDescriptor
@@ -17,7 +18,7 @@ export interface Entity {
   maxHP: AttrDescriptor$HealthPoint
   atk: AttrDescriptor$Attack
 
-  equips: Equip['id'][]
+  equipIds: Equip['id'][]
 }
 
 export interface BattlingEntity extends Entity {
@@ -49,7 +50,7 @@ export interface AttrDescriptor$Attack extends AttrDescriptor {
   type: AttrType.Attack
 }
 
-export type AttrModifier =
+export type AttrModifier = { source?: UniqueId } & (
   | {
       fixed: number
     }
@@ -57,6 +58,7 @@ export type AttrModifier =
       add?: number
       per?: number
     }
+)
 
 export namespace AttrDescriptor {
   export function getValue(entity: Entity, descriptor: AttrDescriptor): number {
@@ -76,12 +78,21 @@ export namespace AttrDescriptor {
     return (derived + modifier.add!) * (1 + modifier.per!)
   }
 
-  export function getDerived(entity: Entity,descriptor: AttrDescriptor): number {
-    switch(descriptor.type) {
+  export function getDerived(
+    entity: Entity,
+    descriptor: AttrDescriptor,
+  ): number {
+    switch (descriptor.type) {
       case AttrType.HealthPoint:
-        return descriptor.base + AttrDescriptor.getValue(entity, entity.constitution) * 5
+        return (
+          descriptor.base +
+          AttrDescriptor.getValue(entity, entity.constitution) * 5
+        )
       case AttrType.Attack:
-        return descriptor.base + Math.floor(AttrDescriptor.getValue(entity, entity.strength) / 2)
+        return (
+          descriptor.base +
+          Math.floor(AttrDescriptor.getValue(entity, entity.strength) / 2)
+        )
       case AttrType.Normal:
         return descriptor.base
     }

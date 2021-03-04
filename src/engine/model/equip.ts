@@ -1,9 +1,9 @@
-import { AttrModifier } from '../model/entity';
+import { AttrModifier } from '../model/entity'
 
 export interface Equip {
   id: number
   name: string
 
-  maxHP: AttrModifier
-  atk: AttrModifier
+  maxHP?: AttrModifier
+  atk?: AttrModifier
 }

@@ -9,29 +9,29 @@ const player = engine.createEntity({
   strength: {
     type: AttrType.Normal,
     base: 2,
-    modifiers: []
+    modifiers: [],
   },
   constitution: {
     type: AttrType.Normal,
     base: 2,
-    modifiers: []
+    modifiers: [],
   },
   speed: {
     type: AttrType.Normal,
     base: 2,
-    modifiers: []
+    modifiers: [],
   },
   maxHP: {
     type: AttrType.HealthPoint,
     base: 100,
-    modifiers: []
+    modifiers: [],
   },
   atk: {
     type: AttrType.Attack,
     base: 10,
-    modifiers: []
+    modifiers: [],
   },
-  equips: [0, 1],
+  equipIds: [0, 1],
 })
 
 const monster = engine.createEntity({
@@ -40,33 +40,30 @@ const monster = engine.createEntity({
   strength: {
     type: AttrType.Normal,
     base: 2,
-    modifiers: []
+    modifiers: [],
   },
   constitution: {
     type: AttrType.Normal,
     base: 2,
-    modifiers: []
+    modifiers: [],
   },
   speed: {
     type: AttrType.Normal,
     base: 1,
-    modifiers: []
+    modifiers: [],
   },
   maxHP: {
     type: AttrType.HealthPoint,
     base: 100,
-    modifiers: []
+    modifiers: [],
   },
   atk: {
     type: AttrType.Attack,
     base: 10,
-    modifiers: []
+    modifiers: [],
   },
-  equips: [],
+  equipIds: [],
 })
 
-const combatState = engine.combat(
-  { members: [player] },
-  { members: [monster] }
-)
+const combatState = engine.combat({ members: [player] }, { members: [monster] })
 console.log(JSON.stringify(combatState, null, 2))

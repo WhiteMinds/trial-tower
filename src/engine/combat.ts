@@ -18,9 +18,9 @@ export class CombatSystem extends EventTarget {
   constructor(...teams: Team[]) {
     super()
     // 克隆，并转换 Entity 为 BattlingEntity
-    this.teams = _.cloneDeep(teams).map(team => ({
+    this.teams = _.cloneDeep(teams).map((team) => ({
       ...team,
-      members: team.members.map(toBattlingEntity)
+      members: team.members.map(toBattlingEntity),
     }))
   }
 
@@ -54,11 +54,14 @@ export class CombatSystem extends EventTarget {
   getNextActor(): undefined | BattlingEntity {
     return _.sortBy(
       getAliveEntities(this).filter((e) => e.progress >= ProgressNeedPoint),
-      'progress'
+      'progress',
     )[0]
   }
 
-  doActionPreparing(entity: BattlingEntity, num: number = AttrDescriptor.getValue(entity, entity.speed)) {
+  doActionPreparing(
+    entity: BattlingEntity,
+    num: number = AttrDescriptor.getValue(entity, entity.speed),
+  ) {
     entity.progress += num
   }
 
@@ -74,9 +77,9 @@ export class CombatSystem extends EventTarget {
         const damage = AttrDescriptor.getValue(actor, actor.atk)
         e.currentHP -= damage
         this.msgs.push(
-          `${actor.name} 攻击了 ${e.name}，造成 ${damage} 伤害，剩余 hp ${e.currentHP}`
+          `${actor.name} 攻击了 ${e.name}，造成 ${damage} 伤害，剩余 hp ${e.currentHP}`,
         )
-      })
+      }),
     )
 
     const isBattleEnded = otherTeams
@@ -100,7 +103,10 @@ function getAliveEntities(state: CombatSystem): BattlingEntity[] {
   return getEntities(state).filter(Entity.isAlive)
 }
 
-function getBelongTeam(state: CombatSystem, entity: Entity): undefined | BattlingTeam {
+function getBelongTeam(
+  state: CombatSystem,
+  entity: Entity,
+): undefined | BattlingTeam {
   return state.teams.find((t) => t.members.find((e) => e.id === entity.id))
 }
 
@@ -108,7 +114,7 @@ function toBattlingEntity(entity: BehaviorSubject<Entity>): BattlingEntity {
   return {
     ...entity.value,
     progress: 0,
-    currentHP: AttrDescriptor.getValue(entity.value, entity.value.maxHP)
+    currentHP: AttrDescriptor.getValue(entity.value, entity.value.maxHP),
   }
 }
 

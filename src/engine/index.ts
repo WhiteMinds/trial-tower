@@ -1,7 +1,7 @@
-import { BehaviorSubject } from 'rxjs';
-import { CombatSystem, Team } from './combat';
-import { Entity } from './model/entity';
-import { EquipModule } from './module/equip';
+import { BehaviorSubject } from 'rxjs'
+import { CombatSystem, Team } from './combat'
+import { Entity } from './model/entity'
+import { EquipModule } from './module/equip'
 
 export class Engine extends EventTarget {
   equipModule = new EquipModule(this)

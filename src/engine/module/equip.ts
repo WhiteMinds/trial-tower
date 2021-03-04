@@ -1,4 +1,5 @@
 import produce from 'immer'
+import _ from 'lodash'
 import { BehaviorSubject } from 'rxjs'
 import { Engine, EntityEvents } from '..'
 import { Entity } from '../model/entity'
@@ -13,17 +14,39 @@ export class EquipModule {
   init() {
     this.engine.addEventListener('entity_init', (event) => {
       const { entity } = event as EntityEvents.Init
-      entity.value.equips.map(id => EquipStore[id]).forEach(equip => {
-        this.equipItem(entity, equip)
-      })
+      entity.value.equipIds
+        .map((id) => EquipStore[id])
+        .forEach((equip) => {
+          this.equipItem(entity, equip)
+        })
     })
   }
 
   equipItem(entity: BehaviorSubject<Entity>, equip: Equip) {
     // 将物品的 modifier 都挂载上
-    entity.next(produce(entity.value, entity => {
-      entity.maxHP.modifiers.push(equip.maxHP)
-      entity.atk.modifiers.push(equip.atk)
-    }))
+    entity.next(
+      produce(entity.value, (entity) => {
+        equip.maxHP && entity.maxHP.modifiers.push(equip.maxHP)
+        equip.atk && entity.atk.modifiers.push(equip.atk)
+      }),
+    )
+  }
+
+  unequipItem(entity: BehaviorSubject<Entity>, equip: Equip) {
+    entity.next(
+      produce(entity.value, (entity) => {
+        if (equip.maxHP) {
+          _.remove(entity.maxHP.modifiers, {
+            source: equip.maxHP.source,
+          })
+        }
+
+        if (equip.atk) {
+          _.remove(entity.atk.modifiers, {
+            source: equip.atk.source,
+          })
+        }
+      }),
+    )
   }
 }
