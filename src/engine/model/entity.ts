@@ -1,57 +1,34 @@
 import { uniqueId } from 'lodash'
+import { BehaviorSubject } from 'rxjs'
+import { Engine } from '..'
 import { UniqueId } from '../types'
 import { Equip } from './equip'
 
 // 如果 hp 的计算受体质属性影响，那在体质变化后，currentHp 怎样更新
 // 可以在任意属性的 base / modifiers 发生变化后进行通知，currentHp 有一个专门的处理函数来做立即更新
+// 比如 desc.modifiers 可以是个 subject？
 
 export class Entity {
   id: UniqueId = uniqueId('entity')
   name: string = 'UnamedEntity'
 
-  // 基础属性
+  /** 基础属性 */
+
   strength = new AttrDescriptor(this)
   constitution = new AttrDescriptor(this)
   // 影响行动进度的增加速度
   speed = new AttrDescriptor(this)
 
-  // 衍生属性
+  /** 衍生属性 */
   maxHP = new AttrDescriptor$HealthPoint(this)
   atk = new AttrDescriptor$Attack(this)
 
-  equipIds: Equip['id'][] = []
+  /** 非游戏引擎原始依赖的属性（如 EquipModeul 添加的 equipIds）*/
 
-  serialize(): SerializedEntity {
-    return {
-      name: this.name,
-      strength: this.strength.base,
-      constitution: this.constitution.base,
-      speed: this.speed.base,
-      maxHP: this.maxHP.base,
-      atk: this.atk.base,
-      equipIds: this.equipIds,
-    }
-  }
+  equipIds = new BehaviorSubject<Equip['id'][]>([])
 
-  static unserialize(data: SerializedEntity): Entity {
-    return this.unserializeToInstance(data, new Entity())
-  }
-
-  static unserializeToInstance<T extends Entity = Entity>(
-    data: SerializedEntity,
-    entity: T,
-  ): T {
-    entity.name = data.name
-    entity.strength.base = data.strength
-    entity.constitution.base = data.constitution
-    entity.speed.base = data.speed
-    entity.maxHP.base = data.maxHP
-    entity.atk.base = data.atk
-    return entity
-  }
-
-  static create(data: Partial<SerializedEntity>) {
-    return this.unserialize({
+  constructor(public engine: Engine, data?: Partial<SerializedEntity>) {
+    this.unserialize({
       name: 'UnamedEntity',
       strength: 1,
       constitution: 1,
@@ -61,10 +38,35 @@ export class Entity {
       equipIds: [],
       ...data,
     })
+
+    // 通知初始化
+    engine.entitySubjects.init.next(this)
   }
 
-  clone() {
-    return Entity.unserialize(this.serialize())
+  serialize(): SerializedEntity {
+    return {
+      name: this.name,
+      strength: this.strength.base,
+      constitution: this.constitution.base,
+      speed: this.speed.base,
+      maxHP: this.maxHP.base,
+      atk: this.atk.base,
+      equipIds: this.equipIds.value,
+    }
+  }
+
+  unserialize(data: SerializedEntity) {
+    this.name = data.name
+    this.strength.base = data.strength
+    this.constitution.base = data.constitution
+    this.speed.base = data.speed
+    this.maxHP.base = data.maxHP
+    this.atk.base = data.atk
+    this.equipIds.next([...data.equipIds])
+  }
+
+  clone(engine = this.engine) {
+    return new Entity(engine, this.serialize())
   }
 }
 
@@ -83,10 +85,7 @@ export class BattlingEntity extends Entity {
   currentHP: number = 0
 
   static from(entity: Entity): BattlingEntity {
-    const battlingEntity = Entity.unserializeToInstance(
-      entity.serialize(),
-      new BattlingEntity(),
-    )
+    const battlingEntity = new BattlingEntity(entity.engine, entity.serialize())
     battlingEntity.currentHP = battlingEntity.maxHP.value
     return battlingEntity
   }
@@ -138,18 +137,26 @@ export namespace AttrDescriptor {
   export function getValue(descriptor: AttrDescriptor): number {
     if (descriptor.modifiers.length === 0) return descriptor.derived
 
-    const modifier = descriptor.modifiers.reduce((result, modifier) => {
-      if ('fixed' in modifier) return modifier
-      if ('fixed' in result) return result
-      return {
-        add: (result.add ?? 0) + (modifier.add ?? 0),
-        per: (result.per ?? 0) + (modifier.per ?? 0),
-      }
-    })
+    const modifier = combineAttrModifier(descriptor.modifiers)
     if ('fixed' in modifier) return modifier.fixed
 
-    return (descriptor.derived + modifier.add!) * (1 + modifier.per!)
+    const add = modifier.add ?? 0
+    const per = 1 + (modifier.per ?? 0)
+    return (descriptor.derived + add) * per
   }
+}
+
+function combineAttrModifier(modifiers: AttrModifier[]): AttrModifier {
+  return modifiers.reduce((result, modifier) => {
+    // 固定值的优先级最高
+    if ('fixed' in modifier) return modifier
+    if ('fixed' in result) return result
+
+    return {
+      add: (result.add ?? 0) + (modifier.add ?? 0),
+      per: (result.per ?? 0) + (modifier.per ?? 0),
+    }
+  })
 }
 
 export namespace Entity {

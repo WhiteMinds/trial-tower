@@ -3,7 +3,7 @@ import { Entity } from './model/entity'
 
 const engine = new Engine()
 
-const player = Entity.create({
+const player = new Entity(engine, {
   name: 'Player',
   strength: 2,
   constitution: 2,
@@ -13,7 +13,7 @@ const player = Entity.create({
   equipIds: [0, 1],
 })
 
-const monster = Entity.create({
+const monster = new Entity(engine, {
   name: 'Monster',
   strength: 2,
   constitution: 2,

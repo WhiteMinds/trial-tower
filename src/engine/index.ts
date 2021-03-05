@@ -4,17 +4,11 @@ import { Entity } from './model/entity'
 import { EquipModule } from './module/equip'
 
 export class Engine extends EventTarget {
-  equipModule = new EquipModule(this)
-
   entitySubjects = {
     init: new Subject<Entity>(),
   }
-
-  createEntity(origin: Entity) {
-    const entity = new BehaviorSubject(origin)
-    this.dispatchEvent(new EntityEvents.Init(entity))
-    return entity
-  }
+  // 需要使用 entitySubjects 的 module 应该在其下方初始化，否则会拿不到
+  equipModule = new EquipModule(this)
 
   combat(...teams: Team[]) {
     const sys = new CombatSystem(...teams)
