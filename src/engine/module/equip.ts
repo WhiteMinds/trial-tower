@@ -23,7 +23,7 @@ export class EquipModule {
           if (addEquipIds.length > 0)
             console.debug(entity.name, 'add', addEquipIds)
 
-          oldEquipIds
+          removeEquipIds
             .map((id) => EquipStore[id])
             .forEach((equip) => {
               this.unequipItem(entity, equip)

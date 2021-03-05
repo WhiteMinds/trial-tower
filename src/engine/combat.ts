@@ -65,8 +65,9 @@ export class CombatSystem extends EventTarget {
     const actor = this.actor
     if (!actor) return
 
-    const team = getBelongTeam(this, actor)
-    const otherTeams = this.teams.filter((t) => t !== team)
+    const team = this.getBelongTeam(actor)
+    if (!team) return
+    const otherTeams = this.getOtherTeams(team)
     // 其余队伍全员受到一次伤害
     otherTeams.forEach((t) =>
       t.members.forEach((e) => {
@@ -89,6 +90,23 @@ export class CombatSystem extends EventTarget {
         team === this.teams[0] ? BattleResult.Win : BattleResult.Lose
     }
   }
+
+  // Utils
+  // ===========================================================================
+
+  getBelongTeam(entity: Entity): undefined | BattlingTeam {
+    return this.teams.find((t) => t.members.find((e) => e.id === entity.id))
+  }
+
+  getOtherTeams(team: BattlingTeam): BattlingTeam[]
+  getOtherTeams(entity: Entity): BattlingTeam[]
+  getOtherTeams(entityOrTeam: Entity | BattlingTeam): BattlingTeam[] {
+    const selfTeam =
+      entityOrTeam instanceof Entity
+        ? this.getBelongTeam(entityOrTeam)
+        : entityOrTeam
+    return this.teams.filter((t) => t !== selfTeam)
+  }
 }
 
 function getEntities(state: CombatSystem): BattlingEntity[] {
@@ -97,13 +115,6 @@ function getEntities(state: CombatSystem): BattlingEntity[] {
 
 function getAliveEntities(state: CombatSystem): BattlingEntity[] {
   return getEntities(state).filter(Entity.isAlive)
-}
-
-function getBelongTeam(
-  state: CombatSystem,
-  entity: Entity,
-): undefined | BattlingTeam {
-  return state.teams.find((t) => t.members.find((e) => e.id === entity.id))
 }
 
 export interface Team {
