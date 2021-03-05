@@ -1,67 +1,25 @@
 import { Engine } from '.'
-import { AttrType } from './model/entity'
+import { Entity } from './model/entity'
 
 const engine = new Engine()
 
-const player = engine.createEntity({
-  id: 1,
+const player = Entity.create({
   name: 'Player',
-  strength: {
-    type: AttrType.Normal,
-    base: 2,
-    modifiers: [],
-  },
-  constitution: {
-    type: AttrType.Normal,
-    base: 2,
-    modifiers: [],
-  },
-  speed: {
-    type: AttrType.Normal,
-    base: 2,
-    modifiers: [],
-  },
-  maxHP: {
-    type: AttrType.HealthPoint,
-    base: 100,
-    modifiers: [],
-  },
-  atk: {
-    type: AttrType.Attack,
-    base: 10,
-    modifiers: [],
-  },
+  strength: 2,
+  constitution: 2,
+  speed: 2,
+  maxHP: 100,
+  atk: 10,
   equipIds: [0, 1],
 })
 
-const monster = engine.createEntity({
-  id: 10,
+const monster = Entity.create({
   name: 'Monster',
-  strength: {
-    type: AttrType.Normal,
-    base: 2,
-    modifiers: [],
-  },
-  constitution: {
-    type: AttrType.Normal,
-    base: 2,
-    modifiers: [],
-  },
-  speed: {
-    type: AttrType.Normal,
-    base: 1,
-    modifiers: [],
-  },
-  maxHP: {
-    type: AttrType.HealthPoint,
-    base: 100,
-    modifiers: [],
-  },
-  atk: {
-    type: AttrType.Attack,
-    base: 10,
-    modifiers: [],
-  },
+  strength: 2,
+  constitution: 2,
+  speed: 1,
+  maxHP: 100,
+  atk: 10,
   equipIds: [],
 })
 

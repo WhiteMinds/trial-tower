@@ -1,6 +1,5 @@
 import _ from 'lodash'
-import { BehaviorSubject } from 'rxjs'
-import { Entity, BattlingEntity, AttrDescriptor } from './model/entity'
+import { Entity, BattlingEntity } from './model/entity'
 import { Equip } from './model/equip'
 
 // 每次行动需要的进度点数
@@ -20,7 +19,7 @@ export class CombatSystem extends EventTarget {
     // 克隆，并转换 Entity 为 BattlingEntity
     this.teams = _.cloneDeep(teams).map((team) => ({
       ...team,
-      members: team.members.map(toBattlingEntity),
+      members: team.members.map(BattlingEntity.from),
     }))
   }
 
@@ -58,10 +57,7 @@ export class CombatSystem extends EventTarget {
     )[0]
   }
 
-  doActionPreparing(
-    entity: BattlingEntity,
-    num: number = AttrDescriptor.getValue(entity, entity.speed),
-  ) {
+  doActionPreparing(entity: BattlingEntity, num: number = entity.speed.value) {
     entity.progress += num
   }
 
@@ -74,7 +70,7 @@ export class CombatSystem extends EventTarget {
     // 其余队伍全员受到一次伤害
     otherTeams.forEach((t) =>
       t.members.forEach((e) => {
-        const damage = AttrDescriptor.getValue(actor, actor.atk)
+        const damage = actor.atk.value
         e.currentHP -= damage
         this.msgs.push(
           `${actor.name} 攻击了 ${e.name}，造成 ${damage} 伤害，剩余 hp ${e.currentHP}`,
@@ -110,16 +106,8 @@ function getBelongTeam(
   return state.teams.find((t) => t.members.find((e) => e.id === entity.id))
 }
 
-function toBattlingEntity(entity: BehaviorSubject<Entity>): BattlingEntity {
-  return {
-    ...entity.value,
-    progress: 0,
-    currentHP: AttrDescriptor.getValue(entity.value, entity.value.maxHP),
-  }
-}
-
 export interface Team {
-  members: BehaviorSubject<Entity>[]
+  members: Entity[]
 }
 
 interface BattlingTeam {
