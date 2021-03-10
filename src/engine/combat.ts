@@ -67,27 +67,45 @@ export class CombatSystem extends EventTarget {
 
     const team = this.getBelongTeam(actor)
     if (!team) return
-    const otherTeams = this.getOtherTeams(team)
-    // 其余队伍全员受到一次伤害
-    otherTeams.forEach((t) =>
-      t.members.forEach((e) => {
-        const damage = actor.atk.value
-        e.currentHP -= damage
-        this.msgs.push(
-          `${actor.name} 攻击了 ${e.name}，造成 ${damage} 伤害，剩余 hp ${e.currentHP}`,
-        )
-      }),
-    )
 
-    const isBattleEnded = otherTeams
+    if (actor.skills.value.length > 0 && _.random(1, 2) === 1) {
+      // 释放技能
+      const skill = _.sample(actor.skills.value)!
+      skill.onUse(this)
+    } else {
+      // 普通攻击
+      const e = this.getFirstEnemy(actor)!
+      const damage = actor.atk.value
+      e.currentHP -= damage
+      this.msgs.push(
+        `${actor.name} 攻击了 ${e.name}，造成 ${damage} 伤害，剩余 hp ${e.currentHP}`,
+      )
+    }
+
+    this.setResultIfBattleEnd()
+  }
+
+  setResultIfBattleEnd() {
+    if (!this.actor) return
+    const actorTeam = this.getBelongTeam(this.actor)
+    if (!actorTeam) return
+
+    const battleStarter = this.teams[0]
+    const enemyTeams = this.getOtherTeams(battleStarter)
+
+    const enemyTeamsHasAlive = enemyTeams
       .map((t) => t.members)
       .flat()
-      .every((e) => e.currentHP <= 0)
-    // TODO: 这个时候自己也可能死亡了
+      .some(Entity.isAlive)
 
-    if (isBattleEnded) {
-      this.result =
-        team === this.teams[0] ? BattleResult.Win : BattleResult.Lose
+    if (!enemyTeamsHasAlive) {
+      this.result = BattleResult.Win
+      return
+    }
+
+    const selfTeamHasAlive = battleStarter.members.some(Entity.isAlive)
+    if (!selfTeamHasAlive) {
+      this.result = BattleResult.Lose
     }
   }
 
@@ -106,6 +124,10 @@ export class CombatSystem extends EventTarget {
         ? this.getBelongTeam(entityOrTeam)
         : entityOrTeam
     return this.teams.filter((t) => t !== selfTeam)
+  }
+
+  getFirstEnemy(entity: Entity): undefined | BattlingEntity {
+    return this.getOtherTeams(entity)?.[0]?.members?.[0]
   }
 }
 

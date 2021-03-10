@@ -1,5 +1,6 @@
 import { Engine } from '.'
 import { Entity } from './model/entity'
+import { Skill$Thump } from './model/skill'
 
 const engine = new Engine()
 
@@ -11,6 +12,11 @@ const player = new Entity(engine, {
   maxHP: 100,
   atk: 10,
   equipIds: [0, 1],
+  skills: [
+    {
+      id: Skill$Thump.id,
+    },
+  ],
 })
 
 const monster = new Entity(engine, {
@@ -20,7 +26,6 @@ const monster = new Entity(engine, {
   speed: 1,
   maxHP: 100,
   atk: 10,
-  equipIds: [],
 })
 
 const combatState = engine.combat({ members: [player] }, { members: [monster] })

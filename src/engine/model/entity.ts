@@ -3,6 +3,7 @@ import { BehaviorSubject } from 'rxjs'
 import { Engine } from '..'
 import { UniqueId } from '../types'
 import { Equip } from './equip'
+import { SerializedSkill, Skill } from './skill'
 
 // 如果 hp 的计算受体质属性影响，那在体质变化后，currentHp 怎样更新
 // 可以在任意属性的 base / modifiers 发生变化后进行通知，currentHp 有一个专门的处理函数来做立即更新
@@ -26,6 +27,7 @@ export class Entity {
   /** 非游戏引擎原始依赖的属性（如 EquipModeul 添加的 equipIds）*/
 
   equipIds = new BehaviorSubject<Equip['id'][]>([])
+  skills = new BehaviorSubject<Skill[]>([])
 
   constructor(public engine: Engine, data?: Partial<SerializedEntity>) {
     this.unserialize({
@@ -36,6 +38,7 @@ export class Entity {
       maxHP: 1,
       atk: 1,
       equipIds: [],
+      skills: [],
       ...data,
     })
 
@@ -52,6 +55,7 @@ export class Entity {
       maxHP: this.maxHP.base,
       atk: this.atk.base,
       equipIds: this.equipIds.value,
+      skills: this.skills.value.map((skill) => skill.serialize()),
     }
   }
 
@@ -63,6 +67,7 @@ export class Entity {
     this.maxHP.base = data.maxHP
     this.atk.base = data.atk
     this.equipIds.next([...data.equipIds])
+    this.skills.next(data.skills.map((skillData) => new Skill(this, skillData)))
   }
 
   clone(engine = this.engine) {
@@ -78,6 +83,7 @@ export interface SerializedEntity {
   maxHP: number
   atk: number
   equipIds: Equip['id'][]
+  skills: Partial<SerializedSkill>[]
 }
 
 export class BattlingEntity extends Entity {
