@@ -10,6 +10,7 @@ export class CombatSystem extends EventTarget {
   teams: BattlingTeam[]
   msgs: string[] = []
   loots: Equip['id'][] = []
+  round = 0
   result?: BattleResult
   // TODO: actor 真的有必要存在 system 对象上吗
   /** @desc 当前的行动者 */
@@ -33,6 +34,12 @@ export class CombatSystem extends EventTarget {
         this.actor.progress -= ProgressNeedPoint
         this.performAction()
         delete this.actor
+
+        // 每次主循环中调用一次 performAction 算一个回合
+        if (++this.round >= 999) {
+          this.result = BattleResult.Timeout
+        }
+
         continue
       }
 
