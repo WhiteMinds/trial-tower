@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import { Entity, BattlingEntity } from './model/entity'
 import { Equip } from './model/equip'
+import { pullSample } from './utils'
 
 // 每次行动需要的进度点数
 const ProgressNeedPoint = 100
@@ -25,7 +26,7 @@ export class CombatSystem extends EventTarget {
 
   start(): Pick<CombatSystem, 'result' | 'msgs' | 'loots'> {
     let preparingEntity: undefined | BattlingEntity
-    while (this.result ?? true) {
+    while (this.result == null) {
       // 解决所有可行动的实体
       this.actor = this.getNextActor()
       if (this.actor) {
@@ -68,13 +69,23 @@ export class CombatSystem extends EventTarget {
     const team = this.getBelongTeam(actor)
     if (!team) return
 
-    if (actor.skills.value.length > 0 && _.random(1, 2) === 1) {
+    let useSkill = _.random(1, 2) === 1
+
+    if (useSkill) {
       // 释放技能
-      const skill = _.sample(actor.skills.value)!
-      skill.onUse(this)
-    } else {
+      let skills = [...actor.skills.value]
+      let skill = pullSample(skills)
+      // 随机尝试释放技能，直到成功或列表为空
+      while (skill && !skill.onUse(this)) {
+        skill = pullSample(skills)
+      }
+      // 如果释放成功了，skill 应该为释放的技能，否则为空，表示释放失败
+      if (!skill) useSkill = false
+    }
+
+    if (!useSkill) {
       // 普通攻击
-      const e = this.getFirstEnemy(actor)!
+      const e = this.getFirstAliveEnemy(actor)!
       const damage = actor.atk.value
       e.currentHP -= damage
       this.msgs.push(
@@ -89,15 +100,11 @@ export class CombatSystem extends EventTarget {
     if (!this.actor) return
     const actorTeam = this.getBelongTeam(this.actor)
     if (!actorTeam) return
-
     const battleStarter = this.teams[0]
-    const enemyTeams = this.getOtherTeams(battleStarter)
 
-    const enemyTeamsHasAlive = enemyTeams
-      .map((t) => t.members)
-      .flat()
-      .some(Entity.isAlive)
-
+    const enemyTeamsHasAlive = this.getEnemies(battleStarter).some(
+      Entity.isAlive,
+    )
     if (!enemyTeamsHasAlive) {
       this.result = BattleResult.Win
       return
@@ -116,8 +123,19 @@ export class CombatSystem extends EventTarget {
     return this.teams.find((t) => t.members.find((e) => e.id === entity.id))
   }
 
+  getTeammates(entity: Entity): BattlingEntity[] {
+    return this.getBelongTeam(entity)?.members.filter((e) => e !== entity) ?? []
+  }
+
+  getAliveTeammates(
+    ...args: Parameters<CombatSystem['getTeammates']>
+  ): BattlingEntity[] {
+    return this.getAliveTeammates(...args).filter(Entity.isAlive)
+  }
+
   getOtherTeams(team: BattlingTeam): BattlingTeam[]
   getOtherTeams(entity: Entity): BattlingTeam[]
+  getOtherTeams(entityOrTeam: Entity | BattlingTeam): BattlingTeam[]
   getOtherTeams(entityOrTeam: Entity | BattlingTeam): BattlingTeam[] {
     const selfTeam =
       entityOrTeam instanceof Entity
@@ -126,8 +144,24 @@ export class CombatSystem extends EventTarget {
     return this.teams.filter((t) => t !== selfTeam)
   }
 
-  getFirstEnemy(entity: Entity): undefined | BattlingEntity {
-    return this.getOtherTeams(entity)?.[0]?.members?.[0]
+  getEnemies(
+    ...args: Parameters<CombatSystem['getOtherTeams']>
+  ): BattlingEntity[] {
+    return this.getOtherTeams(...args)
+      .map((t) => t.members)
+      .flat()
+  }
+
+  getAliveEnemies(
+    ...args: Parameters<CombatSystem['getEnemies']>
+  ): BattlingEntity[] {
+    return this.getEnemies(...args).filter(Entity.isAlive)
+  }
+
+  getFirstAliveEnemy(
+    ...args: Parameters<CombatSystem['getOtherTeams']>
+  ): undefined | BattlingEntity {
+    return this.getAliveEnemies(...args)[0]
   }
 }
 

@@ -169,4 +169,7 @@ export namespace Entity {
   export function isAlive(entity: BattlingEntity) {
     return entity.currentHP > 0
   }
+  export function isDead(entity: BattlingEntity) {
+    return !isAlive(entity)
+  }
 }
