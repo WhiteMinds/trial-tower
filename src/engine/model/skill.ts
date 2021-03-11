@@ -23,8 +23,8 @@ export class Skill {
     return templateMap[this.id] ?? Skill$Base
   }
 
-  onUse(combat: CombatSystem) {
-    return this.template.onUse(this, combat)
+  onUse(combat: CombatSystem): boolean {
+    return this.template.onUse?.(this, combat) ?? false
   }
 
   serialize(): SerializedSkill {
@@ -45,15 +45,12 @@ export interface SerializedSkill {
 export interface SkillTempalte {
   id: number
   name: string
-  onUse(instance: Skill, combat: CombatSystem): boolean
+  onUse?(instance: Skill, combat: CombatSystem): boolean
 }
 
 export const Skill$Base: SkillTempalte = {
   id: -1,
   name: 'UnnamedSkill',
-  onUse() {
-    return false
-  },
 }
 
 /** N 倍伤害的单体攻击 */
