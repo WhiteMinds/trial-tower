@@ -133,6 +133,26 @@ export const Skill$Revive: SkillTempalte = {
   },
 }
 
+/** 施加灼伤效果，每回合扣血，持续 3 回合 */
+export const Skill$Ignition: SkillTempalte = {
+  id: 5,
+  name: '引燃',
+  onUse(instance, combat) {
+    const source = instance.entity
+    const target = _.sample(
+      combat.getTeammates(instance.entity).filter(Entity.isDead),
+    )
+    if (!target) return false
+
+    target.currentHP = Math.round(target.maxHP.value / 2)
+    combat.msgs.push(
+      `${source.name} 对 ${target.name} 释放了 ${this.name}，${target.name} 剩余 hp ${target.currentHP}`,
+    )
+
+    return true
+  },
+}
+
 export const templates: SkillTempalte[] = [
   Skill$Thump,
   Skill$Recovery,
