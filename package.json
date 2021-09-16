@@ -30,6 +30,7 @@
     "@c4605/toolconfs": "^5.2.2",
     "@types/react": "^17.0.2",
     "@types/react-dom": "^17.0.1",
+    "eventemitter3": "^4.0.7",
     "immer": "^8.0.1",
     "lodash": "^4.17.21",
     "react": "^17.0.1",

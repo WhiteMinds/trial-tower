@@ -1,6 +1,9 @@
+import produce from 'immer'
 import { BehaviorSubject, Subject } from 'rxjs'
 import { CombatSystem, Team } from './combat'
-import { BattlingEntity, Entity } from './model/entity'
+import { GlobalDataSource } from './data_source/GlobalDataSource'
+import { DataSource, Entity } from './data_source/types'
+import { BattlingEntity } from './model/entity'
 import { EquipModule } from './module/equip'
 
 export class Engine extends EventTarget {
@@ -26,80 +29,68 @@ export class Engine extends EventTarget {
   }
 }
 
-interface Item {
-  id: string
-  name: string
-  // ... other attrs ...
-}
+// player = PlayerHandler(player).hit(target, 10)
+// player.hp -= 10; player.onUpdate('hp')
+// player = { ...player, hp: player.hp - 10 }
 
-interface Skill {
-  id: string
-  name: string
-  // ... other attrs ...
-}
+// 数据库中的 player、item 数据应该是经由事件（action，如 hit、destroy）来触发变化的。
+// PlayerHandler 层只是事件的 emitter，大部分事件处理函数都将再次触发事件，只有最底层的几个事件会改变数据。
+// 比较底层的事件是由 DataSource 提供。
 
-interface DataSource {
-  items: DataManager<Item>
-}
+// 存储时为 GlobalDataSource 全量序列化一次
 
-class DataManager<T extends { id: unknown }> {
-  data = new Map<T['id'], T>()
-  private subs = new Map<T['id'], BehaviorSubject<T>>()
+// GlobalDataSource 的 add 和一些接口应该都是 private 的，他们不会触发事件，
+// 公开出去 create、destroy 等接口用来执行这两个函数并调用事件，使用 sub 和 get 来获取数据
 
-  get(id: T['id']): BehaviorSubject<T> | null {
-    const sub = this.subs.get(id)
-    if (sub) return sub
-    const item = this.data.get(id)
-    if (!item) return null
+// 一些可确认的事情：
+// 1. 数据存档一定是全量存取的
+//    那么两个数据源直接的克隆是否算一次全量存取？
 
-    const subject = new BehaviorSubject(item)
-    subject.subscribe((val) => this.data.set(id, val))
-    this.subs.set(id, subject)
+// 按照内外系统流通设计，内部流通的数据只在最外层做转换，那么内部流通的数据用什么形式
 
-    return subject
+class EntityHandler {
+  constructor(
+    public src: DataSource,
+    public entity$: BehaviorSubject<Entity>,
+  ) {}
+
+  update(updater: (now: Entity) => void): void {
+    this.src.entities.set(this.id, produce(this.entity$.value, updater))
   }
 
-  set(id: T['id'], val: T): void {
-    this.data.set(id, val)
-    this.subs.get(id)?.next(val)
+  onHit(damage: number) {
+    this.update((entity) => {
+      entity.hp -= damage
+    })
   }
-}
 
-// 这个类主要是实现从来源拷贝一份数据使用，初期先直接全量拷贝，后面有性能问题的时候改成首次使用时再拷贝
-class DataManager$InitWithCopy<
-  T extends { id: unknown }
-> extends DataManager<T> {
-  constructor(copySrc: DataManager<T>) {
-    super()
-    this.data = new Map(copySrc.data)
+  get id() {
+    return this.entity$.value.id
   }
-}
 
-class GlobalDataSource extends EventTarget implements DataSource {
-  entities = new DataManager<Entity>()
-  items = new DataManager<Item>()
-  skills = new DataManager<Skill>()
-  // buffs
-}
-
-class CombatDataSource extends EventTarget implements DataSource {
-  entities: DataManager$InitWithCopy<Entity>
-  items: DataManager$InitWithCopy<Item>
-  skills: DataManager$InitWithCopy<Skill>
-  // teams
-
-  constructor(private globalDS: GlobalDataSource) {
-    super()
-
-    this.entities = new DataManager$InitWithCopy(this.globalDS.entities)
-    this.items = new DataManager$InitWithCopy(this.globalDS.items)
-    this.skills = new DataManager$InitWithCopy(this.globalDS.skills)
+  get name() {
+    return this.entity$.value.name
   }
 }
 
 const src = new GlobalDataSource()
-src.items.set('1', { id: '1', name: '测试物品' })
-const item = src.items.get('1')
-item?.next({ id: '1', name: '测试物品2' })
-const item2 = src.items.get('1')
-console.log(src, item?.value, item2?.value)
+src.items.add({ id: 'i1', name: '测试物品' })
+src.entities.add({
+  id: 'e1',
+  name: '测试实例',
+  attrPoint: 1,
+  strength: 1,
+  constitution: 1,
+  hp: 10,
+  maxHP: 10,
+})
+
+const entity$ = src.entities.sub('e1')!
+const entityHandler = new EntityHandler(src, entity$)
+console.log('e1', entity$.value)
+entityHandler.onHit(5)
+console.log('e1', entity$.value)
+// const item = src.items.sub('1')
+// item?.next({ id: '1', name: '测试物品2' })
+// const item2 = src.items.get('1')
+// console.log(src, item?.value, item2?.value)
