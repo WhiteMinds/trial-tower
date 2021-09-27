@@ -1,51 +1,107 @@
 import { EventEmitter } from 'eventemitter3'
-import { BehaviorSubject } from 'rxjs'
+import { DataSource } from './types'
 
 type DataManagerEventTypes<T> = {
   ItemAdded: [T]
-  ItemUpdate: [T]
+  ItemDeleted: [T]
 }
 
-export class DataManager<T extends { id: unknown }> extends EventEmitter<
-  DataManagerEventTypes<T>
-> {
-  protected data = new Map<T['id'], T>()
-  private subs = new Map<T['id'], BehaviorSubject<T>>()
+type ValidId = string
+
+export class DataManager<
+  T extends { id: ValidId; serialize: () => TData },
+  TData
+> extends EventEmitter<DataManagerEventTypes<T>> {
+  protected items = new Map<T['id'], T>()
+
+  constructor(
+    private ItemClass: {
+      new (): T
+      unserialize: (data: TData, src: DataSource) => T
+    },
+    public src: DataSource,
+  ) {
+    super()
+  }
+
+  protected getData(id: T['id']): TData | null {
+    return null
+  }
+
+  protected setData(id: T['id'], data: TData): void {}
 
   get(id: T['id']): T | null {
-    const item = this.data.get(id)
+    let item = this.items.get(id)
+
+    if (!item) {
+      const data = this.getData(id)
+      if (data) {
+        item = this.ItemClass.unserialize(data, this.src)
+        this.items.set(id, item)
+      }
+    }
+
     return item ?? null
   }
 
-  sub(id: T['id']): BehaviorSubject<T> | null {
-    const sub = this.subs.get(id)
-    if (sub) return sub
-    const item = this.data.get(id)
-    if (!item) return null
-
-    const subject = new BehaviorSubject(item)
-    // subject.subscribe((val) => this.data.set(id, val))
-    this.subs.set(id, subject)
-
-    return subject
-  }
-
-  set(id: T['id'], val: T): void {
-    this.data.set(id, val)
-    this.subs.get(id)?.next(val)
-    this.emit('ItemUpdate', val)
-  }
-
   add(val: T): void {
-    if (this.data.has(val.id)) {
+    if (this.items.has(val.id)) {
       throw new Error('Try add item but existed')
     }
 
-    this.set(val.id, val)
+    this.items.set(val.id, val)
     this.emit('ItemAdded', val)
   }
 
-  getPrimaryData() {
-    return this.data
+  del(val: T): void {
+    if (!this.items.has(val.id)) {
+      throw new Error('Try delete item but not existed')
+    }
+
+    this.items.delete(val.id)
+    this.emit('ItemDeleted', val)
   }
+}
+
+export class DataManager$InitWithStore<
+  T extends { id: ValidId; serialize: () => TData },
+  TData
+> extends DataManager<T, TData> {
+  constructor(
+    ItemClass: { new (): T; unserialize: (data: TData, src: DataSource) => T },
+    src: DataSource,
+  ) {
+    super(ItemClass, src)
+  }
+
+  protected getData(id: T['id']): TData | null {
+    const json = localStorage.getItem(id)
+    if (json == null) return null
+
+    return JSON.parse(json) as TData
+  }
+
+  protected setData(id: T['id'], data: TData): void {
+    localStorage.setItem(id, JSON.stringify(data))
+  }
+}
+
+// 这个类主要是实现从来源拷贝一份数据使用
+export class DataManager$InitWithCopy<
+  T extends { id: ValidId; serialize: () => TData },
+  TData
+> extends DataManager<T, TData> {
+  constructor(
+    ItemClass: { new (): T; unserialize: (data: TData, src: DataSource) => T },
+    src: DataSource,
+    private copySrc: DataManager<T, TData>,
+  ) {
+    super(ItemClass, src)
+  }
+
+  protected getData(id: T['id']): TData | null {
+    return this.copySrc.get(id)?.serialize() ?? null
+  }
+
+  protected setData(id: T['id'], data: TData): void {}
 }

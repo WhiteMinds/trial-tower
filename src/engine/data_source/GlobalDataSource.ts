@@ -1,5 +1,5 @@
 import { EventEmitter } from 'eventemitter3'
-import { DataManager } from './DataManager'
+import { DataManager, DataManager$InitWithStore } from './DataManager'
 import { DataSource, Entity, Item, Skill } from './types'
 
 type GlobalDataSourceEventTypes = {
@@ -10,13 +10,17 @@ type GlobalDataSourceEventTypes = {
 export class GlobalDataSource
   extends EventEmitter<GlobalDataSourceEventTypes>
   implements DataSource {
-  entities = new DataManager<Entity>()
-  items = new DataManager<Item>()
-  skills = new DataManager<Skill>()
+  entities: DataManager<Entity, Entity.Serialized>
+  items: DataManager<Item, Item.Serialized>
+  skills: DataManager<Skill, Skill.Serialized>
   // buffs
 
   constructor() {
     super()
+
+    this.entities = new DataManager$InitWithStore(Entity, this)
+    this.items = new DataManager$InitWithStore(Item, this)
+    this.skills = new DataManager$InitWithStore(Skill, this)
 
     this.entities.on('ItemAdded', (entity) =>
       this.emit('EntityCreated', entity),

@@ -2,7 +2,7 @@ import produce from 'immer'
 import { BehaviorSubject, Subject } from 'rxjs'
 import { CombatSystem, Team } from './combat'
 import { GlobalDataSource } from './data_source/GlobalDataSource'
-import { DataSource, Entity } from './data_source/types'
+import { DataSource, Entity, Item } from './data_source/types'
 import { BattlingEntity } from './model/entity'
 import { EquipModule } from './module/equip'
 
@@ -74,22 +74,26 @@ class EntityHandler {
 }
 
 const src = new GlobalDataSource()
-src.items.add({ id: 'i1', name: '测试物品' })
-src.entities.add({
-  id: 'e1',
-  name: '测试实例',
-  attrPoint: 1,
-  strength: 1,
-  constitution: 1,
-  hp: 10,
-  maxHP: 10,
-})
+const item = Item.create(src, { name: '测试物品' })
+const entity = Entity.create(src, { name: '测试实例' })
+entity.items.push(item)
 
-const entity$ = src.entities.sub('e1')!
-const entityHandler = new EntityHandler(src, entity$)
-console.log('e1', entity$.value)
-entityHandler.onHit(5)
-console.log('e1', entity$.value)
+console.log('entity', entity, src)
+// src.entities.add({
+//   id: 'e1',
+//   name: '测试实例',
+//   attrPoint: 1,
+//   strength: 1,
+//   constitution: 1,
+//   hp: 10,
+//   maxHP: 10,
+// })
+
+// const entity$ = src.entities.sub('e1')!
+// const entityHandler = new EntityHandler(src, entity$)
+// console.log('e1', entity$.value)
+// entityHandler.onHit(5)
+// console.log('e1', entity$.value)
 // const item = src.items.sub('1')
 // item?.next({ id: '1', name: '测试物品2' })
 // const item2 = src.items.get('1')
