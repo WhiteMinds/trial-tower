@@ -1,4 +1,4 @@
-import { AttrModifier } from '../model/entity'
+import { AttrModifier } from './entity'
 
 export interface Equip {
   id: number

@@ -1,6 +1,7 @@
 import { EventEmitter } from 'eventemitter3'
+import { Entity } from '../model/entity'
 import { ObjectManager, ObjectManager$InitWithStore } from './ObjectManager'
-import { Stage, Entity, Item, Skill, StageEventTypes } from './types'
+import { Stage, Item, Skill, StageEventTypes } from './types'
 
 type MainStageEventTypes = {}
 

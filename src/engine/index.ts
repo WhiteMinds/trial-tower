@@ -1,8 +1,8 @@
 import produce from 'immer'
 import { BehaviorSubject, Subject } from 'rxjs'
 import { CombatSystem, Team } from './combat'
-import { Entity, Item } from './stage/types'
-import { BattlingEntity } from './model/entity'
+import { Item } from './stage/types'
+import { BattlingEntity, Entity } from './model/entity'
 import { EquipModule } from './module/equip'
 import { MainStage } from './stage/MainStage'
 

@@ -1,6 +1,6 @@
 import EventEmitter from 'eventemitter3'
 import _, { uniqueId } from 'lodash'
-import { BooleanT } from '../utils'
+import { Entity } from '../model/entity'
 import { ObjectManager } from './ObjectManager'
 
 export class Item {
@@ -62,85 +62,105 @@ export namespace Skill {
   }
 }
 
-export class Entity {
-  id: string = ''
-  name: string = ''
+// export class Entity {
+//   id: string = ''
+//   name: string = ''
 
-  items: Item[] = []
+//   items: Item[] = []
 
-  attrPoint: number = 0
-  strength: number = 0
-  constitution: number = 0
+//   attrPoint: number = 0
+//   strength: number = 0
+//   constitution: number = 0
 
-  hp: number = 0
-  maxHP: number = 0
+//   hp: number = 0
+//   maxHP: number = 0
 
-  serialize(): Entity.Serialized {
-    return {
-      ..._.pick(
-        this,
-        'id',
-        'name',
-        'attrPoint',
-        'strength',
-        'constitution',
-        'hp',
-        'maxHP',
-      ),
-      items: this.items.map((item) => item.id),
-    }
-  }
+//   constructor(public stage: Stage, data?: Partial<Entity.Serialized>) {
+//     // this.unserialize(
+//     //   {
+//     //     id: '0',
+//     //     name: 'UnamedEntity',
+//     //     strength: 1,
+//     //     constitution: 1,
+//     //     maxHP: 1,
+//     //     ...data,
+//     //   },
+//     //   stage,
+//     // )
+//     // 通知初始化
+//     // stage.emit('entity init')
+//   }
 
-  static unserialize(data: Entity.Serialized, stage: Stage): Entity {
-    const entity = new Entity()
-    Object.assign(
-      entity,
-      _.pick(
-        data,
-        'id',
-        'name',
-        'attrPoint',
-        'strength',
-        'constitution',
-        'hp',
-        'maxHP',
-      ),
-    )
-    entity.items = data.items
-      .map((id) => stage.items.get(id))
-      .filter(BooleanT())
-    return entity
-  }
-}
+//   serialize(): Entity.Serialized {
+//     return {
+//       ..._.pick(
+//         this,
+//         'id',
+//         'name',
+//         'attrPoint',
+//         'strength',
+//         'constitution',
+//         'hp',
+//         'maxHP',
+//       ),
+//       items: this.items.map((item) => item.id),
+//     }
+//   }
 
-export namespace Entity {
-  export interface Serialized {
-    id: string
-    name: string
+//   unserialize(data: Entity.Serialized) {
+//     Object.assign(
+//       this,
+//       _.pick(
+//         data,
+//         'id',
+//         'name',
+//         'attrPoint',
+//         'strength',
+//         'constitution',
+//         'hp',
+//         'maxHP',
+//       ),
+//     )
+//     this.items = data.items
+//       .map((id) => this.stage.items.get(id))
+//       .filter(BooleanT())
+//   }
 
-    items: Item['id'][]
+//   static unserialize(data: Entity.Serialized, stage: Stage): Entity {
+//     const entity = new Entity(stage)
+//     entity.unserialize(data)
+//     return entity
+//   }
+// }
 
-    // test attrs
-    attrPoint: number
-    strength: number
-    constitution: number
+// export namespace Entity {
+//   export interface Serialized {
+//     id: string
+//     name: string
 
-    hp: number
-    maxHP: number
-  }
+//     items: Item['id'][]
 
-  export function create(
-    stage: Stage,
-    data: Pick<Entity.Serialized, 'name'>,
-  ): Entity {
-    const entity = new Entity()
-    entity.id = uniqueId('entity')
-    entity.name = data.name
-    stage.entities.add(entity)
-    stage.emit('EntityCreated', entity)
-    return entity
-  }
-}
+//     // test attrs
+//     attrPoint: number
+//     strength: number
+//     constitution: number
+
+//     hp: number
+//     maxHP: number
+//   }
+
+//   export function create(
+//     stage: Stage,
+//     data: Pick<Entity.Serialized, 'name'>,
+//   ): Entity {
+//     const entity = new Entity(stage)
+//     entity.id = uniqueId('entity')
+//     entity.name = data.name
+//     stage.entities.add(entity)
+//     stage.emit('EntityCreated', entity)
+//     return entity
+//   }
+// }
 
 export type StageEventTypes = {
   EntityCreated: [Entity]

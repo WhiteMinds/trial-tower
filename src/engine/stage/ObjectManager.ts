@@ -16,7 +16,6 @@ export class ObjectManager<
 
   constructor(
     public ItemClass: {
-      new (): T
       unserialize: (data: TData, stage: Stage) => T
     },
     public stage: Stage,
@@ -68,7 +67,7 @@ export class ObjectManager$InitWithStore<
   TData
 > extends ObjectManager<T, TData> {
   constructor(
-    ItemClass: { new (): T; unserialize: (data: TData, src: Stage) => T },
+    ItemClass: { unserialize: (data: TData, src: Stage) => T },
     src: Stage,
     private prefixInStoreKey: string,
   ) {

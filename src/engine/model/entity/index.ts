@@ -1,9 +1,9 @@
 import { uniqueId } from 'lodash'
 import { BehaviorSubject } from 'rxjs'
-import { Engine } from '..'
-import { UniqueId } from '../types'
-import { Equip } from './equip'
-import { SerializedSkill, Skill } from './skill'
+import { Stage } from '../../stage/types'
+import { UniqueId } from '../../types'
+import { Equip } from '../equip'
+import { SerializedSkill, Skill } from '../skill'
 
 // 如果 hp 的计算受体质属性影响，那在体质变化后，currentHp 怎样更新
 // 可以在任意属性的 base / modifiers 发生变化后进行通知，currentHp 有一个专门的处理函数来做立即更新
@@ -24,12 +24,14 @@ export class Entity {
   maxHP = new AttrDescriptor$HealthPoint(this)
   atk = new AttrDescriptor$Attack(this)
 
+  currentHP: number = 0
+
   /** 非游戏引擎原始依赖的属性（如 EquipModeul 添加的 equipIds）*/
 
   equipIds = new BehaviorSubject<Equip['id'][]>([])
   skills = new BehaviorSubject<Skill[]>([])
 
-  constructor(public engine: Engine, data?: Partial<SerializedEntity>) {
+  constructor(public stage: Stage, data?: Partial<Entity.Serialized>) {
     this.unserialize({
       name: 'UnamedEntity',
       strength: 1,
@@ -43,10 +45,17 @@ export class Entity {
     })
 
     // 通知初始化
-    engine.entitySubjects.init.next(this)
+    // stage.emit('entity init')
   }
 
-  serialize(): SerializedEntity {
+  static create(stage: Stage, data: Partial<Entity.Serialized>): Entity {
+    const entity = new Entity(stage, data)
+    stage.entities.add(entity)
+    stage.emit('EntityCreated', entity)
+    return entity
+  }
+
+  serialize(): Entity.Serialized {
     return {
       name: this.name,
       strength: this.strength.base,
@@ -59,7 +68,7 @@ export class Entity {
     }
   }
 
-  unserialize(data: SerializedEntity) {
+  unserialize(data: Entity.Serialized) {
     this.name = data.name
     this.strength.base = data.strength
     this.constitution.base = data.constitution
@@ -70,32 +79,35 @@ export class Entity {
     this.skills.next(data.skills.map((skillData) => new Skill(this, skillData)))
   }
 
-  clone(engine = this.engine) {
-    return new Entity(engine, this.serialize())
+  static unserialize(data: Entity.Serialized, stage: Stage): Entity {
+    const entity = new Entity(stage)
+    entity.unserialize(data)
+    return entity
+  }
+
+  // clone(stage = this.stage) {
+  //   return new Entity(stage, this.serialize())
+  // }
+
+  isAlive() {
+    return this.currentHP > 0
   }
 }
 
-export interface SerializedEntity {
-  name: string
-  strength: number
-  constitution: number
-  speed: number
-  maxHP: number
-  atk: number
-  equipIds: Equip['id'][]
-  skills: Partial<SerializedSkill>[]
-}
-
-export class BattlingEntity extends Entity {
-  progress: number = 0
-  currentHP: number = 0
-
-  static from(entity: Entity): BattlingEntity {
-    const battlingEntity = new BattlingEntity(entity.engine, entity.serialize())
-    battlingEntity.currentHP = battlingEntity.maxHP.value
-    return battlingEntity
+export namespace Entity {
+  export interface Serialized {
+    name: string
+    strength: number
+    constitution: number
+    speed: number
+    maxHP: number
+    atk: number
+    equipIds: Equip['id'][]
+    skills: Partial<SerializedSkill>[]
   }
 }
+
+// ============================== AttrDescriptor ==============================
 
 export class AttrDescriptor {
   constructor(public entity: Entity) {}
@@ -163,13 +175,4 @@ function combineAttrModifier(modifiers: AttrModifier[]): AttrModifier {
       per: (result.per ?? 0) + (modifier.per ?? 0),
     }
   })
-}
-
-export namespace Entity {
-  export function isAlive(entity: BattlingEntity) {
-    return entity.currentHP > 0
-  }
-  export function isDead(entity: BattlingEntity) {
-    return !isAlive(entity)
-  }
 }
