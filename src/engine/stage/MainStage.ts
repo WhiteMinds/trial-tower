@@ -1,31 +1,27 @@
 import { EventEmitter } from 'eventemitter3'
-import { DataManager, DataManager$InitWithStore } from './DataManager'
-import { DataSource, Entity, Item, Skill } from './types'
+import { ObjectManager, ObjectManager$InitWithStore } from './ObjectManager'
+import { Stage, Entity, Item, Skill, StageEventTypes } from './types'
 
-type GlobalDataSourceEventTypes = {
-  EntityCreated: [Entity]
-  ItemCreated: [Item]
-}
+type MainStageEventTypes = {}
 
-export class GlobalDataSource
-  extends EventEmitter<GlobalDataSourceEventTypes>
-  implements DataSource {
-  // DataManager 类似于数据库中的一个表
-  entities: DataManager<Entity, Entity.Serialized>
-  items: DataManager<Item, Item.Serialized>
-  skills: DataManager<Skill, Skill.Serialized>
-  // buffs
+export class MainStage
+  extends EventEmitter<StageEventTypes & MainStageEventTypes>
+  implements Stage {
+  entities: ObjectManager<Entity, Entity.Serialized>
+  items: ObjectManager<Item, Item.Serialized>
+  skills: ObjectManager<Skill, Skill.Serialized>
+  // TODO: buffs
 
   constructor() {
     super()
 
-    this.entities = new DataManager$InitWithStore(Entity, this)
-    this.items = new DataManager$InitWithStore(Item, this)
-    this.skills = new DataManager$InitWithStore(Skill, this)
+    this.entities = new ObjectManager$InitWithStore(Entity, this, 'entity')
+    this.items = new ObjectManager$InitWithStore(Item, this, 'item')
+    this.skills = new ObjectManager$InitWithStore(Skill, this, 'skill')
 
-    this.entities.on('ItemAdded', (entity) =>
-      this.emit('EntityCreated', entity),
-    )
-    this.items.on('ItemAdded', (item) => this.emit('ItemCreated', item))
+    // this.entities.on('ItemAdded', (entity) =>
+    //   this.emit('EntityCreated', entity),
+    // )
+    // this.items.on('ItemAdded', (item) => this.emit('ItemCreated', item))
   }
 }

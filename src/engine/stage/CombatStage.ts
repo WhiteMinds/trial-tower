@@ -1,26 +1,23 @@
-import { DataManager, DataManager$InitWithCopy } from './DataManager'
-import { GlobalDataSource } from './MainStage'
-import { DataSource, Entity, Item, Skill } from './types'
+import { ObjectManager, ObjectManager$InitWithCopy } from './ObjectManager'
+import { MainStage } from './MainStage'
+import { Entity, Item, Skill } from './types'
 
-export class CombatDataSource extends EventTarget implements DataSource {
-  entities: DataManager<Entity, Entity.Serialized>
-  items: DataManager<Item, Item.Serialized>
-  skills: DataManager<Skill, Skill.Serialized>
+// type CombatStageEventTypes = {}
+
+export class CombatStage extends MainStage {
+  entities: ObjectManager<Entity, Entity.Serialized>
+  items: ObjectManager<Item, Item.Serialized>
+  skills: ObjectManager<Skill, Skill.Serialized>
   // teams
 
-  constructor(private globalDS: GlobalDataSource) {
+  constructor(private mainStage: MainStage) {
     super()
 
-    this.entities = new DataManager$InitWithCopy(
-      Entity,
+    this.entities = new ObjectManager$InitWithCopy(
       this,
-      this.globalDS.entities,
+      this.mainStage.entities,
     )
-    this.items = new DataManager$InitWithCopy(Item, this, this.globalDS.items)
-    this.skills = new DataManager$InitWithCopy(
-      Skill,
-      this,
-      this.globalDS.skills,
-    )
+    this.items = new ObjectManager$InitWithCopy(this, this.mainStage.items)
+    this.skills = new ObjectManager$InitWithCopy(this, this.mainStage.skills)
   }
 }

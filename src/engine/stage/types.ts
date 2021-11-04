@@ -1,6 +1,7 @@
+import EventEmitter from 'eventemitter3'
 import _, { uniqueId } from 'lodash'
 import { BooleanT } from '../utils'
-import { DataManager } from './DataManager'
+import { ObjectManager } from './ObjectManager'
 
 export class Item {
   id: string = ''
@@ -26,13 +27,13 @@ export namespace Item {
   }
 
   export function create(
-    src: DataSource,
+    stage: Stage,
     data: Omit<Item.Serialized, 'id'>,
   ): Item {
     const item = new Item()
     item.id = uniqueId('item')
     item.name = data.name
-    src.items.add(item)
+    stage.items.add(item)
     return item
   }
 }
@@ -90,7 +91,7 @@ export class Entity {
     }
   }
 
-  static unserialize(data: Entity.Serialized, src: DataSource): Entity {
+  static unserialize(data: Entity.Serialized, stage: Stage): Entity {
     const entity = new Entity()
     Object.assign(
       entity,
@@ -105,7 +106,9 @@ export class Entity {
         'maxHP',
       ),
     )
-    entity.items = data.items.map((id) => src.items.get(id)).filter(BooleanT())
+    entity.items = data.items
+      .map((id) => stage.items.get(id))
+      .filter(BooleanT())
     return entity
   }
 }
@@ -127,19 +130,25 @@ export namespace Entity {
   }
 
   export function create(
-    src: DataSource,
+    stage: Stage,
     data: Pick<Entity.Serialized, 'name'>,
   ): Entity {
     const entity = new Entity()
     entity.id = uniqueId('entity')
     entity.name = data.name
-    src.entities.add(entity)
+    stage.entities.add(entity)
+    stage.emit('EntityCreated', entity)
     return entity
   }
 }
 
-export interface DataSource {
-  entities: DataManager<Entity, Entity.Serialized>
-  items: DataManager<Item, Item.Serialized>
-  skills: DataManager<Skill, Skill.Serialized>
+export type StageEventTypes = {
+  EntityCreated: [Entity]
+  ItemCreated: [Item]
+}
+
+export interface Stage extends EventEmitter<StageEventTypes> {
+  entities: ObjectManager<Entity, Entity.Serialized>
+  items: ObjectManager<Item, Item.Serialized>
+  skills: ObjectManager<Skill, Skill.Serialized>
 }

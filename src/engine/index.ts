@@ -1,33 +1,33 @@
 import produce from 'immer'
 import { BehaviorSubject, Subject } from 'rxjs'
 import { CombatSystem, Team } from './combat'
-import { GlobalDataSource } from './data_source/GlobalDataSource'
-import { DataSource, Entity, Item } from './data_source/types'
+import { Entity, Item } from './stage/types'
 import { BattlingEntity } from './model/entity'
 import { EquipModule } from './module/equip'
+import { MainStage } from './stage/MainStage'
 
-export class Engine extends EventTarget {
-  entitySubjects = {
-    init: new Subject<Entity>(),
-    beforeAttack: new Subject<{
-      combat: CombatSystem
-      entity: BattlingEntity
-      damage: number
-    }>(),
-    beforeDamage: new Subject<{
-      combat: CombatSystem
-      entity: BattlingEntity
-      damage: number
-    }>(),
-  }
-  // 需要使用 entitySubjects 的 module 应该在其下方初始化，否则会拿不到
-  equipModule = new EquipModule(this)
+// export class Engine extends EventTarget {
+//   entitySubjects = {
+//     init: new Subject<Entity>(),
+//     beforeAttack: new Subject<{
+//       combat: CombatSystem
+//       entity: BattlingEntity
+//       damage: number
+//     }>(),
+//     beforeDamage: new Subject<{
+//       combat: CombatSystem
+//       entity: BattlingEntity
+//       damage: number
+//     }>(),
+//   }
+//   // 需要使用 entitySubjects 的 module 应该在其下方初始化，否则会拿不到
+//   equipModule = new EquipModule(this)
 
-  combat(...teams: Team[]) {
-    const sys = new CombatSystem(...teams)
-    return sys.start()
-  }
-}
+//   combat(...teams: Team[]) {
+//     const sys = new CombatSystem(...teams)
+//     return sys.start()
+//   }
+// }
 
 // player = PlayerHandler(player).hit(target, 10)
 // player.hp -= 10; player.onUpdate('hp')
@@ -48,37 +48,37 @@ export class Engine extends EventTarget {
 
 // 按照内外系统流通设计，内部流通的数据只在最外层做转换，那么内部流通的数据用什么形式
 
-class EntityHandler {
-  constructor(
-    public src: DataSource,
-    public entity$: BehaviorSubject<Entity>,
-  ) {}
+// class EntityHandler {
+//   constructor(
+//     public src: DataSource,
+//     public entity$: BehaviorSubject<Entity>,
+//   ) {}
 
-  update(updater: (now: Entity) => void): void {
-    this.src.entities.set(this.id, produce(this.entity$.value, updater))
-  }
+//   update(updater: (now: Entity) => void): void {
+//     this.src.entities.set(this.id, produce(this.entity$.value, updater))
+//   }
 
-  onHit(damage: number) {
-    this.update((entity) => {
-      entity.hp -= damage
-    })
-  }
+//   onHit(damage: number) {
+//     this.update((entity) => {
+//       entity.hp -= damage
+//     })
+//   }
 
-  get id() {
-    return this.entity$.value.id
-  }
+//   get id() {
+//     return this.entity$.value.id
+//   }
 
-  get name() {
-    return this.entity$.value.name
-  }
-}
+//   get name() {
+//     return this.entity$.value.name
+//   }
+// }
 
-const src = new GlobalDataSource()
-const item = Item.create(src, { name: '测试物品' })
-const entity = Entity.create(src, { name: '测试实例' })
-entity.items.push(item)
+// const src = new GlobalDataSource()
+// const item = Item.create(src, { name: '测试物品' })
+// const entity = Entity.create(src, { name: '测试实例' })
+// entity.items.push(item)
 
-console.log('entity', entity, src)
+// console.log('entity', entity, src)
 // src.entities.add({
 //   id: 'e1',
 //   name: '测试实例',
@@ -98,3 +98,7 @@ console.log('entity', entity, src)
 // item?.next({ id: '1', name: '测试物品2' })
 // const item2 = src.items.get('1')
 // console.log(src, item?.value, item2?.value)
+
+const mainStage = new MainStage()
+const item = Item.create(mainStage, { name: '测试物品' })
+const entity = Entity.create(mainStage, { name: '测试实例' })

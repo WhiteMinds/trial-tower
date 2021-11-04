@@ -1,25 +1,25 @@
 import { EventEmitter } from 'eventemitter3'
-import { DataSource } from './types'
+import { Stage } from './types'
 
-type DataManagerEventTypes<T> = {
+type ObjectManagerEventTypes<T> = {
   ItemAdded: [T]
   ItemDeleted: [T]
 }
 
 type ValidId = string
 
-export class DataManager<
+export class ObjectManager<
   T extends { id: ValidId; serialize: () => TData },
   TData
-> extends EventEmitter<DataManagerEventTypes<T>> {
-  protected items = new Map<T['id'], T>()
+> extends EventEmitter<ObjectManagerEventTypes<T>> {
+  protected items = new Map<T['id'], T | null>()
 
   constructor(
-    private ItemClass: {
+    public ItemClass: {
       new (): T
-      unserialize: (data: TData, src: DataSource) => T
+      unserialize: (data: TData, stage: Stage) => T
     },
-    public src: DataSource,
+    public stage: Stage,
   ) {
     super()
   }
@@ -31,17 +31,17 @@ export class DataManager<
   protected setData(id: T['id'], data: TData): void {}
 
   get(id: T['id']): T | null {
-    let item = this.items.get(id)
+    const isFirstGet = !this.items.has(id)
+    if (!isFirstGet) return this.items.get(id) ?? null
 
-    if (!item) {
-      const data = this.getData(id)
-      if (data) {
-        item = this.ItemClass.unserialize(data, this.src)
-        this.items.set(id, item)
-      }
+    let item: T | null = null
+    const data = this.getData(id)
+    if (data != null) {
+      item = this.ItemClass.unserialize(data, this.stage)
     }
 
-    return item ?? null
+    this.items.set(id, item)
+    return item
   }
 
   add(val: T): void {
@@ -63,40 +63,37 @@ export class DataManager<
   }
 }
 
-export class DataManager$InitWithStore<
+export class ObjectManager$InitWithStore<
   T extends { id: ValidId; serialize: () => TData },
   TData
-> extends DataManager<T, TData> {
+> extends ObjectManager<T, TData> {
   constructor(
-    ItemClass: { new (): T; unserialize: (data: TData, src: DataSource) => T },
-    src: DataSource,
+    ItemClass: { new (): T; unserialize: (data: TData, src: Stage) => T },
+    src: Stage,
+    private prefixInStoreKey: string,
   ) {
     super(ItemClass, src)
   }
 
   protected getData(id: T['id']): TData | null {
-    const json = localStorage.getItem(id)
+    const json = localStorage.getItem(`${this.prefixInStoreKey}/` + id)
     if (json == null) return null
 
     return JSON.parse(json) as TData
   }
 
   protected setData(id: T['id'], data: TData): void {
-    localStorage.setItem(id, JSON.stringify(data))
+    localStorage.setItem(`${this.prefixInStoreKey}/` + id, JSON.stringify(data))
   }
 }
 
 // 这个类主要是实现从来源拷贝一份数据使用
-export class DataManager$InitWithCopy<
+export class ObjectManager$InitWithCopy<
   T extends { id: ValidId; serialize: () => TData },
   TData
-> extends DataManager<T, TData> {
-  constructor(
-    ItemClass: { new (): T; unserialize: (data: TData, src: DataSource) => T },
-    src: DataSource,
-    private copySrc: DataManager<T, TData>,
-  ) {
-    super(ItemClass, src)
+> extends ObjectManager<T, TData> {
+  constructor(src: Stage, private copySrc: ObjectManager<T, TData>) {
+    super(copySrc.ItemClass, src)
   }
 
   protected getData(id: T['id']): TData | null {
