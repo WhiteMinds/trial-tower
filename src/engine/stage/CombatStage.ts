@@ -1,23 +1,20 @@
-import { ObjectManager, ObjectManager$InitWithCopy } from './ObjectManager'
-import { MainStage } from './MainStage'
-import { Entity, Item, Skill } from './types'
+import { createStageStore, StageStore } from './store'
+import { Stage } from './types'
 
-// type CombatStageEventTypes = {}
+export class CombatStage implements Stage {
+  store: StageStore
 
-export class CombatStage extends MainStage {
-  entities: ObjectManager<Entity, Entity.Serialized>
-  items: ObjectManager<Item, Item.Serialized>
-  skills: ObjectManager<Skill, Skill.Serialized>
-  // teams
+  // entities: ObjectManager<Entity, Entity.Serialized>
+  // items: ObjectManager<Item, Item.Serialized>
+  // skills: ObjectManager<Skill, Skill.Serialized>
+  // TODO: buffs
 
-  constructor(private mainStage: MainStage) {
-    super()
+  constructor() {
+    this.store = createStageStore({})
 
-    this.entities = new ObjectManager$InitWithCopy(
-      this,
-      this.mainStage.entities,
-    )
-    this.items = new ObjectManager$InitWithCopy(this, this.mainStage.items)
-    this.skills = new ObjectManager$InitWithCopy(this, this.mainStage.skills)
+    // this.entities.on('ItemAdded', (entity) =>
+    //   this.emit('EntityCreated', entity),
+    // )
+    // this.items.on('ItemAdded', (item) => this.emit('ItemCreated', item))
   }
 }

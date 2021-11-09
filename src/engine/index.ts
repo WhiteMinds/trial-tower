@@ -1,10 +1,5 @@
-import produce from 'immer'
-import { BehaviorSubject, Subject } from 'rxjs'
-import { CombatSystem, Team } from './combat'
-import { Item } from './stage/types'
-import { BattlingEntity, Entity } from './model/entity'
-import { EquipModule } from './module/equip'
 import { MainStage } from './stage/MainStage'
+import { Entity } from './stage/types'
 
 // export class Engine extends EventTarget {
 //   entitySubjects = {
@@ -100,5 +95,4 @@ import { MainStage } from './stage/MainStage'
 // console.log(src, item?.value, item2?.value)
 
 const mainStage = new MainStage()
-const item = Item.create(mainStage, { name: '测试物品' })
 const entity = Entity.create(mainStage, { name: '测试实例' })

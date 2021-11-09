@@ -1,13 +1,7 @@
-import { EventEmitter } from 'eventemitter3'
-import { Entity } from '../model/entity'
-import { Store } from '../utils/RxStore'
-import { ObjectManager, ObjectManager$InitWithStore } from './ObjectManager'
 import { createStageStore, StageStore } from './store'
-import { Stage, Item, Skill, StageEventTypes } from './types'
+import { Stage } from './types'
 
-type MainStageEventTypes = {}
-
-export class MainStage {
+export class MainStage implements Stage {
   store: StageStore
 
   // entities: ObjectManager<Entity, Entity.Serialized>

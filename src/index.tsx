@@ -1,7 +1,7 @@
 import 'react-hot-loader'
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
-import './engine/test'
+import './engine/index'
 
 function renderApp() {
   ReactDOM.render(<h1></h1>, document.getElementById('app')!)

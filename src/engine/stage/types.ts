@@ -1,66 +1,48 @@
-import EventEmitter from 'eventemitter3'
 import _, { uniqueId } from 'lodash'
-import { Entity } from '../model/entity'
-import { ObjectManager } from './ObjectManager'
+import { StageStore } from './store'
+import { actionCreators as entityActionCreators } from './store/packs/entity/actions'
+import { actionCreators as itemActionCreators } from './store/packs/item/actions'
 
-export class Item {
-  id: string = ''
-  name: string = ''
-  // ... other attrs ...
-
-  serialize(): Item.Serialized {
-    return _.pick(this, 'id', 'name')
-  }
-
-  static unserialize(data: Item.Serialized): Item {
-    const item = new Item()
-    item.id = data.id
-    item.name = data.name
-    return item
-  }
+export interface Item {
+  id: string
+  name: string
 }
 
 export namespace Item {
-  export interface Serialized {
-    id: string
-    name: string
-  }
-
-  export function create(
-    stage: Stage,
-    data: Omit<Item.Serialized, 'id'>,
-  ): Item {
-    const item = new Item()
-    item.id = uniqueId('item')
-    item.name = data.name
-    stage.items.add(item)
+  export function create(stage: Stage, data: Partial<Omit<Item, 'id'>>): Item {
+    const item = {
+      id: uniqueId('item'),
+      name: 'Item',
+      ...data,
+    }
+    stage.store.dispatch(itemActionCreators.createItem(item))
     return item
   }
 }
 
-export class Skill {
-  id: string = ''
-  name: string = ''
-  // ... other attrs ...
+// export class Skill {
+//   id: string = ''
+//   name: string = ''
+//   // ... other attrs ...
 
-  serialize(): Skill.Serialized {
-    return _.pick(this, 'id', 'name')
-  }
+//   serialize(): Skill.Serialized {
+//     return _.pick(this, 'id', 'name')
+//   }
 
-  static unserialize(data: Skill.Serialized): Skill {
-    const skill = new Skill()
-    skill.id = data.id
-    skill.name = data.name
-    return skill
-  }
-}
+//   static unserialize(data: Skill.Serialized): Skill {
+//     const skill = new Skill()
+//     skill.id = data.id
+//     skill.name = data.name
+//     return skill
+//   }
+// }
 
-export namespace Skill {
-  export interface Serialized {
-    id: string
-    name: string
-  }
-}
+// export namespace Skill {
+//   export interface Serialized {
+//     id: string
+//     name: string
+//   }
+// }
 
 // export class Entity {
 //   id: string = ''
@@ -133,42 +115,42 @@ export namespace Skill {
 //   }
 // }
 
-// export namespace Entity {
-//   export interface Serialized {
-//     id: string
-//     name: string
+export interface Entity {
+  id: string
+  name: string
 
-//     items: Item['id'][]
+  items: Item['id'][]
 
-//     // test attrs
-//     attrPoint: number
-//     strength: number
-//     constitution: number
+  // test attrs
+  attrPoint: number
+  strength: number
+  constitution: number
 
-//     hp: number
-//     maxHP: number
-//   }
-
-//   export function create(
-//     stage: Stage,
-//     data: Pick<Entity.Serialized, 'name'>,
-//   ): Entity {
-//     const entity = new Entity(stage)
-//     entity.id = uniqueId('entity')
-//     entity.name = data.name
-//     stage.entities.add(entity)
-//     stage.emit('EntityCreated', entity)
-//     return entity
-//   }
-// }
-
-export type StageEventTypes = {
-  EntityCreated: [Entity]
-  ItemCreated: [Item]
+  hp: number
+  maxHP: number
 }
 
-export interface Stage extends EventEmitter<StageEventTypes> {
-  entities: ObjectManager<Entity, Entity.Serialized>
-  items: ObjectManager<Item, Item.Serialized>
-  skills: ObjectManager<Skill, Skill.Serialized>
+export namespace Entity {
+  export function create(
+    stage: Stage,
+    data: Partial<Omit<Entity, 'id'>>,
+  ): Entity {
+    const entity: Entity = {
+      id: uniqueId('entity'),
+      name: 'Entity',
+      items: [],
+      attrPoint: 0,
+      strength: 1,
+      constitution: 1,
+      hp: 10,
+      maxHP: 10,
+      ...data,
+    }
+    stage.store.dispatch(entityActionCreators.createEntity(entity))
+    return entity
+  }
+}
+
+export interface Stage {
+  store: StageStore
 }
