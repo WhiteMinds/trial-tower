@@ -8104,10 +8104,10 @@ typedarray@^0.0.6:
   resolved "https://registry.npm.taobao.org/typedarray/download/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
   integrity sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
 
-typescript@^4.2.2:
-  version "4.2.2"
-  resolved "https://registry.npm.taobao.org/typescript/download/typescript-4.2.2.tgz?cache=0&sync_timestamp=1614498040393&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Ftypescript%2Fdownload%2Ftypescript-4.2.2.tgz#1450f020618f872db0ea17317d16d8da8ddb8c4c"
-  integrity sha1-FFDwIGGPhy2w6hcxfRbY2o3bjEw=
+typescript@^4.2.4:
+  version "4.4.4"
+  resolved "https://registry.npmjs.org/typescript/-/typescript-4.4.4.tgz#2cd01a1a1f160704d3101fd5a58ff0f9fcb8030c"
+  integrity sha512-DqGhF5IKoBl8WNf8C1gu8q0xZSInh9j1kJJMqT3a94w1JzVaBU4EXOSMrz9yDqMT0xt3selp83fuFMQ0uzv6qA==
 
 unicode-canonical-property-names-ecmascript@^1.0.4:
   version "1.0.4"

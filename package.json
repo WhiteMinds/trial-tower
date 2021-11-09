@@ -24,7 +24,7 @@
     "sass": "^1.32.8",
     "sass-loader": "^11.0.1",
     "ts-node": "^9.1.1",
-    "typescript": "^4.2.2"
+    "typescript": "^4.2.4"
   },
   "dependencies": {
     "@c4605/toolconfs": "^5.2.2",
