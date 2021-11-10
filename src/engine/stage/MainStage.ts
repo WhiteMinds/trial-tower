@@ -1,5 +1,7 @@
+import { Observable } from 'rxjs'
+import { map } from 'rxjs/operators'
 import { createStageStore, StageStore } from './store'
-import { Stage } from './types'
+import { Item, Stage } from './types'
 
 export class MainStage implements Stage {
   store: StageStore
@@ -16,5 +18,17 @@ export class MainStage implements Stage {
     //   this.emit('EntityCreated', entity),
     // )
     // this.items.on('ItemAdded', (item) => this.emit('ItemCreated', item))
+  }
+
+  getItem(id: Item['id']): Item | null {
+    return this.store.state$.value.items[id] ?? null
+  }
+
+  getItem$(id: Item['id']): Observable<Item | null> {
+    return this.store.state$.pipe(
+      map((state) => {
+        return state.items[id] ?? null
+      }),
+    )
   }
 }

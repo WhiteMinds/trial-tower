@@ -1,8 +1,8 @@
 import { Entity, Item } from '../types'
 
 export interface StageData {
-  entities: Record<string, Entity>
-  items: Record<string, Item>
+  entities: Partial<Record<string, Entity>>
+  items: Partial<Record<string, Item>>
 }
 
 export namespace StageData {
