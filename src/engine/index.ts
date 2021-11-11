@@ -1,5 +1,5 @@
 import { MainStage } from './stage/MainStage'
-import { Entity } from './stage/types'
+import { Entity, Item } from './stage/types'
 
 // export class Engine extends EventTarget {
 //   entitySubjects = {
@@ -95,4 +95,6 @@ import { Entity } from './stage/types'
 // console.log(src, item?.value, item2?.value)
 
 const mainStage = new MainStage()
-const entity = Entity.create(mainStage, { name: '测试实例' })
+const item = Item.create(mainStage, { name: '布甲', maxHP: { add: 10 } })
+const entity = Entity.create(mainStage, { name: '测试实例', equips: [item.id] })
+console.log(Entity.getDataView(entity, mainStage))

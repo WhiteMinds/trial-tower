@@ -7,6 +7,7 @@ import { actionCreators as itemActionCreators } from './store/packs/item/actions
 export interface Item {
   id: string
   name: string
+  maxHP?: AttrModifier
 }
 
 export namespace Item {
@@ -126,6 +127,7 @@ export interface Entity {
   id: string
   name: string
 
+  equips: Item['id'][]
   items: Item['id'][]
 
   // test attrs
@@ -145,6 +147,7 @@ export namespace Entity {
     const entity: Entity = {
       id: uniqueId('entity'),
       name: 'Entity',
+      equips: [],
       items: [],
       attrPoint: 0,
       strength: 1,
@@ -164,11 +167,17 @@ export namespace Entity {
     constitution: number
     maxHPDesc: AttrDescriptor$HealthPoint
     maxHP: number
+    equips: Item.DataView[]
     items: Item.DataView[]
   }
 
   export function getDataView(entity: Entity, stage: Stage): DataView {
     // 计算装备、技能等加成后的实际数值
+
+    const equips = entity.equips
+      .map((id) => stage.getItem(id))
+      .filter(BooleanT())
+    const items = entity.items.map((id) => stage.getItem(id)).filter(BooleanT())
 
     const strengthDesc: AttrDescriptor$Normal = {
       type: AttrType.Normal,
@@ -187,7 +196,7 @@ export namespace Entity {
     const maxHPDesc: AttrDescriptor$HealthPoint = {
       type: AttrType.HealthPoint,
       base: entity.hp,
-      modifiers: [],
+      modifiers: equips.map((item) => item.maxHP).filter(BooleanT()),
     }
     const maxHP = AttrDescriptor.calcValue(maxHPDesc, { constitution })
 
@@ -199,7 +208,8 @@ export namespace Entity {
       constitution,
       maxHPDesc,
       maxHP,
-      items: entity.items.map((id) => stage.getItem(id)).filter(BooleanT()),
+      equips,
+      items,
     }
 
     return view
@@ -265,14 +275,17 @@ export namespace AttrDescriptor {
     let derived = getDerived(descriptor, opts)
     if (descriptor.modifiers.length === 0) return derived
 
-    const modifier = descriptor.modifiers.reduce((result, modifier) => {
-      if ('fixed' in modifier) return modifier
-      if ('fixed' in result) return result
-      return {
-        add: (result.add ?? 0) + (modifier.add ?? 0),
-        per: (result.per ?? 0) + (modifier.per ?? 0),
-      }
-    })
+    const modifier = descriptor.modifiers.reduce(
+      (result, modifier) => {
+        if ('fixed' in modifier) return modifier
+        if ('fixed' in result) return result
+        return {
+          add: (result.add ?? 0) + (modifier.add ?? 0),
+          per: (result.per ?? 0) + (modifier.per ?? 0),
+        }
+      },
+      { add: 0, per: 0 },
+    )
     if ('fixed' in modifier) return modifier.fixed
 
     return (derived + modifier.add!) * (1 + modifier.per!)
