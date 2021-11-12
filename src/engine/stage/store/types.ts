@@ -8,7 +8,9 @@ export type ActionsMap = Action.FromActionCreators<ActionCreators>
 
 export type Actions = ActionsMap[keyof ActionsMap]
 
-export interface CreateOptions {}
+export interface CreateOptions {
+  defaultState?: StageData
+}
 
 export type EpicFactory = GeneralEpicFactory<
   CreateOptions,

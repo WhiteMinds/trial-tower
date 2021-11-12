@@ -1,5 +1,5 @@
 import { combineEpics, Reducer, Store } from '../../utils/RxStore'
-import { StageData as StageData } from './StageData'
+import { CombatStageData, StageData as StageData } from './StageData'
 import type { CreateOptions, Actions, EpicFactory } from './types'
 import { actionCreators as entityActionCreators } from './packs/entity/actions'
 import { reducer as entityReducer } from './packs/entity/reducers'
@@ -23,7 +23,26 @@ export type StageStore = ReturnType<typeof createStageStore>
 export function createStageStore(
   options: CreateOptions,
 ): Store<StageData, Actions> {
-  const store = Store.createStore('Stage', StageData.initial, reducer)
+  const store = Store.createStore(
+    'Stage',
+    options.defaultState ?? StageData.initial,
+    reducer,
+  )
+  store.registerEpic(epic(options))
+  return store
+}
+
+export function createCombatStageStore(
+  options: CreateOptions,
+): Store<CombatStageData, Actions> {
+  const store = Store.createStore<CombatStageData, Actions, any[]>(
+    'CombatStage',
+    {
+      ...CombatStageData.initial,
+      ...options.defaultState,
+    },
+    reducer,
+  )
   store.registerEpic(epic(options))
   return store
 }

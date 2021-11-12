@@ -1,16 +1,16 @@
-import { createStageStore, StageStore } from './store'
-import { Stage } from './types'
+import { MainStage } from './MainStage'
+import { createStageStore } from './store'
 
-export class CombatStage implements Stage {
-  store: StageStore
+export class CombatStage extends MainStage {
+  constructor(public mainStage: MainStage) {
+    super()
 
-  // entities: ObjectManager<Entity, Entity.Serialized>
-  // items: ObjectManager<Item, Item.Serialized>
-  // skills: ObjectManager<Skill, Skill.Serialized>
-  // TODO: buffs
+    this.store = createStageStore({
+      // 相当于从主舞台全量克隆了数据
+      defaultState: mainStage.store.state$.value,
+    })
 
-  constructor() {
-    this.store = createStageStore({})
+    this.combatStore
 
     // this.entities.on('ItemAdded', (entity) =>
     //   this.emit('EntityCreated', entity),

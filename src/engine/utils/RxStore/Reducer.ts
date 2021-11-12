@@ -2,11 +2,12 @@ import * as R from 'ramda'
 import { Draft, produce } from 'immer'
 import { Action } from './Action'
 
-export type Reducer<S, A extends Action<any, any>, E extends any[]> = (
-  prevState: S,
-  action: A,
-  ...extra: E
-) => S
+export type Reducer<
+  S,
+  A extends Action<any, any>,
+  E extends any[],
+  R extends S = S
+> = (prevState: S, action: A, ...extra: E) => R
 
 export namespace Reducer {
   export type ImmerReducer<S, A extends Action<any, any>, E extends any[]> = (
@@ -51,7 +52,7 @@ export namespace Reducer {
     const matcher = Action.getActionMatcher(actionMatcherInput)
     return (prevState: S, action: Action<any, any>, ...extra: E): S =>
       matcher(action)
-        ? produce(prevState, prevState => {
+        ? produce(prevState, (prevState) => {
             reducer(prevState, action, ...extra)
           })
         : prevState
