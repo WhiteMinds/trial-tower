@@ -3,7 +3,9 @@ import { Entity } from '../../model/entity'
 import { Item } from '../../model/item'
 import { Team } from './Team'
 import * as R from 'ramda'
+import { sample } from 'lodash-es'
 
+const MaxRoundCount = 99
 // 每次行动需要的进度点数
 const ProgressNeedPoint = 100
 
@@ -82,7 +84,7 @@ export class CombatStage implements Stage {
   }
 
   doNextRound(): boolean {
-    if (++this.round >= 999) {
+    if (++this.round >= MaxRoundCount) {
       this.result = BattleResult.Timeout
       return false
     }
@@ -94,18 +96,13 @@ export class CombatStage implements Stage {
     const team = this.getBelongTeam(actor)
     if (!team) return
 
-    // TODO: ... codes for do action ...
-    // 单体普通攻击
-    const enemy = this.getFirstAliveEnemy(actor)
-    if (enemy == null) {
-      this.setResultIfBattleEnd()
+    // TODO: 这里需要过滤出可用技能
+    const skill = sample(actor.skills)
+    if (!skill) {
+      // 跳过
       return
     }
-    const damage = actor.atk.value
-    enemy.currentHP -= damage
-    console.log(
-      `${actor.name} 攻击了 ${enemy.name}，造成 ${damage} 伤害，剩余 hp ${enemy.currentHP}`
-    )
+    skill.use()
 
     this.setResultIfBattleEnd()
   }

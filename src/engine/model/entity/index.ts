@@ -63,7 +63,9 @@ export class Entity {
     this.maxHP.base = data.maxHP
     this.atk.base = data.atk
     this._equipIds = []
-    this.skills = data.skills.map((skill) => new Skill(this.stage, skill))
+    this.skills = data.skills.map((skillData) =>
+      Skill.deserialize(skillData, this, this.stage)
+    )
   }
 
   static deserialize(data: Entity.Serialized, stage: Stage): Entity {

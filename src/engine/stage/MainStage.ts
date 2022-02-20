@@ -41,25 +41,27 @@ export class MainStage implements Stage {
     if (player != null) return player
 
     // TODO: test code
-    return this.createEntity({
+    const newPlayer = this.createEntity({
       id: this.character.id,
       name: 'WhiteMind',
       maxHP: 10,
       atk: 2,
       speed: 10,
-      skills: [new PhysicalAttack(this)],
     })
+    newPlayer.skills = [new PhysicalAttack(newPlayer, this)]
+    return newPlayer
   }
 
   createRandomEnemyByPlayerLevel(player: Entity): Entity {
     // TODO: 根据玩家等级进行随机生成
-    return this.createEntity({
+    const entity = this.createEntity({
       name: '怪物',
       maxHP: 10,
       atk: 1,
       speed: 10,
-      skills: [new PhysicalAttack(this)],
     })
+    entity.skills = [new PhysicalAttack(entity, this)]
+    return entity
   }
 
   beginCombat(player: Entity, enemies: Entity[]): void {

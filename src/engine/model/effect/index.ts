@@ -1,3 +1,4 @@
+import { Stage } from '../../stage'
 import { UniqueId } from '../../types'
 import { Entity } from '../entity'
 
@@ -9,9 +10,14 @@ interface Effect {
 }
 
 export class DamageEffect implements Effect {
-  modifiers: ((target: Entity, effect: DamageEffect) => DamageEffect)[] = []
+  modifiers: ((target: Entity, effect: DamageEffect) => void)[] = []
 
-  value: number = 0
+  baseValue: number = 0
+  // 这里先设计的简单点，effect modifier 要倍乘 value 数值时直接改这里，这样就
+  // 不用做成类似 AttrDescriptor 的模式了。
+  multiplier: number = 1
+
+  // 伤害的属性类型，如果多种属性应该是多个 Effect 实例
   property: DamageProperty = DamageProperty.None
   // 是否能够附加攻击特效，这将决定一些 modifier 是否被添加，以及是否额外生成一些 effect。
   // 例如转换攻击属性、改变攻击数值、新增一个 GrantBuffEffect 等。
@@ -22,6 +28,15 @@ export class DamageEffect implements Effect {
   isMagic = false
 
   constructor(public groupId: UniqueId) {}
+
+  // 当前的设计是一个 effect 只能 apply 一次，除非做成不可变数据或可克隆的。
+  // 每个 Effect 的 apply 会返回不同的处理数据，方便调用者做记录。
+  apply(stage: Stage, target: Entity): number {
+    this.modifiers.forEach((modifier) => modifier(target, this))
+    const value = this.baseValue * this.multiplier
+    target.currentHP -= value
+    return value
+  }
 }
 
 enum DamageProperty {
