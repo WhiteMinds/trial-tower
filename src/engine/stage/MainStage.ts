@@ -1,6 +1,7 @@
 import { CombatStage } from '.'
 import { Character } from '..'
 import { Entity } from '../model/entity'
+import { PhysicalAttack } from '../model/skill/active/PhysicalAttack'
 import { Store } from '../store'
 import { Stage } from './types'
 
@@ -39,12 +40,14 @@ export class MainStage implements Stage {
     const player = this.getEntity(this.character.id)
     if (player != null) return player
 
+    // TODO: test code
     return this.createEntity({
       id: this.character.id,
       name: 'WhiteMind',
       maxHP: 10,
       atk: 2,
       speed: 10,
+      skills: [new PhysicalAttack(this)],
     })
   }
 
@@ -55,6 +58,7 @@ export class MainStage implements Stage {
       maxHP: 10,
       atk: 1,
       speed: 10,
+      skills: [new PhysicalAttack(this)],
     })
   }
 

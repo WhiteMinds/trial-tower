@@ -2,6 +2,7 @@ import { Stage } from '../../stage'
 import { UniqueId } from '../../types'
 import { createUniqueId } from '../../utils'
 import { Equip } from '../item'
+import { Skill } from '../skill'
 import {
   AttrDescriptor,
   AttrDescriptor$Attack,
@@ -25,10 +26,12 @@ export class Entity {
 
   currentHP: number = 0
 
-  _equipIds: UniqueId[] = []
+  _equipIds: Equip['id'][] = []
   get equipIds() {
     return this._equipIds
   }
+
+  skills: Skill[] = []
 
   constructor(public stage: Stage, data?: Partial<Entity.Serialized>) {
     this.deserialize({
@@ -47,6 +50,7 @@ export class Entity {
       maxHP: this.maxHP.base,
       atk: this.atk.base,
       equipIds: this._equipIds,
+      skills: this.skills.map((skill) => skill.serialize()),
     }
   }
 
@@ -59,6 +63,7 @@ export class Entity {
     this.maxHP.base = data.maxHP
     this.atk.base = data.atk
     this._equipIds = []
+    this.skills = data.skills.map((skill) => new Skill(this.stage, skill))
   }
 
   static deserialize(data: Entity.Serialized, stage: Stage): Entity {
@@ -82,5 +87,6 @@ export namespace Entity {
     maxHP: number
     atk: number
     equipIds: Equip['id'][]
+    skills: Skill.Serialized[]
   }
 }
