@@ -1,6 +1,7 @@
 import { CombatStage } from '.'
 import { Character } from '..'
 import { Entity } from '../model/entity'
+import { PhysicalAttack } from '../model/skill/active/PhysicalAttack'
 import { Store } from '../store'
 import { Stage } from './types'
 
@@ -39,23 +40,28 @@ export class MainStage implements Stage {
     const player = this.getEntity(this.character.id)
     if (player != null) return player
 
-    return this.createEntity({
+    // TODO: test code
+    const newPlayer = this.createEntity({
       id: this.character.id,
       name: 'WhiteMind',
       maxHP: 10,
       atk: 2,
       speed: 10,
     })
+    newPlayer.skills = [new PhysicalAttack(newPlayer, this)]
+    return newPlayer
   }
 
   createRandomEnemyByPlayerLevel(player: Entity): Entity {
     // TODO: 根据玩家等级进行随机生成
-    return this.createEntity({
+    const entity = this.createEntity({
       name: '怪物',
       maxHP: 10,
       atk: 1,
       speed: 10,
     })
+    entity.skills = [new PhysicalAttack(entity, this)]
+    return entity
   }
 
   beginCombat(player: Entity, enemies: Entity[]): void {
