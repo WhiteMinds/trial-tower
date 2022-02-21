@@ -36,10 +36,11 @@ export class PhysicalAttack extends Skill {
 
     // effects 上可能需要记录 targets？还是说每个 target 生成一次 effect？
     // TODO: emit effects created, stage.emit('useSkill', skill, effects)
+    source.buffs.forEach((buff) => buff.onCaptureEffectSending(damage))
     // TODO: apply effects, combine(baseValue() + modifiers())
-    const damageValue = damage.apply(this.stage, target)
+    const damageValue = damage.cast(this.stage, target)
     console.log(
-      `${source.name} 对 ${target.name} 释放 ${this.displayName}，造成 ${damageValue} 伤害，剩余 hp ${target.currentHP}`
+      `[${source.name}] 对 [${target.name}] 释放 [${this.displayName}]，造成 ${damageValue} 伤害，剩余 hp ${target.currentHP}`
     )
 
     return true
@@ -50,7 +51,7 @@ export class PhysicalAttack extends Skill {
     owner: Entity,
     stage: Stage
   ): PhysicalAttack {
-    const skill = new PhysicalAttack(owner, stage)
+    const skill = new this(owner, stage)
     skill.level = data.level
     return skill
   }
