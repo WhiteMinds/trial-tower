@@ -23,6 +23,8 @@ export class CombatStage implements Stage {
 
     const entity = new Entity(this, entityFromMainStage.serialize())
     entity.currentHP = entity.maxHP.value
+
+    this.loadedEntityMap.set(entity.id, entity)
     return entity
   }
 
