@@ -1,8 +1,9 @@
 import { Stage } from '../../stage'
 import { UniqueId } from '../../types'
+import { Buff } from '../buff'
 import { Entity } from '../entity'
 
-interface Effect {
+export interface Effect {
   groupId: UniqueId
 
   // TODO: 类型不太好写，先单独放到各个实现类里了
@@ -10,7 +11,7 @@ interface Effect {
 }
 
 export class DamageEffect implements Effect {
-  modifiers: ((target: Entity, effect: DamageEffect) => void)[] = []
+  modifiers: ((target: Entity, effect: this) => void)[] = []
 
   baseValue: number = 0
   // 这里先设计的简单点，effect modifier 要倍乘 value 数值时直接改这里，这样就
@@ -31,7 +32,7 @@ export class DamageEffect implements Effect {
 
   // 当前的设计是一个 effect 只能 apply 一次，除非做成不可变数据或可克隆的。
   // 每个 Effect 的 apply 会返回不同的处理数据，方便调用者做记录。
-  apply(stage: Stage, target: Entity): number {
+  cast(stage: Stage, target: Entity): number {
     this.modifiers.forEach((modifier) => modifier(target, this))
     const value = this.baseValue * this.multiplier
     target.currentHP -= value
@@ -43,4 +44,16 @@ enum DamageProperty {
   None,
   Fire,
   Water,
+}
+
+export class GrantBuffEffect implements Effect {
+  modifiers: ((target: Entity, effect: this) => void)[] = []
+
+  constructor(public groupId: UniqueId, public buff: Buff) {}
+
+  cast(stage: Stage, target: Entity): boolean {
+    this.modifiers.forEach((modifier) => modifier(target, this))
+    target.grantBuff(this.buff)
+    return true
+  }
 }

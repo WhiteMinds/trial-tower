@@ -1,6 +1,7 @@
 import { CombatStage } from '.'
 import { Character } from '..'
 import { Entity } from '../model/entity'
+import { Concentrate } from '../model/skill/active/Concentrate'
 import { PhysicalAttack } from '../model/skill/active/PhysicalAttack'
 import { Store } from '../store'
 import { Stage } from './types'
@@ -48,7 +49,10 @@ export class MainStage implements Stage {
       atk: 2,
       speed: 10,
     })
-    newPlayer.skills = [new PhysicalAttack(newPlayer, this)]
+    newPlayer.skills = [
+      new PhysicalAttack(newPlayer, this),
+      new Concentrate(newPlayer, this),
+    ]
     return newPlayer
   }
 

@@ -38,7 +38,7 @@ export class Skill {
     stage: Stage
   ): Skill {
     if (data.templateId === SkillTemplateId.Base) {
-      const skill = new Skill(owner, stage)
+      const skill = new this(owner, stage)
       skill.level = data.level
       return skill
     } else {

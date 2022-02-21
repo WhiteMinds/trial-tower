@@ -1,6 +1,7 @@
 import { Stage } from '../../stage'
 import { UniqueId } from '../../types'
 import { createUniqueId } from '../../utils'
+import { Buff } from '../buff'
 import { Equip } from '../item'
 import { Skill } from '../skill'
 import {
@@ -32,6 +33,7 @@ export class Entity {
   }
 
   skills: Skill[] = []
+  buffs: Buff[] = []
 
   constructor(public stage: Stage, data?: Partial<Entity.Serialized>) {
     this.deserialize({
@@ -76,6 +78,24 @@ export class Entity {
 
   get isAlive() {
     return this.currentHP > 0
+  }
+
+  grantBuff(buff: Buff): void {
+    // TODO: 这里要检查 target 上是否已经有 buff 了
+    // 如果没有就直接施加并触发一些生命周期
+    // 如果有，应该触发 existedBuff.mixing(buff)，在其内部决定叠加的规则，
+    // 如果不可叠加则返回 false，如果具有唯一性则什么也不做就返回 true。
+    // 在返回 false 时添加一个同类型的 buff 到 target 上。
+    // 如果有多个，则按顺序调用，直到其中一个返回 true 时终止
+    const existedBuffs = this.buffs.filter(
+      // TODO: 这个判断可能会出问题，因为可能有 buff 继承自另一个 buff 实现
+      (existedBuff) => existedBuff instanceof buff.constructor
+    )
+    const mixed = existedBuffs.find((existedBuff) => existedBuff.mixing(buff))
+    if (mixed) return
+
+    this.buffs.push(buff)
+    buff.onCasted()
   }
 }
 
