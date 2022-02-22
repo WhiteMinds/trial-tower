@@ -11,15 +11,20 @@ export class Concentrate extends Skill {
     return SkillTemplateId.Concentrate
   }
   static displayName = '全神贯注'
-  static description = '下三次攻击伤害提升 100%'
+  get description() {
+    return `下 ${this.enhanceCount} 次攻击伤害提升 100%`
+  }
+
+  get enhanceCount() {
+    return 2 + this.level
+  }
 
   canSilent = true
   canDisarm = false
 
   use(): boolean {
-    if (!(this.stage instanceof CombatStage)) {
-      throw new Error(`The ${this.templateId} skill can only be used in combat`)
-    }
+    this.assertCombatting()
+    this.assertOwner()
 
     const source = this.owner
     const target = this.owner
@@ -27,7 +32,7 @@ export class Concentrate extends Skill {
     const effectGroupId = createUniqueId()
     const effect = new GrantBuffEffect(
       effectGroupId,
-      new ConcentrateBuff(target)
+      new ConcentrateBuff(target, this.enhanceCount)
     )
 
     effect.cast(this.stage, target)
@@ -41,7 +46,7 @@ export class Concentrate extends Skill {
     owner: Entity,
     stage: Stage
   ): Concentrate {
-    const skill = new this(owner, stage)
+    const skill = new this(stage, owner)
     skill.level = data.level
     return skill
   }

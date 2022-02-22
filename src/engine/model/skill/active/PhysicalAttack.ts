@@ -11,7 +11,9 @@ export class PhysicalAttack extends Skill {
     return SkillTemplateId.PhysicalAttack
   }
   static displayName = '普通攻击（物理）'
-  static description = '对单体目标造成 1 * atk 的伤害，可附加攻击特效'
+  get description() {
+    return '对单体目标造成 1 * atk 的伤害，可附加攻击特效'
+  }
 
   // 沉默无效的
   canSilent = false
@@ -20,9 +22,8 @@ export class PhysicalAttack extends Skill {
   // 上面两个属性理论上应该和 canUse 挂钩
 
   use(): boolean {
-    if (!(this.stage instanceof CombatStage)) {
-      throw new Error(`The ${this.templateId} skill can only be used in combat`)
-    }
+    this.assertCombatting()
+    this.assertOwner()
 
     const source = this.owner
     const target = this.stage.getFirstAliveEnemy(source)
@@ -51,7 +52,7 @@ export class PhysicalAttack extends Skill {
     owner: Entity,
     stage: Stage
   ): PhysicalAttack {
-    const skill = new this(owner, stage)
+    const skill = new this(stage, owner)
     skill.level = data.level
     return skill
   }

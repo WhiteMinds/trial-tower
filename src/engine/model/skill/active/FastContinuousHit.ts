@@ -12,24 +12,27 @@ export class FastContinuousHit extends Skill {
     return SkillTemplateId.FastContinuousHit
   }
   static displayName = '快速连击'
-  // TODO: 如果攻击次数是动态计算的（比如跟随等级），那现在的 description 结构无法支撑
-  static description =
-    '对单体目标造成 2 ~ 5 次的 0.8 * atk 的伤害，可附加攻击特效'
+  get description() {
+    return `对单体目标造成 2 ~ ${this.maxHitCount} 次的 0.8 * atk 的伤害，可附加攻击特效`
+  }
+
+  get maxHitCount() {
+    return 4 + this.level
+  }
 
   canSilent = true
   canDisarm = true
 
   use(): boolean {
-    if (!(this.stage instanceof CombatStage)) {
-      throw new Error(`The ${this.templateId} skill can only be used in combat`)
-    }
+    this.assertCombatting()
+    this.assertOwner()
 
     const source = this.owner
     const target = this.stage.getFirstAliveEnemy(source)
     if (target == null) return false
 
     const effectGroupId = createUniqueId()
-    const damages = R.range(0, random(2, 5)).map(() => {
+    const damages = R.range(0, random(2, this.maxHitCount)).map(() => {
       const damage = new DamageEffect(effectGroupId)
       damage.baseValue = source.atk.value * 0.8
       damage.canAddAttackEffect = true
@@ -55,7 +58,7 @@ export class FastContinuousHit extends Skill {
     owner: Entity,
     stage: Stage
   ): FastContinuousHit {
-    const skill = new this(owner, stage)
+    const skill = new this(stage, owner)
     skill.level = data.level
     return skill
   }

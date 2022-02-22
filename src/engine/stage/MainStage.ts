@@ -51,9 +51,9 @@ export class MainStage implements Stage {
       speed: 10,
     })
     newPlayer.skills = [
-      new PhysicalAttack(newPlayer, this),
-      new Concentrate(newPlayer, this),
-      new FastContinuousHit(newPlayer, this),
+      new PhysicalAttack(this, newPlayer),
+      new Concentrate(this, newPlayer),
+      new FastContinuousHit(this, newPlayer),
     ]
     return newPlayer
   }
@@ -66,7 +66,7 @@ export class MainStage implements Stage {
       atk: 1,
       speed: 10,
     })
-    entity.skills = [new PhysicalAttack(entity, this)]
+    entity.skills = [new PhysicalAttack(this, entity)]
     return entity
   }
 

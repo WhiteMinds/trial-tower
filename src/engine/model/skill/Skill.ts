@@ -1,5 +1,5 @@
 import { SkillTemplateId, SkillTemplateMap } from '.'
-import { Stage } from '../../stage'
+import { CombatStage, Stage } from '../../stage'
 import { Entity } from '../entity'
 
 export class Skill {
@@ -16,14 +16,13 @@ export class Skill {
     return (this.constructor as typeof Skill).displayName
   }
 
-  static description = ''
   get description() {
-    return (this.constructor as typeof Skill).description
+    return 'BaseSkill'
   }
 
   level: number = 1
 
-  constructor(public owner: Entity, public stage: Stage) {}
+  constructor(public stage: Stage, public owner?: Entity) {}
 
   serialize(): Skill.Serialized {
     return {
@@ -38,7 +37,7 @@ export class Skill {
     stage: Stage
   ): Skill {
     if (data.templateId === SkillTemplateId.Base) {
-      const skill = new this(owner, stage)
+      const skill = new this(stage, owner)
       skill.level = data.level
       return skill
     } else {
@@ -48,6 +47,25 @@ export class Skill {
 
   use(): boolean {
     return false
+  }
+
+  assertCombatStage(
+    errMsg = 'Cannot pass assertCombatStage'
+  ): asserts this is this & { stage: CombatStage } {
+    if (!(this.stage instanceof CombatStage)) throw new Error(errMsg)
+  }
+  assertCombatting(): asserts this is this & { stage: CombatStage } {
+    this.assertCombatStage(
+      `The ${this.templateId} skill can only be used in combat`
+    )
+  }
+
+  assertOwner(
+    errMsg = 'Cannot pass assertOwner'
+  ): asserts this is this & { owner: Entity } {
+    if (this.owner == null) {
+      throw new Error(errMsg)
+    }
   }
 }
 

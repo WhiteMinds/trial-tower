@@ -28,7 +28,9 @@ export class Buff {
 export class ConcentrateBuff extends Buff {
   remainingRound = Infinity
 
-  remainingCount = 3
+  constructor(public owner: Entity, public remainingCount = 3) {
+    super(owner)
+  }
 
   onCaptureEffectsSending(effects: Effect[]) {
     effects.forEach((effect) => {
