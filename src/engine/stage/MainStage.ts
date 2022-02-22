@@ -2,6 +2,7 @@ import { CombatStage } from '.'
 import { Character } from '..'
 import { Entity } from '../model/entity'
 import { Concentrate } from '../model/skill/active/Concentrate'
+import { FastContinuousHit } from '../model/skill/active/FastContinuousHit'
 import { PhysicalAttack } from '../model/skill/active/PhysicalAttack'
 import { Store } from '../store'
 import { Stage } from './types'
@@ -52,6 +53,7 @@ export class MainStage implements Stage {
     newPlayer.skills = [
       new PhysicalAttack(newPlayer, this),
       new Concentrate(newPlayer, this),
+      new FastContinuousHit(newPlayer, this),
     ]
     return newPlayer
   }

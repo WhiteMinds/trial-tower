@@ -36,7 +36,7 @@ export class PhysicalAttack extends Skill {
 
     // effects 上可能需要记录 targets？还是说每个 target 生成一次 effect？
     // TODO: emit effects created, stage.emit('useSkill', skill, effects)
-    source.buffs.forEach((buff) => buff.onCaptureEffectSending(damage))
+    source.buffs.forEach((buff) => buff.onCaptureEffectsSending([damage]))
     // TODO: apply effects, combine(baseValue() + modifiers())
     const damageValue = damage.cast(this.stage, target)
     console.log(

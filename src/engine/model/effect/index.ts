@@ -34,7 +34,7 @@ export class DamageEffect implements Effect {
   // 每个 Effect 的 apply 会返回不同的处理数据，方便调用者做记录。
   cast(stage: Stage, target: Entity): number {
     this.modifiers.forEach((modifier) => modifier(target, this))
-    const value = this.baseValue * this.multiplier
+    const value = Math.floor(this.baseValue * this.multiplier)
     target.currentHP -= value
     return value
   }

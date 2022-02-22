@@ -32,6 +32,7 @@ export class Entity {
     return this._equipIds
   }
 
+  // TODO: 外界系统应该通过实例上的 api 来改变这两个属性，不能直接操作
   skills: Skill[] = []
   buffs: Buff[] = []
 

@@ -14,7 +14,7 @@ export class Buff {
   onCasted(): void {}
 
   // 检测到宿主发出 effect 时，对其处理
-  onCaptureEffectSending(effect: Effect): void {}
+  onCaptureEffectsSending(effects: Effect[]): void {}
 
   // 检测到宿主受到 effect 时，对其处理
   onCaptureEffectCasted(): void {}
@@ -30,13 +30,15 @@ export class ConcentrateBuff extends Buff {
 
   remainingCount = 3
 
-  onCaptureEffectSending(effect: Effect) {
-    if (this.remainingCount <= 0) return
-    if (!(effect instanceof DamageEffect)) return
+  onCaptureEffectsSending(effects: Effect[]) {
+    effects.forEach((effect) => {
+      if (this.remainingCount <= 0) return
+      if (!(effect instanceof DamageEffect)) return
 
-    effect.modifiers.push((target, effect) => {
-      effect.multiplier += 1
-      this.remainingCount--
+      effect.modifiers.push((target, effect) => {
+        effect.multiplier += 1
+        this.remainingCount--
+      })
     })
   }
 
