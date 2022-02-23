@@ -4,6 +4,7 @@ import { Entity } from '../model/entity'
 import { Concentrate } from '../model/skill/active/Concentrate'
 import { FastContinuousHit } from '../model/skill/active/FastContinuousHit'
 import { PhysicalAttack } from '../model/skill/active/PhysicalAttack'
+import { EnhanceConstitution } from '../model/skill/passivity/EnhanceConstitution'
 import { Store } from '../store'
 import { Stage } from './types'
 
@@ -46,6 +47,7 @@ export class MainStage implements Stage {
     const newPlayer = this.createEntity({
       id: this.character.id,
       name: 'WhiteMind',
+      constitution: 10,
       maxHP: 10,
       atk: 2,
       speed: 10,
@@ -54,6 +56,7 @@ export class MainStage implements Stage {
       new PhysicalAttack(this, newPlayer),
       new Concentrate(this, newPlayer),
       new FastContinuousHit(this, newPlayer),
+      new EnhanceConstitution(this, newPlayer),
     ]
     return newPlayer
   }

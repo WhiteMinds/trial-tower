@@ -22,7 +22,13 @@ export class Skill {
 
   level: number = 1
 
-  constructor(public stage: Stage, public owner?: Entity) {}
+  protected owner?: Entity
+
+  constructor(public stage: Stage, owner?: Entity) {
+    if (owner != null) {
+      this.cast(owner)
+    }
+  }
 
   serialize(): Skill.Serialized {
     return {
@@ -44,6 +50,13 @@ export class Skill {
       return SkillTemplateMap[data.templateId].deserialize(data, owner, stage)
     }
   }
+
+  cast(entity: Entity) {
+    this.owner = entity
+    this.onCasted()
+  }
+
+  onCasted() {}
 
   use(): boolean {
     return false

@@ -142,6 +142,7 @@ export class CombatStage implements Stage {
   }
 
   getNextActor(): Entity | null {
+    // TODO: 这里写的有问题，后面再改
     const sortEntitiesByProgress = R.sortBy(R.prop('progress'))
     const actionableEntities = this.getAliveEntities().filter(
       (entity) => this.getBattlingState(entity).progress >= ProgressNeedPoint

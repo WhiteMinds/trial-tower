@@ -1,5 +1,6 @@
 import { DamageEffect, Effect } from '../effect'
 import { Entity } from '../entity'
+import { AttrModifier } from '../entity/AttrDescriptor'
 
 export class Buff {
   // TODO: owner 是不是应该在 onCasted 时才赋予？
@@ -47,5 +48,24 @@ export class ConcentrateBuff extends Buff {
   mixing(): boolean {
     this.remainingCount += 3
     return true
+  }
+}
+
+export class EnhanceConstitutionBuff extends Buff {
+  remainingRound = Infinity
+  endTime = Infinity
+
+  constitutionModifier: AttrModifier
+
+  constructor(public owner: Entity, public enhancePctCount: number) {
+    super(owner)
+
+    this.constitutionModifier = {
+      per: enhancePctCount,
+    }
+  }
+
+  onCasted() {
+    this.owner.constitution.modifiers.push(this.constitutionModifier)
   }
 }

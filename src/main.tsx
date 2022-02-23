@@ -16,6 +16,7 @@ function test() {
   const engine = new Engine(character)
   const player = engine.mainStage.getPlayer()
   const enemy = engine.mainStage.createRandomEnemyByPlayerLevel(player)
+  console.log(player, enemy)
   engine.mainStage.beginCombat(player, [enemy])
 }
 
