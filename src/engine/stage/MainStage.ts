@@ -58,6 +58,8 @@ export class MainStage implements Stage {
       new FastContinuousHit(this, newPlayer),
       new EnhanceConstitution(this, newPlayer),
     ]
+    newPlayer.skills[2].level = 2
+    newPlayer.skills[3].level = 2
     return newPlayer
   }
 

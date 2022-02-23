@@ -16,7 +16,7 @@ export class EnhanceConstitution extends Skill {
   }
 
   get enhancePctCount() {
-    return (9 + this.level) / 100
+    return (10 * this.level) / 100
   }
 
   canSilent = false

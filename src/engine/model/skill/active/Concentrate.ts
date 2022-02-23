@@ -36,7 +36,7 @@ export class Concentrate extends Skill {
     )
 
     effect.cast(this.stage, target)
-    console.log(`${source.name} 释放 ${this.displayName}`)
+    console.log(`[${source.name}] 释放 [${this.displayName}]`)
 
     return true
   }
