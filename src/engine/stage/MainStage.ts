@@ -52,14 +52,14 @@ export class MainStage implements Stage {
       atk: 2,
       speed: 10,
     })
-    newPlayer.skills = [
-      new PhysicalAttack(this, newPlayer),
-      new Concentrate(this, newPlayer),
-      new FastContinuousHit(this, newPlayer),
-      new EnhanceConstitution(this, newPlayer),
-    ]
-    newPlayer.skills[2].level = 2
-    newPlayer.skills[3].level = 2
+    newPlayer.addSkill(new PhysicalAttack(this))
+    newPlayer.addSkill(new Concentrate(this))
+    const fastContinuousHit = new FastContinuousHit(this)
+    fastContinuousHit.level = 2
+    newPlayer.addSkill(fastContinuousHit)
+    const enhanceConstitution = new EnhanceConstitution(this)
+    enhanceConstitution.level = 2
+    newPlayer.addSkill(enhanceConstitution)
     return newPlayer
   }
 
@@ -71,7 +71,7 @@ export class MainStage implements Stage {
       atk: 1,
       speed: 10,
     })
-    entity.skills = [new PhysicalAttack(this, entity)]
+    entity.addSkill(new PhysicalAttack(this))
     return entity
   }
 

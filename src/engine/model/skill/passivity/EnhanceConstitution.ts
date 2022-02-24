@@ -1,16 +1,14 @@
-import { SkillTemplateId } from '..'
-import { CombatStage, Stage } from '../../../stage'
+import { Stage } from '../../../stage'
 import { createUniqueId } from '../../../utils'
 import { EnhanceConstitutionBuff } from '../../buff'
-import { DamageEffect, GrantBuffEffect } from '../../effect'
+import { GrantBuffEffect } from '../../effect'
 import { Entity } from '../../entity'
 import { Skill } from '../Skill'
 
 export class EnhanceConstitution extends Skill {
-  get templateId() {
-    return SkillTemplateId.EnhanceConstitution
+  get displayName() {
+    return '体质强化'
   }
-  static displayName = '体质强化'
   get description() {
     return `提升 ${this.enhancePctCount * 100}% 的体质`
   }
@@ -22,7 +20,9 @@ export class EnhanceConstitution extends Skill {
   canSilent = false
   canDisarm = false
 
-  onCasted(): void {
+  // TODO: entity 的赋予或许应该单独写个 skill.cast 函数，否则 onCasted 覆写后可能忘记赋予
+  onCasted(entity: Entity): void {
+    super.onCasted(entity)
     this.assertOwner()
 
     // const source = this.owner
@@ -39,10 +39,9 @@ export class EnhanceConstitution extends Skill {
 
   static deserialize(
     data: Skill.Serialized,
-    owner: Entity,
     stage: Stage
   ): EnhanceConstitution {
-    const skill = new this(stage, owner)
+    const skill = new this(stage)
     skill.level = data.level
     return skill
   }

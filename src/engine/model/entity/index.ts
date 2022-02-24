@@ -32,9 +32,17 @@ export class Entity {
     return this._equipIds
   }
 
-  // TODO: 外界系统应该通过实例上的 api 来改变这两个属性，不能直接操作
-  skills: Skill[] = []
-  buffs: Buff[] = []
+  // 外界系统应该通过实例上的 api 来改变这个属性，不能直接操作。
+  // 缺点是 getSkills 获取的是 skills 快照，而不是一个动态变化的数组，或许应该叫 getCurrentSkills？
+  private _skills: Skill[] = []
+  getSkills(): Skill[] {
+    return this._skills.slice(0)
+  }
+
+  private _buffs: Buff[] = []
+  getBuffs(): Buff[] {
+    return this._buffs.slice(0)
+  }
 
   constructor(public stage: Stage, data?: Partial<Entity.Serialized>) {
     this.deserialize({
@@ -53,7 +61,7 @@ export class Entity {
       maxHP: this.maxHP.base,
       atk: this.atk.base,
       equipIds: this._equipIds,
-      skills: this.skills.map((skill) => skill.serialize()),
+      skills: this.getSkills().map((skill) => skill.serialize()),
     }
   }
 
@@ -66,8 +74,10 @@ export class Entity {
     this.maxHP.base = data.maxHP
     this.atk.base = data.atk
     this._equipIds = []
-    this.skills = data.skills.map((skillData) =>
-      Skill.deserialize(skillData, this, this.stage)
+
+    this._skills = []
+    data.skills.map((skillData) =>
+      this.addSkill(Skill.deserialize(skillData, this.stage))
     )
   }
 
@@ -81,6 +91,11 @@ export class Entity {
     return this.currentHP > 0
   }
 
+  addSkill(skill: Skill): void {
+    this._skills.push(skill)
+    skill.onCasted(this)
+  }
+
   grantBuff(buff: Buff): void {
     // TODO: 这里要检查 target 上是否已经有 buff 了
     // 如果没有就直接施加并触发一些生命周期
@@ -88,14 +103,14 @@ export class Entity {
     // 如果不可叠加则返回 false，如果具有唯一性则什么也不做就返回 true。
     // 在返回 false 时添加一个同类型的 buff 到 target 上。
     // 如果有多个，则按顺序调用，直到其中一个返回 true 时终止
-    const existedBuffs = this.buffs.filter(
+    const existedBuffs = this.getBuffs().filter(
       // TODO: 这个判断可能会出问题，因为可能有 buff 继承自另一个 buff 实现
       (existedBuff) => existedBuff instanceof buff.constructor
     )
     const mixed = existedBuffs.find((existedBuff) => existedBuff.mixing(buff))
     if (mixed) return
 
-    this.buffs.push(buff)
+    this._buffs.push(buff)
     buff.onCasted()
   }
 }

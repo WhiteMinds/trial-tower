@@ -1,25 +1,18 @@
-import { SkillTemplateId } from '..'
-import { CombatStage, Stage } from '../../../stage'
+import { Stage } from '../../../stage'
 import { createUniqueId } from '../../../utils'
 import { DamageEffect } from '../../effect'
-import { Entity } from '../../entity'
 import { Skill } from '../Skill'
 
 export class PhysicalAttack extends Skill {
-  // static templateId = SkillTemplateId.PhysicalAttack
-  get templateId() {
-    return SkillTemplateId.PhysicalAttack
+  get displayName() {
+    return '普通攻击（物理）'
   }
-  static displayName = '普通攻击（物理）'
   get description() {
     return '对单体目标造成 1 * atk 的伤害，可附加攻击特效'
   }
 
-  // 沉默无效的
-  canSilent = false
-  // 缴械有效的
-  canDisarm = true
-  // 上面两个属性理论上应该和 canUse 挂钩
+  readonly canSilent = false
+  readonly canDisarm = true
 
   use(): boolean {
     this.assertCombatting()
@@ -37,7 +30,7 @@ export class PhysicalAttack extends Skill {
 
     // effects 上可能需要记录 targets？还是说每个 target 生成一次 effect？
     // TODO: emit effects created, stage.emit('useSkill', skill, effects)
-    source.buffs.forEach((buff) => buff.onCaptureEffectsSending([damage]))
+    source.getBuffs().forEach((buff) => buff.onCaptureEffectsSending([damage]))
     // TODO: apply effects, combine(baseValue() + modifiers())
     const damageValue = damage.cast(this.stage, target)
     console.log(
@@ -45,15 +38,5 @@ export class PhysicalAttack extends Skill {
     )
 
     return true
-  }
-
-  static deserialize(
-    data: Skill.Serialized,
-    owner: Entity,
-    stage: Stage
-  ): PhysicalAttack {
-    const skill = new this(stage, owner)
-    skill.level = data.level
-    return skill
   }
 }

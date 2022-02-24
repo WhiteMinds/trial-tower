@@ -1,34 +1,33 @@
-import { SkillTemplateId, SkillTemplateMap } from '.'
+import { SkillTemplateMap } from '.'
 import { CombatStage, Stage } from '../../stage'
 import { Entity } from '../entity'
+import { SkillTemplateId } from './SkillTemplateId'
 
 export class Skill {
-  // 这里有循环引用的问题，先直接用 getter 了，后面应该是考虑改成 templateId 不由内部设置，
-  // 而是改成 skill/index.ts 在做 map 的时候自行设置，SkillClass 只负责序列化时对其存取。
-  // static templateId = SkillTemplateId.Base
+  // 该属性会在初始化时被自动处理，所以都默认给 Base 就行
+  static templateId = SkillTemplateId.Base
   get templateId() {
-    return SkillTemplateId.Base
+    return (this.constructor as typeof Skill).templateId
   }
 
-  // 不能叫 name，会和 fn.name 冲突
-  static displayName = 'UnnamedSkill'
   get displayName() {
-    return (this.constructor as typeof Skill).displayName
+    return 'BaseSkill'
   }
-
   get description() {
     return 'BaseSkill'
   }
 
-  level: number = 1
-
   protected owner?: Entity
 
-  constructor(public stage: Stage, owner?: Entity) {
-    if (owner != null) {
-      this.cast(owner)
-    }
-  }
+  // 是否受沉默影响
+  readonly canSilent: boolean = true
+  // 是否受缴械影响
+  readonly canDisarm: boolean = false
+  // TODO: 上面两个属性理论上应该和 canUse 挂钩
+
+  level: number = 1
+
+  constructor(public stage: Stage) {}
 
   serialize(): Skill.Serialized {
     return {
@@ -37,30 +36,29 @@ export class Skill {
     }
   }
 
-  static deserialize(
-    data: Skill.Serialized,
-    owner: Entity,
-    stage: Stage
-  ): Skill {
-    if (data.templateId === SkillTemplateId.Base) {
-      const skill = new this(stage, owner)
-      skill.level = data.level
-      return skill
-    } else {
-      return SkillTemplateMap[data.templateId].deserialize(data, owner, stage)
-    }
+  static deserialize(data: Skill.Serialized, stage: Stage): Skill {
+    const skill = new SkillTemplateMap[data.templateId](stage)
+    skill.level = data.level
+    return skill
   }
 
-  cast(entity: Entity) {
+  // 生命周期
+
+  onCasted(entity: Entity) {
     this.owner = entity
-    this.onCasted()
   }
 
-  onCasted() {}
+  canUse(): boolean {
+    // TODO: 一些技能需求，比如是否装备了武器、能量是否足够消耗等
+    return true
+  }
 
+  // 或者叫 onUse？
   use(): boolean {
     return false
   }
+
+  // utils
 
   assertCombatStage(
     errMsg = 'Cannot pass assertCombatStage'

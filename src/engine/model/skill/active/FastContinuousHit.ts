@@ -1,27 +1,23 @@
 import { random } from 'lodash-es'
 import * as R from 'ramda'
-import { SkillTemplateId } from '..'
-import { CombatStage, Stage } from '../../../stage'
+import { Stage } from '../../../stage'
 import { createUniqueId } from '../../../utils'
 import { DamageEffect } from '../../effect'
-import { Entity } from '../../entity'
 import { Skill } from '../Skill'
 
 export class FastContinuousHit extends Skill {
-  get templateId() {
-    return SkillTemplateId.FastContinuousHit
+  get displayName() {
+    return '快速连击'
   }
-  static displayName = '快速连击'
   get description() {
     return `对单体目标造成 2 ~ ${this.maxHitCount} 次的 0.8 * atk 的伤害，可附加攻击特效`
   }
 
+  readonly canDisarm = true
+
   get maxHitCount() {
     return 4 + this.level
   }
-
-  canSilent = true
-  canDisarm = true
 
   use(): boolean {
     this.assertCombatting()
@@ -39,7 +35,7 @@ export class FastContinuousHit extends Skill {
       return damage
     })
 
-    source.buffs.forEach((buff) => buff.onCaptureEffectsSending(damages))
+    source.getBuffs().forEach((buff) => buff.onCaptureEffectsSending(damages))
 
     const damageValues = damages.map((damage) =>
       damage.cast(this.stage, target)
@@ -51,15 +47,5 @@ export class FastContinuousHit extends Skill {
     )
 
     return true
-  }
-
-  static deserialize(
-    data: Skill.Serialized,
-    owner: Entity,
-    stage: Stage
-  ): FastContinuousHit {
-    const skill = new this(stage, owner)
-    skill.level = data.level
-    return skill
   }
 }

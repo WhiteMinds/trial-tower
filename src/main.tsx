@@ -19,7 +19,8 @@ function test() {
   console.log(player, enemy)
   console.log('角色技能信息：')
   console.log(
-    player.skills
+    player
+      .getSkills()
       .map((s) => `[LV.${s.level}] ${s.displayName}: ${s.description}`)
       .join('\n')
   )

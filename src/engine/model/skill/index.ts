@@ -3,16 +3,9 @@ import { FastContinuousHit } from './active/FastContinuousHit'
 import { PhysicalAttack } from './active/PhysicalAttack'
 import { EnhanceConstitution } from './passivity/EnhanceConstitution'
 import { Skill } from './Skill'
+import { SkillTemplateId } from './SkillTemplateId'
 
 export { Skill }
-
-export enum SkillTemplateId {
-  Base = 'Base',
-  PhysicalAttack = 'PhysicalAttack',
-  Concentrate = 'Concentrate',
-  FastContinuousHit = 'FastContinuousHit',
-  EnhanceConstitution = 'EnhanceConstitution',
-}
 
 export const SkillTemplateMap: Record<SkillTemplateId, typeof Skill> = {
   [SkillTemplateId.Base]: Skill,
@@ -21,3 +14,8 @@ export const SkillTemplateMap: Record<SkillTemplateId, typeof Skill> = {
   [SkillTemplateId.FastContinuousHit]: FastContinuousHit,
   [SkillTemplateId.EnhanceConstitution]: EnhanceConstitution,
 }
+
+Object.entries(SkillTemplateMap).forEach(([templateId, SkillClass]) => {
+  // TODO: 先用 as 顶着
+  SkillClass.templateId = templateId as SkillTemplateId
+})
