@@ -3,6 +3,7 @@ import { Character } from '..'
 import { Entity } from '../model/entity'
 import { Concentrate } from '../model/skill/active/Concentrate'
 import { FastContinuousHit } from '../model/skill/active/FastContinuousHit'
+import { Fireballs } from '../model/skill/active/Fireballs'
 import { PhysicalAttack } from '../model/skill/active/PhysicalAttack'
 import { EnhanceConstitution } from '../model/skill/passivity/EnhanceConstitution'
 import { SoulReaper } from '../model/skill/passivity/SoulReaper'
@@ -55,6 +56,7 @@ export class MainStage implements Stage {
     })
     newPlayer.addSkill(new PhysicalAttack(this))
     newPlayer.addSkill(new Concentrate(this))
+    newPlayer.addSkill(new Fireballs(this))
     const fastContinuousHit = new FastContinuousHit(this)
     fastContinuousHit.level = 2
     newPlayer.addSkill(fastContinuousHit)

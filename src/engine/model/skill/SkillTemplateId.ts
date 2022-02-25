@@ -7,4 +7,5 @@ export enum SkillTemplateId {
   FastContinuousHit = 'FastContinuousHit',
   EnhanceConstitution = 'EnhanceConstitution',
   SoulReaper = 'SoulReaper',
+  Fireballs = 'Fireballs',
 }
