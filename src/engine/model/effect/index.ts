@@ -1,4 +1,4 @@
-import { Stage } from '../../stage'
+import { CombatStage, Stage } from '../../stage'
 import { UniqueId } from '../../types'
 import { Buff } from '../buff'
 import { Entity } from '../entity'
@@ -28,14 +28,28 @@ export class DamageEffect implements Effect {
   // 魔法攻击，对应的处理可能是魔抗之类的
   isMagic = false
 
-  constructor(public groupId: UniqueId) {}
+  constructor(
+    public stage: CombatStage,
+    public source: Entity,
+    public groupId: UniqueId
+  ) {}
 
   // 当前的设计是一个 effect 只能 apply 一次，除非做成不可变数据或可克隆的。
   // 每个 Effect 的 apply 会返回不同的处理数据，方便调用者做记录。
   cast(stage: Stage, target: Entity): number {
     this.modifiers.forEach((modifier) => modifier(target, this))
     const value = Math.floor(this.baseValue * this.multiplier)
+    // TODO: 这是为了防止死亡后的攻击，比如一组 DamageEffect，死亡后就不应该继续触发了，或者
+    // 应该由 stage 来控制
+    if (!target.isAlive) {
+      return value
+    }
+    // TODO: 如果不允许伤害溢出的话，可以在这里做 Math.min 操作，或者通过 target.decreaseHP 封装
     target.currentHP -= value
+    if (!target.isAlive) {
+      // TODO: 这里是不是应该调用 stage.onHit / onDamage，然后在它内部做 onKill 检查？
+      this.stage.onKill(this.source, target)
+    }
     return value
   }
 }

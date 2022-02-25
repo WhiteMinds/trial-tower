@@ -15,16 +15,11 @@ function test() {
     characters[0] ?? Engine.createCharacter({ name: 'WhiteMind' })
   const engine = new Engine(character)
   const player = engine.mainStage.getPlayer()
-  const enemy = engine.mainStage.createRandomEnemyByPlayerLevel(player)
-  console.log(player, enemy)
-  console.log('角色技能信息：')
-  console.log(
-    player
-      .getSkills()
-      .map((s) => `[LV.${s.level}] ${s.displayName}: ${s.description}`)
-      .join('\n')
-  )
-  engine.mainStage.beginCombat(player, [enemy])
+  const enemy1 = engine.mainStage.createRandomEnemyByPlayerLevel(player)
+  enemy1.name = '🦊'
+  const enemy2 = engine.mainStage.createRandomEnemyByPlayerLevel(player)
+  enemy2.name = '🐒'
+  engine.mainStage.beginCombat(player, [enemy1, enemy2])
 }
 
 test()

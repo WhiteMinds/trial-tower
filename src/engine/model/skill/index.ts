@@ -2,6 +2,7 @@ import { Concentrate } from './active/Concentrate'
 import { FastContinuousHit } from './active/FastContinuousHit'
 import { PhysicalAttack } from './active/PhysicalAttack'
 import { EnhanceConstitution } from './passivity/EnhanceConstitution'
+import { SoulReaper } from './passivity/SoulReaper'
 import { Skill } from './Skill'
 import { SkillTemplateId } from './SkillTemplateId'
 
@@ -13,6 +14,7 @@ export const SkillTemplateMap: Record<SkillTemplateId, typeof Skill> = {
   [SkillTemplateId.Concentrate]: Concentrate,
   [SkillTemplateId.FastContinuousHit]: FastContinuousHit,
   [SkillTemplateId.EnhanceConstitution]: EnhanceConstitution,
+  [SkillTemplateId.SoulReaper]: SoulReaper,
 }
 
 Object.entries(SkillTemplateMap).forEach(([templateId, SkillClass]) => {

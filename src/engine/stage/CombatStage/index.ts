@@ -53,7 +53,20 @@ export class CombatStage implements Stage {
         //  TODO: 先给个强制类型转换了，之后调整
         new Team(memberIds.map((memberId) => this.getEntity(memberId)!))
     )
-    console.log('this.teams', this.teams)
+
+    console.log('# 开始战斗，队伍信息：')
+    this.teams.forEach((team, idx) => {
+      console.log(`## ${idx + 1} 号队伍成员：`)
+      team.members.forEach((entity) => {
+        console.log(`### ${entity.name}：`)
+        console.log(
+          entity
+            .getSkills()
+            .map((s) => `[LV.${s.level}] ${s.displayName}: ${s.description}`)
+            .join('\n')
+        )
+      })
+    })
 
     let preparingEntity: Entity | null = null
     while (this.result == null) {
@@ -160,6 +173,16 @@ export class CombatStage implements Stage {
     this.battlingStateMap.set(entity.id, state)
     return state
   }
+
+  // 生命周期
+
+  onKill(source: Entity, target: Entity): void {
+    // TODO: 这里有点问题，会比最后一次攻击的输出要早，有待调整
+    console.log(`[${source.name}] 击杀了 [${target.name}]`)
+    source.getSkills().forEach((skill) => skill.onKill(target))
+  }
+
+  // utils
 
   getEntities(): Entity[] {
     return this.teams.map((team) => team.members).flat()

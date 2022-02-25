@@ -13,12 +13,11 @@ export class EnhanceConstitution extends Skill {
     return `提升 ${this.enhancePctCount * 100}% 的体质`
   }
 
+  readonly canSilent = false
+
   get enhancePctCount() {
     return (10 * this.level) / 100
   }
-
-  canSilent = false
-  canDisarm = false
 
   // TODO: entity 的赋予或许应该单独写个 skill.cast 函数，否则 onCasted 覆写后可能忘记赋予
   onCasted(entity: Entity): void {
@@ -35,14 +34,5 @@ export class EnhanceConstitution extends Skill {
     )
 
     effect.cast(this.stage, target)
-  }
-
-  static deserialize(
-    data: Skill.Serialized,
-    stage: Stage
-  ): EnhanceConstitution {
-    const skill = new this(stage)
-    skill.level = data.level
-    return skill
   }
 }

@@ -28,8 +28,9 @@ export class FastContinuousHit extends Skill {
     if (target == null) return false
 
     const effectGroupId = createUniqueId()
+    const stage = this.stage
     const damages = R.range(0, random(2, this.maxHitCount)).map(() => {
-      const damage = new DamageEffect(effectGroupId)
+      const damage = new DamageEffect(stage, source, effectGroupId)
       damage.baseValue = source.atk.value * 0.8
       damage.canAddAttackEffect = true
       return damage

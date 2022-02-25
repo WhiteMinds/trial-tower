@@ -37,6 +37,12 @@ export class Skill {
   }
 
   static deserialize(data: Skill.Serialized, stage: Stage): Skill {
+    const hasCustomDeserialize =
+      SkillTemplateMap[data.templateId].deserialize !== this.deserialize
+    if (hasCustomDeserialize) {
+      return SkillTemplateMap[data.templateId].deserialize(data, stage)
+    }
+
     const skill = new SkillTemplateMap[data.templateId](stage)
     skill.level = data.level
     return skill
@@ -57,6 +63,8 @@ export class Skill {
   use(): boolean {
     return false
   }
+
+  onKill(entity: Entity): void {}
 
   // utils
 

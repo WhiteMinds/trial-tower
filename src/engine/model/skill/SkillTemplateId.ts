@@ -6,4 +6,5 @@ export enum SkillTemplateId {
   Concentrate = 'Concentrate',
   FastContinuousHit = 'FastContinuousHit',
   EnhanceConstitution = 'EnhanceConstitution',
+  SoulReaper = 'SoulReaper',
 }

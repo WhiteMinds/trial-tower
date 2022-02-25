@@ -23,7 +23,7 @@ export class PhysicalAttack extends Skill {
     if (target == null) return false
 
     const effectGroupId = createUniqueId()
-    const damage = new DamageEffect(effectGroupId)
+    const damage = new DamageEffect(this.stage, source, effectGroupId)
     damage.baseValue = source.atk.value
     damage.canAddAttackEffect = true
     // const effects = [damage]

@@ -5,6 +5,7 @@ import { Concentrate } from '../model/skill/active/Concentrate'
 import { FastContinuousHit } from '../model/skill/active/FastContinuousHit'
 import { PhysicalAttack } from '../model/skill/active/PhysicalAttack'
 import { EnhanceConstitution } from '../model/skill/passivity/EnhanceConstitution'
+import { SoulReaper } from '../model/skill/passivity/SoulReaper'
 import { Store } from '../store'
 import { Stage } from './types'
 
@@ -60,6 +61,9 @@ export class MainStage implements Stage {
     const enhanceConstitution = new EnhanceConstitution(this)
     enhanceConstitution.level = 2
     newPlayer.addSkill(enhanceConstitution)
+    const soulReaper = new SoulReaper(this)
+    soulReaper.killCount = 10
+    newPlayer.addSkill(soulReaper)
     return newPlayer
   }
 
@@ -76,11 +80,17 @@ export class MainStage implements Stage {
   }
 
   beginCombat(player: Entity, enemies: Entity[]): void {
-    console.log(player, enemies)
     // TODO: 调用战斗模拟器
     const combatStage = new CombatStage(this)
     const team1 = [player.id]
     const team2 = enemies.map((entity) => entity.id)
     combatStage.beginCombat([team1, team2])
+
+    // TODO: 这里先硬编码查询下，之后要同步数据到 MainStage 中
+    const soulReaper = combatStage
+      .getEntity(player.id)
+      ?.getSkills()
+      .find((skill) => skill instanceof SoulReaper) as SoulReaper | undefined
+    console.log('灵魂收割者计数器', soulReaper?.killCount)
   }
 }
