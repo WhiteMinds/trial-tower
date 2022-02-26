@@ -55,6 +55,10 @@ export class SoulReaper extends Skill {
     effect.cast(this.stage, target)
   }
 
+  canUse(): boolean {
+    return false
+  }
+
   onKill(entity: Entity): void {
     this.killCount++
     // TODO: 更新 SoulReaperBuff

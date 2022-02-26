@@ -112,7 +112,7 @@ export class CombatStage implements Stage {
     if (!team) return
 
     // TODO: 这里需要过滤出可用技能
-    const skill = sample(actor.getSkills())
+    const skill = sample(actor.getSkills().filter((skill) => skill.canUse()))
     if (!skill) {
       // 跳过
       return

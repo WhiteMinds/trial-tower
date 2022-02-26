@@ -35,4 +35,8 @@ export class EnhanceConstitution extends Skill {
 
     effect.cast(this.stage, target)
   }
+
+  canUse(): boolean {
+    return false
+  }
 }
