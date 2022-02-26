@@ -155,12 +155,27 @@ export class CombatStage implements Stage {
   }
 
   getNextActor(): Entity | null {
-    // TODO: 这里写的有问题，后面再改
-    const sortEntitiesByProgress = R.sortBy(R.prop('progress'))
-    const actionableEntities = this.getAliveEntities().filter(
-      (entity) => this.getBattlingState(entity).progress >= ProgressNeedPoint
+    type EntityWithProgress = {
+      entity: Entity
+      progress: number
+    }
+
+    const getActionableEntitiesSortedByDescendProgress = R.compose(
+      R.map(R.prop('entity')),
+      R.sortWith<EntityWithProgress>([R.descend(R.prop('progress'))]),
+      R.filter<EntityWithProgress>(
+        ({ progress }) => progress >= ProgressNeedPoint
+      ),
+      R.map<Entity, EntityWithProgress>((entity) => ({
+        entity,
+        progress: this.getBattlingState(entity).progress,
+      }))
     )
-    return R.head(sortEntitiesByProgress(actionableEntities)) ?? null
+
+    const actionableEntities = getActionableEntitiesSortedByDescendProgress(
+      this.getAliveEntities()
+    )
+    return R.head(actionableEntities) ?? null
   }
 
   getBattlingState(entity: Entity): EntityBattlingState {
