@@ -21,7 +21,7 @@ export class CombatStage implements Stage {
     const entityFromMainStage = this.mainStage.getEntity(id)
     if (entityFromMainStage == null) return null
 
-    const entity = new Entity(this, entityFromMainStage.serialize())
+    const entity = Entity.deserialize(entityFromMainStage.serialize(), this)
     entity.currentHP = entity.maxHP.value
 
     this.loadedEntityMap.set(entity.id, entity)
@@ -37,6 +37,21 @@ export class CombatStage implements Stage {
 
   destroyEntity(id: Entity['id']): void {
     // TODO: 比如临时创建的怪物实体需要销毁
+  }
+
+  private loadedItemMap: Map<Item['id'], Item> = new Map()
+
+  getItem(id: Item['id']): Item | null {
+    const loadedItem = this.loadedItemMap.get(id)
+    if (loadedItem != null) return loadedItem
+
+    const itemFromMainStage = this.mainStage.getItem(id)
+    if (itemFromMainStage == null) return null
+
+    const item = Item.deserialize(itemFromMainStage.serialize(), this)
+
+    this.loadedItemMap.set(item.id, item)
+    return item
   }
 
   teams: Team[] = []
@@ -65,6 +80,13 @@ export class CombatStage implements Stage {
             .map((s) => `[LV.${s.level}] ${s.displayName}: ${s.description}`)
             .join('\n')
         )
+        console.log(
+          entity.equips
+            .map((item) => `====== ${item.name} ======\n${item.description}`)
+            .join('\n')
+        )
+        console.log('计算后的攻击值：', entity.atk.value)
+        console.log('计算后的生命值：', entity.maxHP.value)
       })
     })
 

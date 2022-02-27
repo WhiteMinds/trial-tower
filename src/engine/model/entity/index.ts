@@ -14,6 +14,8 @@ export class Entity {
   id: UniqueId = createUniqueId()
   name: string = 'UnnamedEntity'
 
+  level: number = 1
+
   /** 基础属性 */
 
   strength = new AttrDescriptor(this)
@@ -27,9 +29,9 @@ export class Entity {
 
   currentHP: number = 0
 
-  _equipIds: Equip['id'][] = []
-  get equipIds() {
-    return this._equipIds
+  private _equips: Equip[] = []
+  get equips(): Equip[] {
+    return this._equips.slice(0)
   }
 
   // 外界系统应该通过实例上的 api 来改变这个属性，不能直接操作。
@@ -60,7 +62,7 @@ export class Entity {
       speed: this.speed.base,
       maxHP: this.maxHP.base,
       atk: this.atk.base,
-      equipIds: this._equipIds,
+      equipIds: this.equips.map(({ id }) => id),
       skills: this.getSkills().map((skill) => skill.serialize()),
     }
   }
@@ -73,10 +75,15 @@ export class Entity {
     this.speed.base = data.speed
     this.maxHP.base = data.maxHP
     this.atk.base = data.atk
-    this._equipIds = []
+
+    this._equips = []
+    data.equipIds
+      .map((id) => this.stage.getItem(id))
+      .filter((item): item is Equip => item instanceof Equip)
+      .forEach((equip) => this.equip(equip))
 
     this._skills = []
-    data.skills.map((skillData) =>
+    data.skills.forEach((skillData) =>
       this.addSkill(Skill.deserialize(skillData, this.stage))
     )
   }
@@ -112,6 +119,13 @@ export class Entity {
 
     this._buffs.push(buff)
     buff.onCasted()
+  }
+
+  equip(item: Equip): void {
+    this._equips.push(item)
+    // 这个生命周期应该在 addItem 时调用，不过目前先在这里实现
+    item.onCasted(this)
+    item.onEquip()
   }
 }
 

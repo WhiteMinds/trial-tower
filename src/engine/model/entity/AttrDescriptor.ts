@@ -17,7 +17,7 @@ export class AttrDescriptor {
 
   // 最终值，将所有修饰器应用于衍生值后得出的结果
   get value() {
-    return AttrDescriptor.getValue(this)
+    return Math.round(AttrDescriptor.getValue(this))
   }
 }
 

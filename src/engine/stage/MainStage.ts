@@ -1,6 +1,8 @@
 import { CombatStage } from '.'
 import { Character } from '..'
 import { Entity } from '../model/entity'
+import { Item } from '../model/item'
+import { ClothArmor, WoodenSword } from '../model/item/Equip'
 import { Concentrate } from '../model/skill/active/Concentrate'
 import { FastContinuousHit } from '../model/skill/active/FastContinuousHit'
 import { Fireballs } from '../model/skill/active/Fireballs'
@@ -12,6 +14,7 @@ import { Stage } from './types'
 
 const StoreKey = {
   Entity: 'Entity',
+  Item: 'Item',
 }
 
 export class MainStage implements Stage {
@@ -27,7 +30,7 @@ export class MainStage implements Stage {
       `${StoreKey.Entity}/${id}`
     )
     if (data == null) return null
-    return new Entity(this, data)
+    return Entity.deserialize(data, this)
   }
 
   createEntity(data: Partial<Entity.Serialized>): Entity {
@@ -39,6 +42,23 @@ export class MainStage implements Stage {
 
   destroyEntity(id: Entity['id']): void {
     // TODO: 比如临时创建的怪物实体需要销毁
+  }
+
+  private loadedItemMap: Map<Item['id'], Item> = new Map()
+
+  getItem(id: Item['id']): Item | null {
+    const loadedItem = this.loadedItemMap.get(id)
+    if (loadedItem != null) return loadedItem
+
+    const data = this.store.getItem<Item.Serialized>(`${StoreKey.Item}/${id}`)
+    if (data == null) return null
+    return Item.deserialize(data, this)
+  }
+
+  // TODO: 这里没想好怎么做 createItem 比较合适，就先这样简单实现了
+  registerItem<T extends Item>(item: T): T {
+    this.loadedItemMap.set(item.id, item)
+    return item
   }
 
   getPlayer(): Entity {
@@ -66,6 +86,10 @@ export class MainStage implements Stage {
     const soulReaper = new SoulReaper(this)
     soulReaper.killCount = 10
     newPlayer.addSkill(soulReaper)
+    const sword = this.registerItem(new WoodenSword(this))
+    newPlayer.equip(sword)
+    const armor = this.registerItem(new ClothArmor(this))
+    newPlayer.equip(armor)
     return newPlayer
   }
 
@@ -73,7 +97,7 @@ export class MainStage implements Stage {
     // TODO: 根据玩家等级进行随机生成
     const entity = this.createEntity({
       name: '怪物',
-      maxHP: 10,
+      maxHP: 30,
       atk: 1,
       speed: 10,
     })
