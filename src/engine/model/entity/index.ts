@@ -58,6 +58,8 @@ export class Entity {
     return {
       id: this.id,
       name: this.name,
+      level: this.level,
+      exp: this.exp,
       strength: this.strength.base,
       constitution: this.constitution.base,
       speed: this.speed.base,
@@ -71,6 +73,8 @@ export class Entity {
   deserialize(data: Entity.Serialized): void {
     this.id = data.id
     this.name = data.name
+    this.level = data.level
+    this.exp = data.exp
     this.strength.base = data.strength
     this.constitution.base = data.constitution
     this.speed.base = data.speed
@@ -134,6 +138,8 @@ export namespace Entity {
   export interface Serialized {
     id: UniqueId
     name: string
+    level: number
+    exp: number
     strength: number
     constitution: number
     speed: number

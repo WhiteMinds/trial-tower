@@ -16,9 +16,8 @@ function test() {
   const engine = new Engine(character)
   const player = engine.mainStage.getPlayer()
   const enemy1 = engine.mainStage.createRandomEnemyByPlayerLevel(player)
-  enemy1.name = '🦊'
   const enemy2 = engine.mainStage.createRandomEnemyByPlayerLevel(player)
-  enemy2.name = '🐒'
+  if (enemy2.name === enemy1.name) enemy2.name += ' 2'
   engine.mainStage.beginCombat(player, [enemy1, enemy2])
 }
 

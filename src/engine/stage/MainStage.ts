@@ -3,13 +3,13 @@ import { Character } from '..'
 import { Entity } from '../model/entity'
 import { Item } from '../model/item'
 import { ClothArmor, WoodenSword } from '../model/item/Equip'
-import { TomeOfKnowledge } from '../model/item/Item'
 import { Concentrate } from '../model/skill/active/Concentrate'
 import { FastContinuousHit } from '../model/skill/active/FastContinuousHit'
 import { Fireballs } from '../model/skill/active/Fireballs'
 import { PhysicalAttack } from '../model/skill/active/PhysicalAttack'
 import { EnhanceConstitution } from '../model/skill/passivity/EnhanceConstitution'
 import { SoulReaper } from '../model/skill/passivity/SoulReaper'
+import { createRandomEnemy } from '../monster'
 import { Store } from '../store'
 import { BattleResult } from './CombatStage'
 import { LootGenerator, LootType, Stage } from './types'
@@ -108,23 +108,7 @@ export class MainStage implements Stage {
   }
 
   createRandomEnemyByPlayerLevel(player: Entity): Entity {
-    // TODO: 根据玩家等级进行随机生成
-    const entity = this.createEntity({
-      name: '怪物',
-      maxHP: 30 + player.level * 10,
-      atk: 1 + player.level,
-      speed: 10,
-    })
-    entity.addSkill(new PhysicalAttack(this))
-    this.setLootGenerator(entity.id, (stage) => {
-      const item = new TomeOfKnowledge(stage)
-      stage.registerItem(item)
-      return [
-        { type: LootType.EXP, amount: 10 },
-        { type: LootType.Item, item },
-      ]
-    })
-    return entity
+    return createRandomEnemy(this, { level: player.level })
   }
 
   beginCombat(player: Entity, enemies: Entity[]): void {
