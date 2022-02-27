@@ -4,6 +4,7 @@ import { Item } from '../../model/item'
 import { Team } from './Team'
 import * as R from 'ramda'
 import { sample } from 'lodash-es'
+import { Loot, LootGenerator } from '../types'
 
 const MaxRoundCount = 99
 // 每次行动需要的进度点数
@@ -54,8 +55,23 @@ export class CombatStage implements Stage {
     return item
   }
 
+  // TODO: 这里没想好怎么做 createItem 比较合适，就先这样简单实现了
+  registerItem<T extends Item>(item: T): T {
+    this.loadedItemMap.set(item.id, item)
+    return item
+  }
+
+  getLootGenerator(id: Entity['id']): LootGenerator | null {
+    return this.mainStage.getLootGenerator(id)
+  }
+
+  generateLoots(entity: Entity): Loot[] {
+    const generator = this.getLootGenerator(entity.id)
+    return generator?.(this, entity) ?? []
+  }
+
   teams: Team[] = []
-  loots: Item[] = []
+  loots: Loot[] = []
 
   round = 0
   battlingStateMap: Map<Entity['id'], EntityBattlingState> = new Map()
@@ -116,8 +132,6 @@ export class CombatStage implements Stage {
         this.doActionPreparing(preparingEntity)
       } while (preparingEntity == null)
     }
-
-    console.log('combat end', this)
   }
 
   doNextRound(): boolean {
@@ -215,7 +229,12 @@ export class CombatStage implements Stage {
 
   onKill(source: Entity, target: Entity): void {
     // TODO: 这里有点问题，会比最后一次攻击的输出要早，有待调整
-    console.log(`[${source.name}] 击杀了 [${target.name}]`)
+
+    // TODO: 这里先不管是否是己方队伍的，简单点实现，包括重复死亡之类的也之后再考虑
+    const loots = this.generateLoots(target)
+    this.loots.push(...loots)
+
+    console.log(`[${source.name}] 击杀了 [${target.name}]，战利品：`, loots)
     source.getSkills().forEach((skill) => skill.onKill(target))
   }
 
@@ -273,8 +292,8 @@ interface EntityBattlingState {
   progress: number
 }
 
-enum BattleResult {
-  Win,
+export enum BattleResult {
+  Win = 1,
   Lose,
   Timeout,
 }

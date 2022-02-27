@@ -3,6 +3,7 @@ import { Character } from '..'
 import { Entity } from '../model/entity'
 import { Item } from '../model/item'
 import { ClothArmor, WoodenSword } from '../model/item/Equip'
+import { TomeOfKnowledge } from '../model/item/Item'
 import { Concentrate } from '../model/skill/active/Concentrate'
 import { FastContinuousHit } from '../model/skill/active/FastContinuousHit'
 import { Fireballs } from '../model/skill/active/Fireballs'
@@ -10,7 +11,8 @@ import { PhysicalAttack } from '../model/skill/active/PhysicalAttack'
 import { EnhanceConstitution } from '../model/skill/passivity/EnhanceConstitution'
 import { SoulReaper } from '../model/skill/passivity/SoulReaper'
 import { Store } from '../store'
-import { Stage } from './types'
+import { BattleResult } from './CombatStage'
+import { LootGenerator, LootType, Stage } from './types'
 
 const StoreKey = {
   Entity: 'Entity',
@@ -61,6 +63,18 @@ export class MainStage implements Stage {
     return item
   }
 
+  // 只为了战利品做一个新的 Monster 类的话有点不必要，但如果直接放 Entity 上也不方便传递给 CombatStage，
+  // 所以就直接放到 Stage 上来存储。
+  private lootTableMap: Map<Entity['id'], LootGenerator> = new Map()
+
+  setLootGenerator(id: Entity['id'], generator: LootGenerator) {
+    this.lootTableMap.set(id, generator)
+  }
+
+  getLootGenerator(id: Entity['id']): LootGenerator | null {
+    return this.lootTableMap.get(id) ?? null
+  }
+
   getPlayer(): Entity {
     const player = this.getEntity(this.character.id)
     if (player != null) return player
@@ -97,11 +111,19 @@ export class MainStage implements Stage {
     // TODO: 根据玩家等级进行随机生成
     const entity = this.createEntity({
       name: '怪物',
-      maxHP: 30,
-      atk: 1,
+      maxHP: 30 + player.level * 10,
+      atk: 1 + player.level,
       speed: 10,
     })
     entity.addSkill(new PhysicalAttack(this))
+    this.setLootGenerator(entity.id, (stage) => {
+      const item = new TomeOfKnowledge(stage)
+      stage.registerItem(item)
+      return [
+        { type: LootType.EXP, amount: 10 },
+        { type: LootType.Item, item },
+      ]
+    })
     return entity
   }
 
@@ -111,6 +133,34 @@ export class MainStage implements Stage {
     const team1 = [player.id]
     const team2 = enemies.map((entity) => entity.id)
     combatStage.beginCombat([team1, team2])
+
+    console.log(
+      `战斗${
+        combatStage.result === BattleResult.Win
+          ? '胜利'
+          : combatStage.result === BattleResult.Lose
+          ? '胜利'
+          : '超时'
+      }，战利品：`,
+      combatStage.loots
+    )
+    combatStage.loots.forEach((loot) => {
+      switch (loot.type) {
+        case LootType.EXP:
+          player.exp += loot.amount
+          if (player.exp >= 100) {
+            player.level++
+          }
+          break
+        case LootType.Gold:
+          // TODO: 之后再处理
+          break
+        case LootType.Item:
+          this.registerItem(loot.item)
+          // TODO: player.addItem
+          break
+      }
+    })
 
     // TODO: 这里先硬编码查询下，之后要同步数据到 MainStage 中
     const soulReaper = combatStage

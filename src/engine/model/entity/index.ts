@@ -2,7 +2,7 @@ import { Stage } from '../../stage'
 import { UniqueId } from '../../types'
 import { createUniqueId } from '../../utils'
 import { Buff } from '../buff'
-import { Equip } from '../item'
+import { Equip, Item } from '../item'
 import { Skill } from '../skill'
 import {
   AttrDescriptor,
@@ -15,6 +15,7 @@ export class Entity {
   name: string = 'UnnamedEntity'
 
   level: number = 1
+  exp: number = 0
 
   /** 基础属性 */
 
