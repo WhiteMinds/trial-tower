@@ -160,7 +160,8 @@ export class CombatStage implements Stage {
 
   setResultIfBattleEnd() {
     // 优先判断地方队伍是否全部死亡，然后才是发起者的队伍判断，这是对于战斗发起者的优势条件。
-    const battleStarter = this.teams[0]
+    const battleStarter = this.getBattleStarter()
+    if (battleStarter == null) throw new Error('assert battleStarter')
 
     const enemyTeamsHasAlive = R.any(
       R.prop('isAnyoneAlive'),
@@ -230,11 +231,16 @@ export class CombatStage implements Stage {
   onKill(source: Entity, target: Entity): void {
     // TODO: 这里有点问题，会比最后一次攻击的输出要早，有待调整
 
-    // TODO: 这里先不管是否是己方队伍的，简单点实现，包括重复死亡之类的也之后再考虑
-    const loots = this.generateLoots(target)
-    this.loots.push(...loots)
-
-    console.log(`[${source.name}] 击杀了 [${target.name}]，战利品：`, loots)
+    // TODO: 这里先简单点实现，重复死亡之类的之后再考虑
+    const battleStarter = this.getBattleStarter()
+    if (battleStarter == null) throw new Error('assert battleStarter')
+    if (!battleStarter.contains(target)) {
+      const loots = this.generateLoots(target)
+      this.loots.push(...loots)
+      console.log(`[${source.name}] 击杀了 [${target.name}]，战利品：`, loots)
+    } else {
+      console.log(`[${source.name}] 击杀了 [${target.name}]`)
+    }
     source.getSkills().forEach((skill) => skill.onKill(target))
   }
 
@@ -269,6 +275,10 @@ export class CombatStage implements Stage {
 
     const isNotSelf = R.compose(R.not, R.equals(selfTeam))
     return R.filter(isNotSelf, this.teams)
+  }
+
+  getBattleStarter(): Team | null {
+    return this.teams[0]
   }
 
   getEnemies(...args: Parameters<CombatStage['getOtherTeams']>): Entity[] {

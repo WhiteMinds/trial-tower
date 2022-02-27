@@ -67,7 +67,7 @@ const templates: MonsterTemplate[] = [
     mutation(entity, stage) {
       entity.maxHP.base *= 2
       stage.setLootGenerator(entity.id, () => {
-        return [{ type: LootType.EXP, amount: 20 }]
+        return [{ type: LootType.EXP, amount: 100 }]
       })
     },
   },

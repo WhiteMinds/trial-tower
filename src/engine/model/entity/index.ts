@@ -15,6 +15,7 @@ export class Entity {
   name: string = 'UnnamedEntity'
 
   level: number = 1
+  // TODO: 经验值看起来是 player 独有的属性，可能应该单独实现一个类，不过有些成本暂时不搞
   exp: number = 0
 
   /** 基础属性 */
@@ -101,6 +102,18 @@ export class Entity {
 
   get isAlive() {
     return this.currentHP > 0
+  }
+
+  addExp(amount: number): void {
+    this.exp += amount
+    // TODO: 升级曲线之后再做，先固定一个数字
+    const nextLevelNeed = 100
+    while (this.exp >= nextLevelNeed) {
+      this.exp -= nextLevelNeed
+      this.level++
+      // TODO: 调用生命周期 onLevelUp 之类的
+      console.log(`[${this.name}] 升级至 LV.${this.level}`)
+    }
   }
 
   addSkill(skill: Skill): void {

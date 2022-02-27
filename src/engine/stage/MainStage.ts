@@ -131,7 +131,7 @@ export class MainStage implements Stage {
     combatStage.loots.forEach((loot) => {
       switch (loot.type) {
         case LootType.EXP:
-          player.exp += loot.amount
+          player.addExp(loot.amount)
           if (player.exp >= 100) {
             player.level++
           }
