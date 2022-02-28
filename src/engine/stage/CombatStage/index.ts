@@ -93,7 +93,7 @@ export class CombatStage implements Stage {
         console.log(
           entity
             .getSkills()
-            .map((s) => `[LV.${s.level}] ${s.displayName}: ${s.description}`)
+            .map((s) => `[LV.${s.level}] ${s.name}: ${s.description}`)
             .join('\n')
         )
         console.log(

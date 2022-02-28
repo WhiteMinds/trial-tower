@@ -28,6 +28,15 @@ export class Item {
 
   constructor(public stage: Stage) {}
 
+  createSnapshot(): Item.Snapshot {
+    return {
+      id: this.id,
+      name: this.name,
+      description: this.description,
+      stacked: this.stacked,
+    }
+  }
+
   serialize(): Item.Serialized {
     return {
       id: this.id,
@@ -90,6 +99,13 @@ export namespace Item {
   export interface Serialized {
     id: UniqueId
     templateId: ItemTemplateId
+    stacked: number
+  }
+
+  export interface Snapshot {
+    id: UniqueId
+    name: string
+    description: string
     stacked: number
   }
 }

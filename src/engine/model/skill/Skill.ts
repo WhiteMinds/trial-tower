@@ -10,7 +10,7 @@ export class Skill {
     return (this.constructor as typeof Skill).templateId
   }
 
-  get displayName() {
+  get name() {
     return 'BaseSkill'
   }
   get description() {
@@ -28,6 +28,14 @@ export class Skill {
   level: number = 1
 
   constructor(public stage: Stage) {}
+
+  createSnapshot(): Skill.Snapshot {
+    return {
+      name: this.name,
+      description: this.description,
+      level: this.level,
+    }
+  }
 
   serialize(): Skill.Serialized {
     return {
@@ -91,6 +99,12 @@ export class Skill {
 export namespace Skill {
   export interface Serialized {
     templateId: SkillTemplateId
+    level: number
+  }
+
+  export interface Snapshot {
+    name: string
+    description: string
     level: number
   }
 }

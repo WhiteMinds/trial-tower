@@ -6,7 +6,7 @@ import { Entity } from '../../entity'
 import { Skill } from '../Skill'
 
 export class SoulReaper extends Skill {
-  get displayName() {
+  get name() {
     return '灵魂收割者'
   }
   get description() {

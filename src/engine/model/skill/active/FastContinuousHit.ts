@@ -6,7 +6,7 @@ import { DamageEffect } from '../../effect'
 import { Skill } from '../Skill'
 
 export class FastContinuousHit extends Skill {
-  get displayName() {
+  get name() {
     return '快速连击'
   }
   get description() {
@@ -43,7 +43,7 @@ export class FastContinuousHit extends Skill {
     )
     console.log(
       `[${source.name}] 对 [${target.name}] 释放 [${
-        this.displayName
+        this.name
       }]，造成 ${damageValues.join('、')} 伤害，剩余 hp ${target.currentHP}`
     )
 

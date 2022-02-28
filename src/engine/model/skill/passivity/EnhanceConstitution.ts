@@ -6,7 +6,7 @@ import { Entity } from '../../entity'
 import { Skill } from '../Skill'
 
 export class EnhanceConstitution extends Skill {
-  get displayName() {
+  get name() {
     return '体质强化'
   }
   get description() {

@@ -4,7 +4,7 @@ import { DamageEffect } from '../../effect'
 import { Skill } from '../Skill'
 
 export class PhysicalAttack extends Skill {
-  get displayName() {
+  get name() {
     return '普通攻击（物理）'
   }
   get description() {
@@ -34,7 +34,7 @@ export class PhysicalAttack extends Skill {
     // TODO: apply effects, combine(baseValue() + modifiers())
     const damageValue = damage.cast(this.stage, target)
     console.log(
-      `[${source.name}] 对 [${target.name}] 释放 [${this.displayName}]，造成 ${damageValue} 伤害，剩余 hp ${target.currentHP}`
+      `[${source.name}] 对 [${target.name}] 释放 [${this.name}]，造成 ${damageValue} 伤害，剩余 hp ${target.currentHP}`
     )
 
     return true

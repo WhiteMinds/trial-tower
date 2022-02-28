@@ -55,6 +55,23 @@ export class Entity {
     })
   }
 
+  createSnapshot(): Entity.Snapshot {
+    return {
+      id: this.id,
+      name: this.name,
+      level: this.level,
+      exp: this.exp,
+      strength: this.strength.base,
+      constitution: this.constitution.base,
+      speed: this.speed.base,
+      maxHP: this.maxHP.base,
+      atk: this.atk.base,
+      currentHP: this.currentHP,
+      equips: this.equips.map((e) => e.createSnapshot()),
+      skills: this.getSkills().map((s) => s.createSnapshot()),
+    }
+  }
+
   serialize(): Entity.Serialized {
     return {
       id: this.id,
@@ -160,5 +177,21 @@ export namespace Entity {
     atk: number
     equipIds: Equip['id'][]
     skills: Skill.Serialized[]
+  }
+
+  export interface Snapshot {
+    id: UniqueId
+    name: string
+    level: number
+    exp: number
+    strength: number
+    constitution: number
+    speed: number
+    maxHP: number
+    atk: number
+    currentHP: number
+    equips: Equip.Snapshot[]
+    skills: Skill.Snapshot[]
+    // TODO: buffs
   }
 }

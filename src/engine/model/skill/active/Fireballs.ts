@@ -3,7 +3,7 @@ import { DamageEffect } from '../../effect'
 import { Skill } from '../Skill'
 
 export class Fireballs extends Skill {
-  get displayName() {
+  get name() {
     return '群体火球术'
   }
   get description() {
@@ -41,7 +41,7 @@ export class Fireballs extends Skill {
 
     console.log(
       `[${source.name}] 对 [${targets.map((t) => t.name).join('、')}] 释放 [${
-        this.displayName
+        this.name
       }]，造成 ${damageValues.join('、')} 伤害`
     )
 

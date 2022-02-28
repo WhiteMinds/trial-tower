@@ -5,7 +5,7 @@ import { GrantBuffEffect } from '../../effect'
 import { Skill } from '../Skill'
 
 export class Concentrate extends Skill {
-  get displayName() {
+  get name() {
     return '全神贯注'
   }
   get description() {
@@ -30,7 +30,7 @@ export class Concentrate extends Skill {
     )
 
     effect.cast(this.stage, target)
-    console.log(`[${source.name}] 释放 [${this.displayName}]`)
+    console.log(`[${source.name}] 释放 [${this.name}]`)
 
     return true
   }

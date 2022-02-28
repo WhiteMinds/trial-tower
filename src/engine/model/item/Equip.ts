@@ -14,6 +14,7 @@ export class Equip extends Item {
     return 'BaseEquip'
   }
   get description() {
+    // TODO: 这些需求、属性到时候要放到视图层里做，这里应该只是放对于装备的介绍之类的
     return [
       ...getRequiredTexts(this.required),
       '',
@@ -29,6 +30,20 @@ export class Equip extends Item {
   speedModifier?: AttrModifier
   maxHPModifier?: AttrModifier
   atkModifier?: AttrModifier
+
+  createSnapshot(): Equip.Snapshot {
+    return {
+      ...super.createSnapshot(),
+      isEquip: true,
+      required: this.required,
+
+      strModifier: this.strModifier,
+      conModifier: this.conModifier,
+      speedModifier: this.speedModifier,
+      maxHPModifier: this.maxHPModifier,
+      atkModifier: this.atkModifier,
+    }
+  }
 
   canUse(): boolean {
     this.assertOwner()
@@ -69,6 +84,20 @@ export class Equip extends Item {
     this.speedModifier && this.owner.speed.modifiers.push(this.speedModifier)
     this.maxHPModifier && this.owner.maxHP.modifiers.push(this.maxHPModifier)
     this.atkModifier && this.owner.atk.modifiers.push(this.atkModifier)
+  }
+}
+
+export namespace Equip {
+  export interface Snapshot extends Item.Snapshot {
+    isEquip: true
+
+    required: EquipRequired
+
+    strModifier?: AttrModifier
+    conModifier?: AttrModifier
+    speedModifier?: AttrModifier
+    maxHPModifier?: AttrModifier
+    atkModifier?: AttrModifier
   }
 }
 
@@ -118,6 +147,9 @@ export class WoodenSword extends Equip {
   get name() {
     return '木剑'
   }
+  get description(): string {
+    return `木质的剑\n${super.description}`
+  }
   get required(): EquipRequired {
     return {
       level: 1,
@@ -130,6 +162,9 @@ export class WoodenSword extends Equip {
 export class ClothArmor extends Equip {
   get name() {
     return '布甲'
+  }
+  get description(): string {
+    return `布质的甲\n${super.description}`
   }
   get required(): EquipRequired {
     return {
