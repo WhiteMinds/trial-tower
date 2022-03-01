@@ -57,6 +57,7 @@ export class Entity {
 
   createSnapshot(): Entity.Snapshot {
     return {
+      snapshotType: 'Entity',
       id: this.id,
       name: this.name,
       level: this.level,
@@ -180,6 +181,7 @@ export namespace Entity {
   }
 
   export interface Snapshot {
+    snapshotType: 'Entity'
     id: UniqueId
     name: string
     level: number

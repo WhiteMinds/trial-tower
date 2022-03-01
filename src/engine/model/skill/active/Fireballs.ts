@@ -1,4 +1,5 @@
 import { createUniqueId } from '../../../utils'
+import { Snapshot } from '../../combat_log'
 import { DamageEffect } from '../../effect'
 import { Skill } from '../Skill'
 
@@ -39,11 +40,21 @@ export class Fireballs extends Skill {
       return damageValue
     })
 
-    console.log(
-      `[${source.name}] 对 [${targets.map((t) => t.name).join('、')}] 释放 [${
-        this.name
-      }]，造成 ${damageValues.join('、')} 伤害`
-    )
+    this.stage.logs.push([
+      // TODO: 可以尝试做成 {target[]} 之类的，或者做工具函数来简化。
+      // 或者 {targets[0]}，然后提供 targets。
+      `{source}对${targets
+        .map((t, idx) => `{target${idx}}`)
+        .join('、')}释放{skill}，造成 ${damageValues.join('、')} 伤害`,
+      {
+        source: source.createSnapshot(),
+        skill: this.createSnapshot(),
+        ...targets.reduce((map, val, idx) => {
+          map['target' + idx] = val.createSnapshot()
+          return map
+        }, {} as Record<string, Snapshot>),
+      },
+    ])
 
     return true
   }

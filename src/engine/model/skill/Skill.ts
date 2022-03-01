@@ -31,6 +31,7 @@ export class Skill {
 
   createSnapshot(): Skill.Snapshot {
     return {
+      snapshotType: 'Skill',
       name: this.name,
       description: this.description,
       level: this.level,
@@ -103,6 +104,7 @@ export namespace Skill {
   }
 
   export interface Snapshot {
+    snapshotType: 'Skill'
     name: string
     description: string
     level: number

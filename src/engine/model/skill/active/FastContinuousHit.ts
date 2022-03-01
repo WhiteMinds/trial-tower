@@ -41,11 +41,16 @@ export class FastContinuousHit extends Skill {
     const damageValues = damages.map((damage) =>
       damage.cast(this.stage, target)
     )
-    console.log(
-      `[${source.name}] 对 [${target.name}] 释放 [${
-        this.name
-      }]，造成 ${damageValues.join('、')} 伤害，剩余 hp ${target.currentHP}`
-    )
+    this.stage.logs.push([
+      `{source}对{target}释放{skill}，造成 ${damageValues.join(
+        '、'
+      )} 伤害，剩余 hp ${target.currentHP}`,
+      {
+        source: source.createSnapshot(),
+        target: target.createSnapshot(),
+        skill: this.createSnapshot(),
+      },
+    ])
 
     return true
   }

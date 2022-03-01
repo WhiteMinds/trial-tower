@@ -1,5 +1,6 @@
 import { CombatStage } from '.'
 import { Character } from '..'
+import { Snapshot } from '../model/combat_log'
 import { Entity } from '../model/entity'
 import { Item } from '../model/item'
 import { ClothArmor, WoodenSword } from '../model/item/Equip'
@@ -118,6 +119,30 @@ export class MainStage implements Stage {
     const team2 = enemies.map((entity) => entity.id)
     combatStage.beginCombat([team1, team2])
 
+    combatStage.logs.forEach(([format, snapshotMap]) => {
+      console.log(
+        // TODO: 先用正则简陋的实现下，之后换成 AST 实现
+        format.replace(
+          /{(.*?)}/g,
+          (match, paramName: string, start, source) => {
+            const snap = snapshotMap[paramName]
+            let text = snapshotToString(snap)
+            const notNeedSpaceReg = /[\s，、：]/
+            if (start !== 0 && !source[start - 1].match(notNeedSpaceReg)) {
+              text = ' ' + text
+            }
+            if (
+              start + match.length !== source.length &&
+              !source[start + match.length].match(notNeedSpaceReg)
+            ) {
+              text = text + ' '
+            }
+            return text
+          }
+        )
+      )
+    })
+
     console.log(
       `战斗${
         combatStage.result === BattleResult.Win
@@ -152,5 +177,16 @@ export class MainStage implements Stage {
       ?.getSkills()
       .find((skill) => skill instanceof SoulReaper) as SoulReaper | undefined
     console.log('灵魂收割者计数器', soulReaper?.killCount)
+  }
+}
+
+function snapshotToString(snap: Snapshot): string {
+  switch (snap.snapshotType) {
+    case 'Entity':
+      return `[${snap.name}]`
+    case 'Skill':
+      return `[${snap.name}]`
+    case 'Item':
+      return `[${snap.name}]`
   }
 }

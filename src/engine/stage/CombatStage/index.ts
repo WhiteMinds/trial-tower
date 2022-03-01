@@ -4,7 +4,8 @@ import { Item } from '../../model/item'
 import { Team } from './Team'
 import * as R from 'ramda'
 import { sample } from 'lodash-es'
-import { Loot, LootGenerator } from '../types'
+import { Loot, Loot$Item, LootGenerator, LootType } from '../types'
+import { CombatLog, Snapshot } from '../../model/combat_log'
 
 const MaxRoundCount = 99
 // 每次行动需要的进度点数
@@ -71,6 +72,7 @@ export class CombatStage implements Stage {
   }
 
   teams: Team[] = []
+  logs: CombatLog[] = []
   loots: Loot[] = []
 
   round = 0
@@ -237,9 +239,42 @@ export class CombatStage implements Stage {
     if (!battleStarter.contains(target)) {
       const loots = this.generateLoots(target)
       this.loots.push(...loots)
-      console.log(`[${source.name}] 击杀了 [${target.name}]，战利品：`, loots)
+      // TODO: 这里先过滤掉非 item 的战利品了，目前的日志系统还不能支撑非 snapshot 的类型，
+      // 需要再思考下。
+      const lootItems = loots
+        .filter((loot): loot is Loot$Item => loot.type === LootType.Item)
+        .map((loot) => loot.item)
+      if (lootItems.length > 0) {
+        this.logs.push([
+          `{source}击杀了{target}，战利品：${lootItems
+            .map((item, idx) => `{loot${idx}}`)
+            .join('、')}`,
+          {
+            source: source.createSnapshot(),
+            target: target.createSnapshot(),
+            ...lootItems.reduce((map, val, idx) => {
+              map['loot' + idx] = val.createSnapshot()
+              return map
+            }, {} as Record<string, Snapshot>),
+          },
+        ])
+      } else {
+        this.logs.push([
+          `{source}击杀了{target}`,
+          {
+            source: source.createSnapshot(),
+            target: target.createSnapshot(),
+          },
+        ])
+      }
     } else {
-      console.log(`[${source.name}] 击杀了 [${target.name}]`)
+      this.logs.push([
+        `{source}击杀了{target}`,
+        {
+          source: source.createSnapshot(),
+          target: target.createSnapshot(),
+        },
+      ])
     }
     source.getSkills().forEach((skill) => skill.onKill(target))
   }

@@ -33,9 +33,14 @@ export class PhysicalAttack extends Skill {
     source.getBuffs().forEach((buff) => buff.onCaptureEffectsSending([damage]))
     // TODO: apply effects, combine(baseValue() + modifiers())
     const damageValue = damage.cast(this.stage, target)
-    console.log(
-      `[${source.name}] 对 [${target.name}] 释放 [${this.name}]，造成 ${damageValue} 伤害，剩余 hp ${target.currentHP}`
-    )
+    this.stage.logs.push([
+      `{source}对{target}释放{skill}，造成 ${damageValue} 伤害，剩余 hp ${target.currentHP}`,
+      {
+        source: source.createSnapshot(),
+        target: target.createSnapshot(),
+        skill: this.createSnapshot(),
+      },
+    ])
 
     return true
   }

@@ -88,6 +88,7 @@ export class Equip extends Item {
 }
 
 export namespace Equip {
+  // 暂时和 Item 使用同一个 snapshotType，防止细化的类型衍生出过多的 Snapshot 种类
   export interface Snapshot extends Item.Snapshot {
     isEquip: true
 

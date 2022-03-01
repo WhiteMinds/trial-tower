@@ -30,6 +30,7 @@ export class Item {
 
   createSnapshot(): Item.Snapshot {
     return {
+      snapshotType: 'Item',
       id: this.id,
       name: this.name,
       description: this.description,
@@ -103,6 +104,7 @@ export namespace Item {
   }
 
   export interface Snapshot {
+    snapshotType: 'Item'
     id: UniqueId
     name: string
     description: string
