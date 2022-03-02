@@ -29,7 +29,6 @@ export class Concentrate extends Skill {
       new ConcentrateBuff(target, this.enhanceCount)
     )
 
-    effect.cast(this.stage, target)
     this.stage.logs.push([
       `{source}释放{skill}`,
       {
@@ -37,6 +36,7 @@ export class Concentrate extends Skill {
         skill: this.createSnapshot(),
       },
     ])
+    effect.cast(this.stage, target)
 
     return true
   }

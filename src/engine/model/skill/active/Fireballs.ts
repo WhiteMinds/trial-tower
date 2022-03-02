@@ -28,15 +28,17 @@ export class Fireballs extends Skill {
     const effectGroupId = createUniqueId()
     const stage = this.stage
 
-    const damageValues = targets.map((target) => {
+    const damages = targets.map((target) => {
       const damage = new DamageEffect(stage, source, effectGroupId)
       damage.baseValue = source.atk.value
-
       source
         .getBuffs()
         .forEach((buff) => buff.onCaptureEffectsSending([damage]))
-
-      const damageValue = damage.cast(this.stage, target)
+      return damage
+    })
+    const damageValues = damages.map((damage, idx) => {
+      const target = targets[idx]
+      const damageValue = damage.calcValue(target)
       return damageValue
     })
 
@@ -55,6 +57,11 @@ export class Fireballs extends Skill {
         }, {} as Record<string, Snapshot>),
       },
     ])
+
+    damages.forEach((damage, idx) => {
+      const target = targets[idx]
+      damage.cast(this.stage, target)
+    })
 
     return true
   }

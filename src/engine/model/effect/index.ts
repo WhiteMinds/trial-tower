@@ -34,11 +34,15 @@ export class DamageEffect implements Effect {
     public groupId: UniqueId
   ) {}
 
+  calcValue(target: Entity) {
+    this.modifiers.forEach((modifier) => modifier(target, this))
+    return Math.floor(this.baseValue * this.multiplier)
+  }
+
   // 当前的设计是一个 effect 只能 apply 一次，除非做成不可变数据或可克隆的。
   // 每个 Effect 的 apply 会返回不同的处理数据，方便调用者做记录。
   cast(stage: Stage, target: Entity): number {
-    this.modifiers.forEach((modifier) => modifier(target, this))
-    const value = Math.floor(this.baseValue * this.multiplier)
+    const value = this.calcValue(target)
     // TODO: 这是为了防止死亡后的攻击，比如一组 DamageEffect，死亡后就不应该继续触发了，或者
     // 应该由 stage 来控制
     if (!target.isAlive) {

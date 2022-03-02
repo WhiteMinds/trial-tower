@@ -38,9 +38,7 @@ export class FastContinuousHit extends Skill {
 
     source.getBuffs().forEach((buff) => buff.onCaptureEffectsSending(damages))
 
-    const damageValues = damages.map((damage) =>
-      damage.cast(this.stage, target)
-    )
+    const damageValues = damages.map((damage) => damage.calcValue(target))
     this.stage.logs.push([
       `{source}对{target}释放{skill}，造成 ${damageValues.join(
         '、'
@@ -51,6 +49,7 @@ export class FastContinuousHit extends Skill {
         skill: this.createSnapshot(),
       },
     ])
+    damages.forEach((damage) => damage.cast(this.stage, target))
 
     return true
   }
