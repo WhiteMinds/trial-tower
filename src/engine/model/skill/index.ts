@@ -1,3 +1,4 @@
+import { ClayGolem } from './active/ClayGolem'
 import { Concentrate } from './active/Concentrate'
 import { FastContinuousHit } from './active/FastContinuousHit'
 import { Fireballs } from './active/Fireballs'
@@ -17,6 +18,7 @@ export const SkillTemplateMap: Record<SkillTemplateId, typeof Skill> = {
   [SkillTemplateId.EnhanceConstitution]: EnhanceConstitution,
   [SkillTemplateId.SoulReaper]: SoulReaper,
   [SkillTemplateId.Fireballs]: Fireballs,
+  [SkillTemplateId.ClayGolem]: ClayGolem,
 }
 
 Object.entries(SkillTemplateMap).forEach(([templateId, SkillClass]) => {

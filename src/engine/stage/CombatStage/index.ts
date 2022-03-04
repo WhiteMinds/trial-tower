@@ -32,6 +32,7 @@ export class CombatStage implements Stage {
 
   createEntity(data: Partial<Entity.Serialized>): Entity {
     const entity = new Entity(this, data)
+    entity.currentHP = entity.maxHP.value
     this.loadedEntityMap.set(entity.id, entity)
     // TODO: 通知 stage
     return entity

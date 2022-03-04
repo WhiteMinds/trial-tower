@@ -4,6 +4,7 @@ import { Snapshot } from '../model/combat_log'
 import { Entity } from '../model/entity'
 import { Item } from '../model/item'
 import { ClothArmor, FireWand } from '../model/item/Equip'
+import { ClayGolem } from '../model/skill/active/ClayGolem'
 import { Concentrate } from '../model/skill/active/Concentrate'
 import { FastContinuousHit } from '../model/skill/active/FastContinuousHit'
 import { Fireballs } from '../model/skill/active/Fireballs'
@@ -92,6 +93,7 @@ export class MainStage implements Stage {
     newPlayer.addSkill(new PhysicalAttack(this))
     newPlayer.addSkill(new Concentrate(this))
     newPlayer.addSkill(new Fireballs(this))
+    newPlayer.addSkill(new ClayGolem(this))
     const fastContinuousHit = new FastContinuousHit(this)
     fastContinuousHit.level = 2
     newPlayer.addSkill(fastContinuousHit)
