@@ -1,6 +1,9 @@
 import R from 'ramda'
 import { Item } from '.'
+import { SkillModifier } from '../entity'
 import { AttrModifier } from '../entity/AttrDescriptor'
+import { SkillTemplateMap } from '../skill'
+import { SkillTemplateId } from '../skill/SkillTemplateId'
 
 interface EquipRequired {
   level?: number
@@ -8,8 +11,26 @@ interface EquipRequired {
   con?: number
 }
 
+export enum EquipSlot {
+  // 主手
+  MainHead,
+  // 副手
+  OffHead,
+  // 头部
+  Head,
+  // 身体
+  Body,
+  // 足部
+  Foot,
+  // 项链
+  Amulet,
+}
+
 // 相对于 Item，它特别的地方在于它的 use 固定为调度 player 的 equip，并且有一些特殊的生命周期
 export class Equip extends Item {
+  get slot(): EquipSlot {
+    return EquipSlot.MainHead
+  }
   get name(): string {
     return 'BaseEquip'
   }
@@ -19,6 +40,7 @@ export class Equip extends Item {
       ...getRequiredTexts(this.required),
       '',
       ...getAttrBonusTexts(this),
+      ...getSkillBonusTexts(this),
     ].join('\n')
   }
   get required(): EquipRequired {
@@ -31,17 +53,21 @@ export class Equip extends Item {
   maxHPModifier?: AttrModifier
   atkModifier?: AttrModifier
 
+  skillModifiers: SkillModifier[] = []
+
   createSnapshot(): Equip.Snapshot {
     return {
       ...super.createSnapshot(),
       isEquip: true,
       required: this.required,
 
+      // TODO: 这些可能是可变数据，看看之后要不要处理下
       strModifier: this.strModifier,
       conModifier: this.conModifier,
       speedModifier: this.speedModifier,
       maxHPModifier: this.maxHPModifier,
       atkModifier: this.atkModifier,
+      skillModifiers: this.skillModifiers,
     }
   }
 
@@ -84,6 +110,11 @@ export class Equip extends Item {
     this.speedModifier && this.owner.speed.modifiers.push(this.speedModifier)
     this.maxHPModifier && this.owner.maxHP.modifiers.push(this.maxHPModifier)
     this.atkModifier && this.owner.atk.modifiers.push(this.atkModifier)
+
+    for (let i = 0; i < this.skillModifiers.length; i++) {
+      const modifier = this.skillModifiers[i]
+      this.owner.addSkillModifier(modifier)
+    }
   }
 }
 
@@ -99,6 +130,7 @@ export namespace Equip {
     speedModifier?: AttrModifier
     maxHPModifier?: AttrModifier
     atkModifier?: AttrModifier
+    skillModifiers: SkillModifier[]
   }
 }
 
@@ -144,7 +176,19 @@ function getAttrBonusTexts(item: Equip): string[] {
     .flat()
 }
 
+function getSkillBonusTexts(item: Equip): string[] {
+  return item.skillModifiers.map(
+    (modifier) =>
+      `${new SkillTemplateMap[modifier.skillTemplateId](item.stage).name} +${
+        modifier.upgradeLevel
+      }`
+  )
+}
+
 export class WoodenSword extends Equip {
+  get slot(): EquipSlot {
+    return EquipSlot.MainHead
+  }
   get name() {
     return '木剑'
   }
@@ -161,6 +205,9 @@ export class WoodenSword extends Equip {
 }
 
 export class ClothArmor extends Equip {
+  get slot(): EquipSlot {
+    return EquipSlot.Body
+  }
   get name() {
     return '布甲'
   }
@@ -175,4 +222,27 @@ export class ClothArmor extends Equip {
 
   conModifier = { add: 5 }
   maxHPModifier = { per: 0.1 }
+}
+
+export class FireWand extends Equip {
+  get slot(): EquipSlot {
+    return EquipSlot.MainHead
+  }
+  get name() {
+    return '火魔杖'
+  }
+  get description(): string {
+    return `着火的木质魔杖？\n${super.description}`
+  }
+  get required(): EquipRequired {
+    return {
+      level: 1,
+    }
+  }
+
+  atkModifier = { add: 1 }
+
+  skillModifiers = [
+    { skillTemplateId: SkillTemplateId.Fireballs, upgradeLevel: 1 },
+  ]
 }

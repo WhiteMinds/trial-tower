@@ -3,12 +3,18 @@ import { UniqueId } from '../../types'
 import { createUniqueId } from '../../utils'
 import { Buff } from '../buff'
 import { Equip, Item } from '../item'
-import { Skill } from '../skill'
+import { Skill, SkillTemplateMap } from '../skill'
+import { SkillTemplateId } from '../skill/SkillTemplateId'
 import {
   AttrDescriptor,
   AttrDescriptor$Attack,
   AttrDescriptor$HealthPoint,
 } from './AttrDescriptor'
+
+export interface SkillModifier {
+  skillTemplateId: SkillTemplateId
+  upgradeLevel: number
+}
 
 export class Entity {
   id: UniqueId = createUniqueId()
@@ -41,6 +47,23 @@ export class Entity {
   private _skills: Skill[] = []
   getSkills(): Skill[] {
     return this._skills.slice(0)
+  }
+
+  skillModifiers: SkillModifier[] = []
+  addSkillModifier(skillModifier: SkillModifier): void {
+    const existedSkill = this.getSkills().find(
+      ({ templateId }) => templateId === skillModifier.skillTemplateId
+    )
+    if (existedSkill == null) {
+      const skill = new SkillTemplateMap[skillModifier.skillTemplateId](
+        this.stage
+      )
+      skill.level = skillModifier.upgradeLevel
+      this.addSkill(skill)
+      return
+    }
+
+    existedSkill.level += skillModifier.upgradeLevel
   }
 
   private _buffs: Buff[] = []

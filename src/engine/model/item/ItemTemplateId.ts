@@ -14,4 +14,5 @@ export enum ItemTemplateId {
 
   WoodenSword = 10001,
   ClothArmor,
+  FireWand,
 }

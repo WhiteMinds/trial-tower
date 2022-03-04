@@ -1,5 +1,5 @@
 import { Item, TomeOfKnowledge } from './Item'
-import { ClothArmor, Equip, WoodenSword } from './Equip'
+import { ClothArmor, Equip, FireWand, WoodenSword } from './Equip'
 import { ItemTemplateId } from './ItemTemplateId'
 
 export { Item, Equip }
@@ -9,6 +9,7 @@ export const ItemTemplateMap: Record<ItemTemplateId, typeof Item> = {
   [ItemTemplateId.TomeOfKnowledge]: TomeOfKnowledge,
   [ItemTemplateId.WoodenSword]: WoodenSword,
   [ItemTemplateId.ClothArmor]: ClothArmor,
+  [ItemTemplateId.FireWand]: FireWand,
 }
 
 Object.entries(ItemTemplateMap).forEach(([templateId, ItemClass]) => {
