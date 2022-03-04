@@ -135,6 +135,40 @@ export class CombatStage implements Stage {
         this.doActionPreparing(preparingEntity)
       } while (preparingEntity == null)
     }
+
+    // TODO: 这里先过滤掉非 item 的战利品了，目前的日志系统还不能支撑非 snapshot 的类型，
+    // 需要再思考下。
+    const lootItems = this.loots
+      .filter((loot): loot is Loot$Item => loot.type === LootType.Item)
+      .map((loot) => loot.item)
+    if (lootItems.length > 0) {
+      this.logs.push([
+        `战斗${
+          this.result === BattleResult.Win
+            ? '胜利'
+            : this.result === BattleResult.Lose
+            ? '胜利'
+            : '超时'
+        }，战利品：${lootItems.map((item, idx) => `{loot${idx}}`).join('、')}`,
+        {
+          ...lootItems.reduce((map, val, idx) => {
+            map['loot' + idx] = val.createSnapshot()
+            return map
+          }, {} as Record<string, Snapshot>),
+        },
+      ])
+    } else {
+      this.logs.push([
+        `战斗${
+          this.result === BattleResult.Win
+            ? '胜利'
+            : this.result === BattleResult.Lose
+            ? '胜利'
+            : '超时'
+        }`,
+        {},
+      ])
+    }
   }
 
   doNextRound(): boolean {

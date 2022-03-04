@@ -1,6 +1,6 @@
 import { CombatStage } from '.'
 import { Character } from '..'
-import { Snapshot } from '../model/combat_log'
+import { CombatLog, Snapshot } from '../model/combat_log'
 import { Entity } from '../model/entity'
 import { Item } from '../model/item'
 import { ClothArmor, FireWand } from '../model/item/Equip'
@@ -114,47 +114,47 @@ export class MainStage implements Stage {
     return createRandomEnemy(this, { level: player.level })
   }
 
-  beginCombat(player: Entity, enemies: Entity[]): void {
+  beginCombat(player: Entity, enemies: Entity[]): CombatLog[] {
     // TODO: 调用战斗模拟器
     const combatStage = new CombatStage(this)
     const team1 = [player.id]
     const team2 = enemies.map((entity) => entity.id)
     combatStage.beginCombat([team1, team2])
 
-    combatStage.logs.forEach(([format, snapshotMap]) => {
-      console.log(
-        // TODO: 先用正则简陋的实现下，之后换成 AST 实现
-        format.replace(
-          /{(.*?)}/g,
-          (match, paramName: string, start, source) => {
-            const snap = snapshotMap[paramName]
-            let text = snapshotToString(snap)
-            const notNeedSpaceReg = /[\s，、：]/
-            if (start !== 0 && !source[start - 1].match(notNeedSpaceReg)) {
-              text = ' ' + text
-            }
-            if (
-              start + match.length !== source.length &&
-              !source[start + match.length].match(notNeedSpaceReg)
-            ) {
-              text = text + ' '
-            }
-            return text
-          }
-        )
-      )
-    })
+    // combatStage.logs.forEach(([format, snapshotMap]) => {
+    //   console.log(
+    //     // TODO: 先用正则简陋的实现下，之后换成 AST 实现
+    //     format.replace(
+    //       /{(.*?)}/g,
+    //       (match, paramName: string, start, source) => {
+    //         const snap = snapshotMap[paramName]
+    //         let text = snapshotToString(snap)
+    //         const notNeedSpaceReg = /[\s，、：]/
+    //         if (start !== 0 && !source[start - 1].match(notNeedSpaceReg)) {
+    //           text = ' ' + text
+    //         }
+    //         if (
+    //           start + match.length !== source.length &&
+    //           !source[start + match.length].match(notNeedSpaceReg)
+    //         ) {
+    //           text = text + ' '
+    //         }
+    //         return text
+    //       }
+    //     )
+    //   )
+    // })
 
-    console.log(
-      `战斗${
-        combatStage.result === BattleResult.Win
-          ? '胜利'
-          : combatStage.result === BattleResult.Lose
-          ? '胜利'
-          : '超时'
-      }，战利品：`,
-      combatStage.loots
-    )
+    // console.log(
+    //   `战斗${
+    //     combatStage.result === BattleResult.Win
+    //       ? '胜利'
+    //       : combatStage.result === BattleResult.Lose
+    //       ? '胜利'
+    //       : '超时'
+    //   }，战利品：`,
+    //   combatStage.loots
+    // )
     combatStage.loots.forEach((loot) => {
       switch (loot.type) {
         case LootType.EXP:
@@ -179,6 +179,8 @@ export class MainStage implements Stage {
       ?.getSkills()
       .find((skill) => skill instanceof SoulReaper) as SoulReaper | undefined
     console.log('灵魂收割者计数器', soulReaper?.killCount)
+
+    return combatStage.logs
   }
 }
 
