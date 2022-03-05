@@ -136,39 +136,28 @@ export class CombatStage implements Stage {
       } while (preparingEntity == null)
     }
 
+    const log: CombatLog = [
+      `战斗${
+        this.result === BattleResult.Win
+          ? '胜利'
+          : this.result === BattleResult.Lose
+          ? '胜利'
+          : '超时'
+      }`,
+    ]
     // TODO: 这里先过滤掉非 item 的战利品了，目前的日志系统还不能支撑非 snapshot 的类型，
     // 需要再思考下。
     const lootItems = this.loots
       .filter((loot): loot is Loot$Item => loot.type === LootType.Item)
       .map((loot) => loot.item)
     if (lootItems.length > 0) {
-      this.logs.push([
-        `战斗${
-          this.result === BattleResult.Win
-            ? '胜利'
-            : this.result === BattleResult.Lose
-            ? '胜利'
-            : '超时'
-        }，战利品：${lootItems.map((item, idx) => `{loot${idx}}`).join('、')}`,
-        {
-          ...lootItems.reduce((map, val, idx) => {
-            map['loot' + idx] = val.createSnapshot()
-            return map
-          }, {} as Record<string, Snapshot>),
-        },
-      ])
-    } else {
-      this.logs.push([
-        `战斗${
-          this.result === BattleResult.Win
-            ? '胜利'
-            : this.result === BattleResult.Lose
-            ? '胜利'
-            : '超时'
-        }`,
-        {},
-      ])
+      log.push(
+        '，战利品：',
+        // TODO: 需要注入顿号分隔
+        ...lootItems.map((l) => l.createSnapshot())
+      )
     }
+    this.logs.push(log)
   }
 
   doNextRound(): boolean {
@@ -271,6 +260,12 @@ export class CombatStage implements Stage {
     // TODO: 这里先简单点实现，重复死亡之类的之后再考虑
     const battleStarter = this.getBattleStarter()
     if (battleStarter == null) throw new Error('assert battleStarter')
+
+    const log: CombatLog = [
+      source.createSnapshot(),
+      '击杀了',
+      target.createSnapshot(),
+    ]
     if (!battleStarter.contains(target)) {
       const loots = this.generateLoots(target)
       this.loots.push(...loots)
@@ -280,37 +275,15 @@ export class CombatStage implements Stage {
         .filter((loot): loot is Loot$Item => loot.type === LootType.Item)
         .map((loot) => loot.item)
       if (lootItems.length > 0) {
-        this.logs.push([
-          `{source}击杀了{target}，战利品：${lootItems
-            .map((item, idx) => `{loot${idx}}`)
-            .join('、')}`,
-          {
-            source: source.createSnapshot(),
-            target: target.createSnapshot(),
-            ...lootItems.reduce((map, val, idx) => {
-              map['loot' + idx] = val.createSnapshot()
-              return map
-            }, {} as Record<string, Snapshot>),
-          },
-        ])
-      } else {
-        this.logs.push([
-          `{source}击杀了{target}`,
-          {
-            source: source.createSnapshot(),
-            target: target.createSnapshot(),
-          },
-        ])
+        log.push(
+          '，战利品：',
+          // TODO: 需要注入顿号分隔
+          ...lootItems.map((l) => l.createSnapshot())
+        )
       }
-    } else {
-      this.logs.push([
-        `{source}击杀了{target}`,
-        {
-          source: source.createSnapshot(),
-          target: target.createSnapshot(),
-        },
-      ])
     }
+    this.logs.push(log)
+
     source.getSkills().forEach((skill) => skill.onKill(target))
   }
 

@@ -43,19 +43,13 @@ export class Fireballs extends Skill {
     })
 
     this.stage.logs.push([
-      // TODO: 可以尝试做成 {target[]} 之类的，或者做工具函数来简化。
-      // 或者 {targets[0]}，然后提供 targets。
-      `{source}对${targets
-        .map((t, idx) => `{target${idx}}`)
-        .join('、')}释放{skill}，造成 ${damageValues.join('、')} 伤害`,
-      {
-        source: source.createSnapshot(),
-        skill: this.createSnapshot(),
-        ...targets.reduce((map, val, idx) => {
-          map['target' + idx] = val.createSnapshot()
-          return map
-        }, {} as Record<string, Snapshot>),
-      },
+      source.createSnapshot(),
+      '对',
+      // TODO: 要注入顿号分隔
+      ...targets.map((t) => t.createSnapshot()),
+      '释放',
+      this.createSnapshot(),
+      `造成 ${damageValues.join('、')} 伤害`,
     ])
 
     damages.forEach((damage, idx) => {

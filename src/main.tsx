@@ -24,6 +24,11 @@ const CharacterSelectScreen: FC<{
     props.onSelect?.(c)
   }, [newCharacterName, props.onSelect])
 
+  // TODO: test code
+  useEffect(() => {
+    if (characters[0]) props.onSelect?.(characters[0])
+  }, [characters])
+
   return (
     <div>
       <h3>选择已有角色：</h3>
@@ -57,6 +62,11 @@ const GameScreen: FC<{ character: Character }> = (props) => {
     setCombatLogs(logs)
   }, [])
 
+  // TODO: test code
+  useEffect(() => {
+    randomCombat()
+  }, [])
+
   return (
     <div>
       <div>昵称：{player.name}</div>
@@ -72,27 +82,14 @@ const GameScreen: FC<{ character: Character }> = (props) => {
 }
 
 const CombatLogView: FC<{ log: CombatLog }> = (props) => {
-  const [format, snapshotMap] = props.log
-  // TODO: 先用正则简陋的实现下，之后换成 AST 实现
-  const text = format.replace(
-    /{(.*?)}/g,
-    (match, paramName: string, start, source) => {
-      const snap = snapshotMap[paramName]
-      let text = snapshotToString(snap)
-      const notNeedSpaceReg = /[\s，、：]/
-      if (start !== 0 && !source[start - 1].match(notNeedSpaceReg)) {
-        text = ' ' + text
-      }
-      if (
-        start + match.length !== source.length &&
-        !source[start + match.length].match(notNeedSpaceReg)
-      ) {
-        text = text + ' '
-      }
-      return text
-    }
+  return (
+    <>
+      {props.log.map((item, idx) => {
+        if (typeof item === 'string') return item
+        return snapshotToString(item)
+      })}
+    </>
   )
-  return <>{text}</>
 }
 
 function snapshotToString(snap: Snapshot): string {

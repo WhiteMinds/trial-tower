@@ -30,11 +30,9 @@ export class Concentrate extends Skill {
     )
 
     this.stage.logs.push([
-      `{source}释放{skill}`,
-      {
-        source: source.createSnapshot(),
-        skill: this.createSnapshot(),
-      },
+      source.createSnapshot(),
+      '释放',
+      this.createSnapshot(),
     ])
     effect.cast(this.stage, target)
 

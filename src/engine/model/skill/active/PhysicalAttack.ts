@@ -34,12 +34,12 @@ export class PhysicalAttack extends Skill {
     // TODO: apply effects, combine(baseValue() + modifiers())
     const damageValue = damage.calcValue(target)
     this.stage.logs.push([
-      `{source}对{target}释放{skill}，造成 ${damageValue} 伤害，剩余 hp ${target.currentHP}`,
-      {
-        source: source.createSnapshot(),
-        target: target.createSnapshot(),
-        skill: this.createSnapshot(),
-      },
+      source.createSnapshot(),
+      '对',
+      target.createSnapshot(),
+      '释放',
+      this.createSnapshot(),
+      `造成 ${damageValue} 伤害，剩余 hp ${target.currentHP}`,
     ])
     damage.cast(this.stage, target)
 

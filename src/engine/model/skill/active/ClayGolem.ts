@@ -32,12 +32,11 @@ export class ClayGolem extends Skill {
     entity.addSkill(new PhysicalAttack(this.stage))
 
     this.stage.logs.push([
-      `{source}释放{skill}，召唤出{entity}`,
-      {
-        source: source.createSnapshot(),
-        skill: this.createSnapshot(),
-        entity: entity.createSnapshot(),
-      },
+      source.createSnapshot(),
+      '释放',
+      this.createSnapshot(),
+      '，召唤出',
+      entity.createSnapshot(),
     ])
 
     this.stage.getBelongTeam(source)?.members.push(entity)
