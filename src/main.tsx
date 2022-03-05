@@ -2,6 +2,7 @@ import React, { FC, useCallback, useEffect, useMemo, useState } from 'react'
 import ReactDOM from 'react-dom'
 import { Character, Engine } from './engine'
 import { CombatLog, Snapshot } from './engine/model/combat_log'
+import { MessageWidgets } from './widgets'
 
 const App: FC = () => {
   const [character, setCharacter] = useState<Character>()
@@ -86,20 +87,20 @@ const CombatLogView: FC<{ log: CombatLog }> = (props) => {
     <>
       {props.log.map((item, idx) => {
         if (typeof item === 'string') return item
-        return snapshotToString(item)
+        return <SnapshotCard key={idx} snapshot={item} />
       })}
     </>
   )
 }
 
-function snapshotToString(snap: Snapshot): string {
-  switch (snap.snapshotType) {
+const SnapshotCard: FC<{ snapshot: Snapshot }> = (props) => {
+  switch (props.snapshot.snapshotType) {
     case 'Entity':
-      return `[${snap.name}]`
+      return <MessageWidgets.Entity entity={props.snapshot} />
     case 'Skill':
-      return `[${snap.name}]`
+      return <MessageWidgets.Skill skill={props.snapshot} />
     case 'Item':
-      return `[${snap.name}]`
+      return <MessageWidgets.Item item={props.snapshot} />
   }
 }
 

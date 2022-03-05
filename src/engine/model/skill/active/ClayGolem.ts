@@ -6,7 +6,7 @@ export class ClayGolem extends Skill {
     return '召唤粘土石魔'
   }
   get description() {
-    return `召唤 1 个粘土石魔，属性：\n攻击 ${this.atk}\n 血量 ${this.maxHP}`
+    return `召唤 1 个粘土石魔，属性：\n攻击 ${this.atk}\n血量 ${this.maxHP}`
   }
 
   get atk() {

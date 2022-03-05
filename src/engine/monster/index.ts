@@ -1,5 +1,6 @@
 import { sample } from 'lodash-es'
 import { Entity } from '../model/entity'
+import { ClothArmor } from '../model/item/Equip'
 import { TomeOfKnowledge } from '../model/item/Item'
 import { FastContinuousHit } from '../model/skill/active/FastContinuousHit'
 import { Fireballs } from '../model/skill/active/Fireballs'
@@ -67,7 +68,12 @@ const templates: MonsterTemplate[] = [
     mutation(entity, stage) {
       entity.maxHP.base *= 2
       stage.setLootGenerator(entity.id, () => {
-        return [{ type: LootType.EXP, amount: 100 }]
+        const item = new ClothArmor(stage)
+        stage.registerItem(item)
+        return [
+          { type: LootType.EXP, amount: 100 },
+          { type: LootType.Item, item },
+        ]
       })
     },
   },
