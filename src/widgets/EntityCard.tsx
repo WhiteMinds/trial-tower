@@ -19,6 +19,23 @@ export const EntityCard: FC<{ entity: Entity.Snapshot }> = (props) => {
         <Typography variant="body2" component="p">
           Attack: {props.entity.atk}
         </Typography>
+
+        {props.entity.buffs.length > 0 && (
+          <>
+            <Typography
+              sx={{ fontSize: 14, marginTop: 1 }}
+              color="textSecondary"
+              gutterBottom
+            >
+              Buffs:
+            </Typography>
+            {props.entity.buffs.map((buff, idx) => (
+              <Typography key={idx} variant="body2" component="p">
+                {buff.name} (x{buff.stacked}): {buff.description}
+              </Typography>
+            ))}
+          </>
+        )}
       </CardContent>
     </Card>
   )

@@ -151,6 +151,7 @@ engine.mainStage.beginCombat(player, [enemy1, enemy2])
 - [x] 实现一个召唤类技能
 - [x] 实现一个简单的 UI
 - [x] 实现战利品的 Snapshot & UI
+- [x] 实现 entity buff 的 snapshot，并展示到 entity 卡片
 - [ ] 实现玩家仓库
 - [ ] 实现装备栏 UI
 - [ ] 实现玩家仓库 UI

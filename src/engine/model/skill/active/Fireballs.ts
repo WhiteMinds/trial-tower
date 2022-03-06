@@ -1,5 +1,5 @@
 import { createUniqueId } from '../../../utils'
-import { Snapshot } from '../../combat_log'
+import { CombatLog, Snapshot } from '../../combat_log'
 import { DamageEffect } from '../../effect'
 import { Skill } from '../Skill'
 
@@ -28,6 +28,16 @@ export class Fireballs extends Skill {
     const effectGroupId = createUniqueId()
     const stage = this.stage
 
+    const log: CombatLog = [
+      source.createSnapshot(),
+      '对',
+      // TODO: 要注入顿号分隔
+      ...targets.map((t) => t.createSnapshot()),
+      '释放',
+      this.createSnapshot(),
+    ]
+    this.stage.logs.push(log)
+
     const damages = targets.map((target) => {
       const damage = new DamageEffect(stage, source, effectGroupId)
       damage.baseValue = source.atk.value
@@ -38,24 +48,11 @@ export class Fireballs extends Skill {
     })
     const damageValues = damages.map((damage, idx) => {
       const target = targets[idx]
-      const damageValue = damage.calcValue(target)
+      const damageValue = damage.cast(this.stage, target)
       return damageValue
     })
 
-    this.stage.logs.push([
-      source.createSnapshot(),
-      '对',
-      // TODO: 要注入顿号分隔
-      ...targets.map((t) => t.createSnapshot()),
-      '释放',
-      this.createSnapshot(),
-      `造成 ${damageValues.join('、')} 伤害`,
-    ])
-
-    damages.forEach((damage, idx) => {
-      const target = targets[idx]
-      damage.cast(this.stage, target)
-    })
+    log.push(`，造成 ${damageValues.join('、')} 伤害`)
 
     return true
   }

@@ -4,13 +4,30 @@ import { Entity } from '../entity'
 import { AttrModifier } from '../entity/AttrDescriptor'
 
 export class Buff {
-  // TODO: owner 是不是应该在 onCasted 时才赋予？
-  constructor(public owner: Entity) {}
+  get name() {
+    return 'BaseBuff'
+  }
+  get description() {
+    return 'BaseBuff'
+  }
 
   // 战斗时使用
   remainingRound: number = 0
   // 非战斗时使用
   endTime: number = Date.now()
+
+  stacked: number = 1
+
+  // TODO: owner 是不是应该在 onCasted 时才赋予？
+  constructor(public owner: Entity) {}
+
+  createSnapshot(): Buff.Snapshot {
+    return {
+      name: this.name,
+      description: this.description,
+      stacked: this.stacked,
+    }
+  }
 
   // 被赋予时触发
   onCasted(): void {}
@@ -27,32 +44,61 @@ export class Buff {
   }
 }
 
+export namespace Buff {
+  export interface Snapshot {
+    name: string
+    description: string
+    stacked: number
+  }
+}
+
 export class ConcentrateBuff extends Buff {
+  get name() {
+    return '全神贯注'
+  }
+  get description() {
+    return '下 1 次攻击伤害提升 100%'
+  }
+
   remainingRound = Infinity
 
-  constructor(public owner: Entity, public remainingCount = 3) {
+  constructor(public owner: Entity, public stacked = 3) {
     super(owner)
   }
 
   onCaptureEffectsSending(effects: Effect[]) {
     effects.forEach((effect) => {
-      if (this.remainingCount <= 0) return
       if (!(effect instanceof DamageEffect)) return
+      if (effect.source !== this.owner) return
+
+      if (this.stacked <= 0) return
+      this.stacked--
 
       effect.modifiers.push((target, effect) => {
         effect.multiplier += 1
-        this.remainingCount--
       })
     })
+
+    // TODO: 之后要抽出去做成辅助函数，比如 setStacked 之类的里面检查
+    if (this.stacked <= 0) {
+      this.owner.withdrawBuff(this)
+    }
   }
 
-  mixing(): boolean {
-    this.remainingCount += 3
+  mixing(buff: this): boolean {
+    this.stacked += buff.stacked
     return true
   }
 }
 
 export class EnhanceConstitutionBuff extends Buff {
+  get name() {
+    return '体质强化'
+  }
+  get description() {
+    return `提升 ${this.enhancePctCount * 100}% 的体质`
+  }
+
   remainingRound = Infinity
   endTime = Infinity
 
@@ -72,16 +118,23 @@ export class EnhanceConstitutionBuff extends Buff {
 }
 
 export class SoulReaperBuff extends Buff {
+  get name() {
+    return '灵魂收割者'
+  }
+  get description() {
+    return `提升 ${this.stacked} 点最大生命值`
+  }
+
   remainingRound = Infinity
   endTime = Infinity
 
   maxHPModifier: AttrModifier
 
-  constructor(public owner: Entity, public enhanceCount: number) {
+  constructor(public owner: Entity, public stacked: number) {
     super(owner)
 
     this.maxHPModifier = {
-      add: enhanceCount,
+      add: stacked,
     }
   }
 
@@ -90,7 +143,7 @@ export class SoulReaperBuff extends Buff {
   }
 
   mixing(buff: this): boolean {
-    this.changeEnhanceCount(buff.enhanceCount)
+    this.changeEnhanceCount(buff.stacked)
     return true
   }
 

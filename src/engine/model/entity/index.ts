@@ -1,3 +1,4 @@
+import { remove } from 'lodash-es'
 import { Stage } from '../../stage'
 import { UniqueId } from '../../types'
 import { createUniqueId } from '../../utils'
@@ -93,6 +94,7 @@ export class Entity {
       currentHP: this.currentHP,
       equips: this.equips.map((e) => e.createSnapshot()),
       skills: this.getSkills().map((s) => s.createSnapshot()),
+      buffs: this.getBuffs().map((b) => b.createSnapshot()),
     }
   }
 
@@ -180,6 +182,10 @@ export class Entity {
     buff.onCasted()
   }
 
+  withdrawBuff(buff: Buff): void {
+    remove(this._buffs, buff)
+  }
+
   equip(item: Equip): void {
     this._equips.push(item)
     // 这个生命周期应该在 addItem 时调用，不过目前先在这里实现
@@ -189,6 +195,11 @@ export class Entity {
 }
 
 export namespace Entity {
+  // Snapshot 与 Serialized 的主要区别是：
+  // Snapshot 具有更多的数据，本身可以表达出一个较完整的信息，主要用于信息传递，比如服务端
+  // 传达给客户端，不要求数据可逆的。
+  // 而 Serialized 主要是负责持久化存储，会将一些数据拆分开存储，以及一些运行时才存在的数据
+  // 会直接丢弃（比如 buff），所以它本身不一定能完整表达数据，但要求其数据是可结合其他数据逆向转回实例的。
   export interface Serialized {
     id: UniqueId
     name: string
@@ -217,6 +228,6 @@ export namespace Entity {
     currentHP: number
     equips: Equip.Snapshot[]
     skills: Skill.Snapshot[]
-    // TODO: buffs
+    buffs: Buff.Snapshot[]
   }
 }

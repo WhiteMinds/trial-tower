@@ -2,6 +2,7 @@ import { random } from 'lodash-es'
 import * as R from 'ramda'
 import { Stage } from '../../../stage'
 import { createUniqueId } from '../../../utils'
+import { CombatLog } from '../../combat_log'
 import { DamageEffect } from '../../effect'
 import { Skill } from '../Skill'
 
@@ -36,18 +37,24 @@ export class FastContinuousHit extends Skill {
       return damage
     })
 
-    source.getBuffs().forEach((buff) => buff.onCaptureEffectsSending(damages))
-
-    const damageValues = damages.map((damage) => damage.calcValue(target))
-    this.stage.logs.push([
+    // 不能在 onCaptureEffectsSending 之后 createSnapshot，因为可能会造成数据变化
+    const log: CombatLog = [
       source.createSnapshot(),
       '对',
       target.createSnapshot(),
       '释放',
       this.createSnapshot(),
-      `造成 ${damageValues.join('、')} 伤害，剩余 hp ${target.currentHP}`,
-    ])
-    damages.forEach((damage) => damage.cast(this.stage, target))
+    ]
+    this.stage.logs.push(log)
+
+    source.getBuffs().forEach((buff) => buff.onCaptureEffectsSending(damages))
+
+    const damageValues = damages.map((damage) =>
+      damage.cast(this.stage, target)
+    )
+    log.push(
+      `造成 ${damageValues.join('、')} 伤害，剩余 hp ${target.currentHP}`
+    )
 
     return true
   }
