@@ -121,44 +121,10 @@ export class MainStage implements Stage {
     const team2 = enemies.map((entity) => entity.id)
     combatStage.beginCombat([team1, team2])
 
-    // combatStage.logs.forEach(([format, snapshotMap]) => {
-    //   console.log(
-    //     // TODO: 先用正则简陋的实现下，之后换成 AST 实现
-    //     format.replace(
-    //       /{(.*?)}/g,
-    //       (match, paramName: string, start, source) => {
-    //         const snap = snapshotMap[paramName]
-    //         let text = snapshotToString(snap)
-    //         const notNeedSpaceReg = /[\s，、：]/
-    //         if (start !== 0 && !source[start - 1].match(notNeedSpaceReg)) {
-    //           text = ' ' + text
-    //         }
-    //         if (
-    //           start + match.length !== source.length &&
-    //           !source[start + match.length].match(notNeedSpaceReg)
-    //         ) {
-    //           text = text + ' '
-    //         }
-    //         return text
-    //       }
-    //     )
-    //   )
-    // })
-
-    // console.log(
-    //   `战斗${
-    //     combatStage.result === BattleResult.Win
-    //       ? '胜利'
-    //       : combatStage.result === BattleResult.Lose
-    //       ? '胜利'
-    //       : '超时'
-    //   }，战利品：`,
-    //   combatStage.loots
-    // )
     combatStage.loots.forEach((loot) => {
       switch (loot.type) {
         case LootType.EXP:
-          player.addExp(loot.amount)
+          player.addExp(loot.payload)
           if (player.exp >= 100) {
             player.level++
           }
@@ -167,7 +133,7 @@ export class MainStage implements Stage {
           // TODO: 之后再处理
           break
         case LootType.Item:
-          this.registerItem(loot.item)
+          this.registerItem(loot.payload)
           // TODO: player.addItem
           break
       }
@@ -181,16 +147,5 @@ export class MainStage implements Stage {
     console.log('灵魂收割者计数器', soulReaper?.killCount)
 
     return combatStage.logs
-  }
-}
-
-function snapshotToString(snap: Snapshot): string {
-  switch (snap.snapshotType) {
-    case 'Entity':
-      return `[${snap.name}]`
-    case 'Skill':
-      return `[${snap.name}]`
-    case 'Item':
-      return `[${snap.name}]`
   }
 }

@@ -150,7 +150,7 @@ engine.mainStage.beginCombat(player, [enemy1, enemy2])
 - [x] 实现技能的计数器，比如每使用技能击杀 10 个怪物，就会成长一点能力
 - [x] 实现一个召唤类技能
 - [x] 实现一个简单的 UI
-- [ ] 实现战利品的 Snapshot & UI
+- [x] 实现战利品的 Snapshot & UI
 - [ ] 实现玩家仓库
 - [ ] 实现装备栏 UI
 - [ ] 实现玩家仓库 UI

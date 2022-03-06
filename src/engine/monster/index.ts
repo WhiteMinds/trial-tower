@@ -48,8 +48,8 @@ const templates: MonsterTemplate[] = [
         const item = new TomeOfKnowledge(stage)
         stage.registerItem(item)
         return [
-          { type: LootType.EXP, amount: 10 },
-          { type: LootType.Item, item },
+          { type: LootType.EXP, payload: 10 },
+          { type: LootType.Item, payload: item },
         ]
       })
     },
@@ -59,7 +59,7 @@ const templates: MonsterTemplate[] = [
     mutation(entity, stage) {
       entity.addSkill(new FastContinuousHit(stage))
       stage.setLootGenerator(entity.id, () => {
-        return [{ type: LootType.EXP, amount: 10 }]
+        return [{ type: LootType.EXP, payload: 10 }]
       })
     },
   },
@@ -71,8 +71,8 @@ const templates: MonsterTemplate[] = [
         const item = new ClothArmor(stage)
         stage.registerItem(item)
         return [
-          { type: LootType.EXP, amount: 100 },
-          { type: LootType.Item, item },
+          { type: LootType.EXP, payload: 100 },
+          { type: LootType.Item, payload: item },
         ]
       })
     },

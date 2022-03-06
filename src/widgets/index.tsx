@@ -2,6 +2,7 @@ import { FC } from 'react'
 import { Entity } from '../engine/model/entity'
 import { Item } from '../engine/model/item'
 import { Skill } from '../engine/model/skill'
+import { Loot, LootType } from '../engine/stage/types'
 import MouseOverPopover from '../MouseOverPopover'
 import { EntityCard } from './EntityCard'
 import { ItemCard } from './ItemCard'
@@ -38,30 +39,6 @@ const MessageWidget$Skill: FC<{
   )
 }
 
-// const MessageWidget$Loots: FC<{
-//   loots: Loot[]
-// }> = (props) => {
-//   return (
-//     <>
-//       {props.loots.map((loot, idx) => {
-//         return (
-//           <span key={idx}>
-//             [
-//             {loot.type === LootType.EXP ? (
-//               '经验值'
-//             ) : loot.type === LootType.Gold ? (
-//               <span style={{ color: '#999900' }}>金币</span>
-//             ) : loot.type === LootType.Item ? (
-//               <MessageWidget$Item item={loot.item} />
-//             ) : null}{' '}
-//             x{loot.amount}]
-//           </span>
-//         )
-//       })}
-//     </>
-//   )
-// }
-
 const MessageWidget$Item: FC<{
   item: Item.Snapshot
 }> = (props) => {
@@ -78,9 +55,22 @@ const MessageWidget$Item: FC<{
   )
 }
 
+const MessageWidget$Loot: FC<{
+  loot: Loot.Snapshot
+}> = (props) => {
+  switch (props.loot.type) {
+    case LootType.EXP:
+      return <>[经验值 x {props.loot.payload}]</>
+    case LootType.Gold:
+      return <>[金币 x {props.loot.payload}]</>
+    case LootType.Item:
+      return <MessageWidget$Item item={props.loot.payload} />
+  }
+}
+
 export const MessageWidgets = {
   Entity: MessageWidget$Entity,
   Skill: MessageWidget$Skill,
   Item: MessageWidget$Item,
-  // Loots: MessageWidget$Loots,
+  Loot: MessageWidget$Loot,
 }

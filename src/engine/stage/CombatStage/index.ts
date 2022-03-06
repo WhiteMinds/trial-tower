@@ -145,16 +145,11 @@ export class CombatStage implements Stage {
           : '超时'
       }`,
     ]
-    // TODO: 这里先过滤掉非 item 的战利品了，目前的日志系统还不能支撑非 snapshot 的类型，
-    // 需要再思考下。
-    const lootItems = this.loots
-      .filter((loot): loot is Loot$Item => loot.type === LootType.Item)
-      .map((loot) => loot.item)
-    if (lootItems.length > 0) {
+    if (this.loots.length > 0) {
       log.push(
         '，战利品：',
         // TODO: 需要注入顿号分隔
-        ...lootItems.map((l) => l.createSnapshot())
+        ...this.loots.map((l) => Loot.createSnapshot(l))
       )
     }
     this.logs.push(log)
@@ -268,17 +263,12 @@ export class CombatStage implements Stage {
     ]
     if (!battleStarter.contains(target)) {
       const loots = this.generateLoots(target)
-      this.loots.push(...loots)
-      // TODO: 这里先过滤掉非 item 的战利品了，目前的日志系统还不能支撑非 snapshot 的类型，
-      // 需要再思考下。
-      const lootItems = loots
-        .filter((loot): loot is Loot$Item => loot.type === LootType.Item)
-        .map((loot) => loot.item)
-      if (lootItems.length > 0) {
+      if (loots.length > 0) {
+        this.loots.push(...loots)
         log.push(
           '，战利品：',
           // TODO: 需要注入顿号分隔
-          ...lootItems.map((l) => l.createSnapshot())
+          ...loots.map((l) => Loot.createSnapshot(l))
         )
       }
     }

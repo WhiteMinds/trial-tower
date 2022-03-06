@@ -19,19 +19,44 @@ export enum LootType {
 
 export interface Loot$EXP {
   type: LootType.EXP
-  amount: number
+  payload: number
 }
 
 export interface Loot$Gold {
   type: LootType.Gold
-  amount: number
+  payload: number
 }
 
 export interface Loot$Item {
   type: LootType.Item
-  item: Item
+  payload: Item
 }
 
 export type Loot = Loot$EXP | Loot$Gold | Loot$Item
 
 export type LootGenerator = (stage: Stage, entity: Entity) => Loot[]
+
+export namespace Loot {
+  export type Snapshot = {
+    snapshotType: 'Loot'
+  } & (
+    | Loot$EXP
+    | Loot$Gold
+    | (Pick<Loot$Item, 'type'> & { payload: Item.Snapshot })
+  )
+
+  export function createSnapshot(loot: Loot): Loot.Snapshot {
+    if (loot.type === LootType.Item) {
+      return {
+        snapshotType: 'Loot',
+        ...loot,
+        payload: loot.payload.createSnapshot(),
+      }
+    }
+
+    return {
+      snapshotType: 'Loot',
+      ...loot,
+    }
+  }
+}

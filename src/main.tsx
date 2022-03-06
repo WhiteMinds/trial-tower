@@ -101,6 +101,8 @@ const SnapshotCard: FC<{ snapshot: Snapshot }> = (props) => {
       return <MessageWidgets.Skill skill={props.snapshot} />
     case 'Item':
       return <MessageWidgets.Item item={props.snapshot} />
+    case 'Loot':
+      return <MessageWidgets.Loot loot={props.snapshot} />
   }
 }
 
