@@ -51,11 +51,11 @@ const CharacterSelectScreen: FC<{
 const GameScreen: FC<{ character: Character }> = (props) => {
   const { character } = props
   const engine = useMemo(() => new Engine(character), [character])
-  const player = useMemo(() => engine.mainStage.getPlayer(), [engine])
 
   const [combatLogs, setCombatLogs] = useState<CombatLog[]>([])
 
   const randomCombat = useCallback(() => {
+    const player = engine.mainStage.getPlayer()
     const enemy1 = engine.mainStage.createRandomEnemyByPlayerLevel(player)
     const enemy2 = engine.mainStage.createRandomEnemyByPlayerLevel(player)
     if (enemy2.name === enemy1.name) enemy2.name += ' 2'
@@ -67,6 +67,9 @@ const GameScreen: FC<{ character: Character }> = (props) => {
   useEffect(() => {
     randomCombat()
   }, [])
+
+  const player = engine.mainStage.getPlayer().createSnapshot()
+  console.log('player snapshot on render', player)
 
   return (
     <div>

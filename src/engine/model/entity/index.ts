@@ -1,7 +1,7 @@
 import { remove } from 'lodash-es'
 import { Stage } from '../../stage'
 import { UniqueId } from '../../types'
-import { createUniqueId } from '../../utils'
+import { BooleanT, createUniqueId } from '../../utils'
 import { Buff } from '../buff'
 import { Equip, Item } from '../item'
 import { Skill, SkillTemplateMap } from '../skill'
@@ -22,8 +22,9 @@ export class Entity {
   name: string = 'UnnamedEntity'
 
   level: number = 1
-  // TODO: 经验值看起来是 player 独有的属性，可能应该单独实现一个类，不过有些成本暂时不搞
+  // TODO: 经验值和金币看起来是 player 独有的属性，可能应该单独实现一个类，不过有些成本暂时不搞
   exp: number = 0
+  gold: number = 0
 
   /** 基础属性 */
 
@@ -41,6 +42,12 @@ export class Entity {
   private _equips: Equip[] = []
   get equips(): Equip[] {
     return this._equips.slice(0)
+  }
+
+  // player inventory
+  private _items: Item[] = []
+  get items(): Item[] {
+    return this._items.slice(0)
   }
 
   // 外界系统应该通过实例上的 api 来改变这个属性，不能直接操作。
@@ -92,6 +99,7 @@ export class Entity {
       maxHP: this.maxHP.value,
       atk: this.atk.value,
       currentHP: this.currentHP,
+      items: this.items.map((i) => i.createSnapshot()),
       equips: this.equips.map((e) => e.createSnapshot()),
       skills: this.getSkills().map((s) => s.createSnapshot()),
       buffs: this.getBuffs().map((b) => b.createSnapshot()),
@@ -109,6 +117,7 @@ export class Entity {
       speed: this.speed.base,
       maxHP: this.maxHP.base,
       atk: this.atk.base,
+      itemIds: this.items.map(({ id }) => id),
       equipIds: this.equips.map(({ id }) => id),
       skills: this.getSkills().map((skill) => skill.serialize()),
     }
@@ -124,6 +133,12 @@ export class Entity {
     this.speed.base = data.speed
     this.maxHP.base = data.maxHP
     this.atk.base = data.atk
+
+    this._items = []
+    data.itemIds
+      .map((id) => this.stage.getItem(id))
+      .filter(BooleanT())
+      .forEach((item) => this.addItem(item))
 
     this._equips = []
     data.equipIds
@@ -186,7 +201,16 @@ export class Entity {
     remove(this._buffs, buff)
   }
 
+  addItem(item: Item): void {
+    this._items.push(item)
+  }
+
+  removeItem(item: Item): void {
+    remove(this._items, item)
+  }
+
   equip(item: Equip): void {
+    this.removeItem(item)
     this._equips.push(item)
     // 这个生命周期应该在 addItem 时调用，不过目前先在这里实现
     item.onCasted(this)
@@ -210,6 +234,7 @@ export namespace Entity {
     speed: number
     maxHP: number
     atk: number
+    itemIds: Item['id'][]
     equipIds: Equip['id'][]
     skills: Skill.Serialized[]
   }
@@ -226,6 +251,7 @@ export namespace Entity {
     maxHP: number
     atk: number
     currentHP: number
+    items: Item.Snapshot[]
     equips: Equip.Snapshot[]
     skills: Skill.Snapshot[]
     buffs: Buff.Snapshot[]

@@ -125,16 +125,13 @@ export class MainStage implements Stage {
       switch (loot.type) {
         case LootType.EXP:
           player.addExp(loot.payload)
-          if (player.exp >= 100) {
-            player.level++
-          }
           break
         case LootType.Gold:
-          // TODO: 之后再处理
+          player.gold += loot.payload
           break
         case LootType.Item:
-          this.registerItem(loot.payload)
-          // TODO: player.addItem
+          const item = this.registerItem(loot.payload)
+          player.addItem(item)
           break
       }
     })

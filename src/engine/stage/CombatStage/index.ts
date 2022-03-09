@@ -141,7 +141,7 @@ export class CombatStage implements Stage {
         this.result === BattleResult.Win
           ? '胜利'
           : this.result === BattleResult.Lose
-          ? '胜利'
+          ? '失败'
           : '超时'
       }`,
     ]
