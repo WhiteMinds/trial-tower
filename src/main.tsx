@@ -90,6 +90,7 @@ const GameScreen: FC<{ character: Character }> = (props) => {
       <div>昵称：{player.name}</div>
       <div>等级：{player.level}</div>
       <Stack spacing={2}>
+        <EquipButton engine={engine} />
         <InventoryButton engine={engine} />
 
         <Button variant="contained" onClick={randomCombat}>
@@ -102,6 +103,50 @@ const GameScreen: FC<{ character: Character }> = (props) => {
         </p>
       ))}
     </div>
+  )
+}
+
+const EquipButton: FC<{ engine: Engine }> = (props) => {
+  const popupState = usePopupState({ variant: 'popover', popupId: 'demoMenu' })
+
+  const player = props.engine.mainStage.getPlayer().createSnapshot()
+
+  return (
+    <>
+      <Button variant="contained" {...bindTrigger(popupState)}>
+        装备栏
+      </Button>
+      <Popover
+        {...bindPopover(popupState)}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'center',
+        }}
+      >
+        <div style={{ padding: 16, minWidth: 200 }}>
+          <Stack>
+            {player.equips.map((equip) => (
+              <div key={equip.id}>
+                {/* TODO: 这里显示 slot 之类的 */}
+                <MessageWidgets.Item item={equip} />
+                <Button
+                  variant="outlined"
+                  onClick={() => {
+                    // TODO: player.unEquip
+                  }}
+                >
+                  卸下
+                </Button>
+              </div>
+            ))}
+          </Stack>
+        </div>
+      </Popover>
+    </>
   )
 }
 

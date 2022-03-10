@@ -153,7 +153,7 @@ engine.mainStage.beginCombat(player, [enemy1, enemy2])
 - [x] 实现战利品的 Snapshot & UI
 - [x] 实现 entity buff 的 snapshot，并展示到 entity 卡片
 - [x] 实现玩家仓库
-- [ ] 实现装备栏 UI
+- [x] 实现装备栏 UI
 - [x] 实现玩家仓库 UI
 - [ ] 实现数据保存
 - [ ] 支持 C / S 模式，本地单人游玩时也采用模拟 Server
