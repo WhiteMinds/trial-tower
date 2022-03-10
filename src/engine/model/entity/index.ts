@@ -202,7 +202,17 @@ export class Entity {
   }
 
   addItem(item: Item): void {
+    // TODO: 没有检查是否已存在
+    const sameTemplateItems = this._items.filter(
+      ({ templateId }) => templateId === item.templateId
+    )
+    for (let i = 0; i < sameTemplateItems.length; i++) {
+      if (sameTemplateItems[i].mixing(item)) {
+        return
+      }
+    }
     this._items.push(item)
+    item.onCasted(this)
   }
 
   removeItem(item: Item): void {
@@ -212,9 +222,7 @@ export class Entity {
   equip(item: Equip): void {
     this.removeItem(item)
     this._equips.push(item)
-    // 这个生命周期应该在 addItem 时调用，不过目前先在这里实现
-    item.onCasted(this)
-    item.onEquip()
+    item.onEquip(this)
   }
 }
 

@@ -22,7 +22,7 @@ export class Item {
     return 'BaseItem'
   }
 
-  readonly canStacked = true
+  readonly canStacked: boolean = true
   readonly maxStackCount = 64
   stacked = 1
 
@@ -74,6 +74,13 @@ export class Item {
   }
 
   use(): boolean {
+    this.assertOwner()
+    if (this.stacked <= 0) return false
+    this.stacked--
+    if (this.stacked <= 0) {
+      this.owner.removeItem(this)
+      // TODO: onDestroy
+    }
     return true
   }
 
@@ -125,8 +132,11 @@ export class TomeOfKnowledge extends Item {
   }
 
   use(): boolean {
+    if (!super.use()) return false
+
     this.assertOwner()
     this.owner.level++
+    console.log('use', this, this.owner)
     return true
   }
 }

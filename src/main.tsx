@@ -1,8 +1,22 @@
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react'
+import { Button, Popover, Stack, Typography } from '@mui/material'
+import React, {
+  FC,
+  HTMLAttributes,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import ReactDOM from 'react-dom'
 import { Character, Engine } from './engine'
 import { CombatLog, Snapshot } from './engine/model/combat_log'
 import { MessageWidgets } from './widgets'
+import {
+  usePopupState,
+  bindTrigger,
+  bindPopover,
+} from 'material-ui-popup-state/hooks'
+import { Entity } from './engine/model/entity'
 
 const App: FC = () => {
   const [character, setCharacter] = useState<Character>()
@@ -75,13 +89,65 @@ const GameScreen: FC<{ character: Character }> = (props) => {
     <div>
       <div>昵称：{player.name}</div>
       <div>等级：{player.level}</div>
-      <button onClick={randomCombat}>随机战斗</button>
+      <Stack spacing={2}>
+        <InventoryButton engine={engine} />
+
+        <Button variant="contained" onClick={randomCombat}>
+          随机战斗
+        </Button>
+      </Stack>
       {combatLogs.map((log, idx) => (
         <p key={idx}>
           <CombatLogView log={log} />
         </p>
       ))}
     </div>
+  )
+}
+
+const InventoryButton: FC<{ engine: Engine }> = (props) => {
+  const popupState = usePopupState({ variant: 'popover', popupId: 'demoMenu' })
+  const [, rerender] = useRerender()
+
+  const player = props.engine.mainStage.getPlayer().createSnapshot()
+
+  return (
+    <>
+      <Button variant="contained" {...bindTrigger(popupState)}>
+        背包（{player.items.length}）
+      </Button>
+      <Popover
+        {...bindPopover(popupState)}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'center',
+        }}
+      >
+        <div style={{ padding: 16, minWidth: 200 }}>
+          <Typography>库存：</Typography>
+          <Stack>
+            {player.items.map((item) => (
+              <div key={item.id}>
+                <MessageWidgets.Item item={item} /> x{item.stacked}{' '}
+                <Button
+                  variant="outlined"
+                  onClick={() => {
+                    props.engine.mainStage.getItem(item.id)?.use()
+                    rerender()
+                  }}
+                >
+                  使用
+                </Button>
+              </div>
+            ))}
+          </Stack>
+        </div>
+      </Popover>
+    </>
   )
 }
 
@@ -107,6 +173,17 @@ const SnapshotCard: FC<{ snapshot: Snapshot }> = (props) => {
     case 'Loot':
       return <MessageWidgets.Loot loot={props.snapshot} />
   }
+}
+
+export function useRerender(): useRerender.Ret {
+  const [key, setKey] = useState(Math.random())
+  const rerender = useCallback(() => setKey(Math.random()), [])
+
+  return [key, rerender]
+}
+
+export namespace useRerender {
+  export type Ret = [key: number, rerender: () => void]
 }
 
 ReactDOM.render(

@@ -1,6 +1,6 @@
 import R from 'ramda'
 import { Item } from '.'
-import { SkillModifier } from '../entity'
+import { Entity, SkillModifier } from '../entity'
 import { AttrModifier } from '../entity/AttrDescriptor'
 import { SkillTemplateMap } from '../skill'
 import { SkillTemplateId } from '../skill/SkillTemplateId'
@@ -43,6 +43,9 @@ export class Equip extends Item {
       ...getSkillBonusTexts(this),
     ].join('\n')
   }
+
+  readonly canStacked = false
+
   get required(): EquipRequired {
     return {}
   }
@@ -102,8 +105,8 @@ export class Equip extends Item {
     return true
   }
 
-  onEquip(): void {
-    this.assertOwner()
+  onEquip(entity: Entity): void {
+    this.owner = entity
 
     this.strModifier && this.owner.strength.modifiers.push(this.strModifier)
     this.conModifier && this.owner.constitution.modifiers.push(this.conModifier)
