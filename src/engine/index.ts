@@ -36,7 +36,9 @@ export class Engine {
     )
   }
 
-  destroy(): void {}
+  destroy(): void {
+    this.mainStage.saveAllToStore()
+  }
 }
 
 export interface Character {

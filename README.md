@@ -155,7 +155,7 @@ engine.mainStage.beginCombat(player, [enemy1, enemy2])
 - [x] 实现玩家仓库
 - [x] 实现装备栏 UI
 - [x] 实现玩家仓库 UI
-- [ ] 实现数据保存
+- [x] 实现数据保存
 - [ ] 支持 C / S 模式，本地单人游玩时也采用模拟 Server
 - [ ] 实现一个简单的成就系统 + 新手上路（任意怪物击杀 \* 1）成就
   1. 这需要让 MainStage 能够知道 kill event，最好能够更通用的知道 skill event 等

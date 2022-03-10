@@ -13,7 +13,6 @@ import { EnhanceConstitution } from '../model/skill/passivity/EnhanceConstitutio
 import { SoulReaper } from '../model/skill/passivity/SoulReaper'
 import { createRandomEnemy } from '../monster'
 import { Store } from '../store'
-import { BattleResult } from './CombatStage'
 import { LootGenerator, LootType, Stage } from './types'
 
 const StoreKey = {
@@ -34,7 +33,9 @@ export class MainStage implements Stage {
       `${StoreKey.Entity}/${id}`
     )
     if (data == null) return null
-    return Entity.deserialize(data, this)
+    const entity = Entity.deserialize(data, this)
+    this.loadedEntityMap.set(entity.id, entity)
+    return entity
   }
 
   createEntity(data: Partial<Entity.Serialized>): Entity {
@@ -56,13 +57,31 @@ export class MainStage implements Stage {
 
     const data = this.store.getItem<Item.Serialized>(`${StoreKey.Item}/${id}`)
     if (data == null) return null
-    return Item.deserialize(data, this)
+    const item = Item.deserialize(data, this)
+    this.loadedItemMap.set(item.id, item)
+    return item
   }
 
   // TODO: 这里没想好怎么做 createItem 比较合适，就先这样简单实现了
   registerItem<T extends Item>(item: T): T {
     this.loadedItemMap.set(item.id, item)
     return item
+  }
+
+  saveAllToStore(): void {
+    this.loadedEntityMap.forEach((entity, id) => {
+      this.store.setItem<Entity.Serialized>(
+        `${StoreKey.Entity}/${id}`,
+        entity.serialize()
+      )
+    })
+
+    this.loadedItemMap.forEach((item, id) => {
+      this.store.setItem<Item.Serialized>(
+        `${StoreKey.Item}/${id}`,
+        item.serialize()
+      )
+    })
   }
 
   // 只为了战利品做一个新的 Monster 类的话有点不必要，但如果直接放 Entity 上也不方便传递给 CombatStage，

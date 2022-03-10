@@ -16,7 +16,6 @@ import {
   bindTrigger,
   bindPopover,
 } from 'material-ui-popup-state/hooks'
-import { Entity } from './engine/model/entity'
 
 const App: FC = () => {
   const [character, setCharacter] = useState<Character>()
@@ -65,6 +64,11 @@ const CharacterSelectScreen: FC<{
 const GameScreen: FC<{ character: Character }> = (props) => {
   const { character } = props
   const engine = useMemo(() => new Engine(character), [character])
+  useEffect(() => {
+    const beforeunload = () => engine.destroy()
+    addEventListener('beforeunload', beforeunload)
+    return () => removeEventListener('beforeunload', beforeunload)
+  }, [engine])
 
   const [combatLogs, setCombatLogs] = useState<CombatLog[]>([])
 
