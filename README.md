@@ -1,6 +1,8 @@
-# text-game-engine
+# trial-tower
 
-文字游戏引擎的一些想法和 demo 尝试
+试炼之塔，通过文本展示战斗过程的放置类回合战斗 RPG 游戏。
+
+同时包含一个 RPG 回合制自动战斗引擎，适用于 idle game、文本展示战斗过程游戏等。
 
 ## 当前的一些效果展示：
 
@@ -157,6 +159,15 @@ engine.mainStage.beginCombat(player, [enemy1, enemy2])
 - [x] 实现玩家仓库 UI
 - [x] 实现数据保存
 - [ ] 支持 C / S 模式，本地单人游玩时也采用模拟 Server
+  1. 升级到 yarn v3，使用更完善的 workspace 特性
+  2. 回合制自动战斗引擎命名
+     1. 暂定为 Hedra（意指多面体）
+  3. 拆分出多个包
+     1. common（一些通用的类型、model）
+     2. hedra-engine（默认基于 memory 存储）
+     3. trial-tower-http-server
+     4. trial-tower-local-server（基于 indexedDB 或者一些其他的浏览器存储方案）
+     5. trial-tower-web
 - [ ] 实现一个简单的成就系统 + 新手上路（任意怪物击杀 \* 1）成就
   1. 这需要让 MainStage 能够知道 kill event，最好能够更通用的知道 skill event 等
      1. 可以为所有需要让 MainStage 知道的信息，创建特定的事件，比如：
