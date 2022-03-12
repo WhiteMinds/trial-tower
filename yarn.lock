@@ -756,6 +756,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/node@npm:^17.0.21":
+  version: 17.0.21
+  resolution: "@types/node@npm:17.0.21"
+  checksum: 89dcd2fe82f21d3634266f8384e9c865cf8af49685639fbdbd799bdd1040480fb1e8eeda2d3b9fce41edbe704d2a4be9f427118c4ae872e8d9bb7cbeb3c41a94
+  languageName: node
+  linkType: hard
+
 "@types/parse-json@npm:^4.0.0":
   version: 4.0.0
   resolution: "@types/parse-json@npm:4.0.0"
@@ -1560,6 +1567,20 @@ __metadata:
   checksum: b9ad53d53be4af90ce5d1c38331e712522417d017d5ef1ebd0507e07c2fbad8686fffb8e12ddecd4c39ca9b9b47431afbb975b8abf7f3c3b82c98e9aad052792
   languageName: node
   linkType: hard
+
+"hedra-engine@workspace:packages/hedra-engine":
+  version: 0.0.0-use.local
+  resolution: "hedra-engine@workspace:packages/hedra-engine"
+  dependencies:
+    "@types/lodash-es": ^4.17.6
+    "@types/ramda": ^0.27.64
+    "@types/uuid": ^8.3.4
+    lodash-es: ^4.17.21
+    ramda: ^0.28.0
+    typescript: ^4.5.4
+    uuid: ^8.3.2
+  languageName: unknown
+  linkType: soft
 
 "hoist-non-react-statics@npm:^3.3.1, hoist-non-react-statics@npm:^3.3.2":
   version: 3.3.2
@@ -2572,6 +2593,7 @@ __metadata:
     "@emotion/styled": ^11.8.1
     "@mui/material": ^5.4.4
     "@types/lodash-es": ^4.17.6
+    "@types/node": ^17.0.21
     "@types/ramda": ^0.27.64
     "@types/react": ^17.0.33
     "@types/react-dom": ^17.0.10

@@ -1,15 +1,7 @@
 import { Button, Popover, Stack, Typography } from '@mui/material'
-import React, {
-  FC,
-  HTMLAttributes,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react'
 import ReactDOM from 'react-dom'
-import { Character, Engine } from './engine'
-import { CombatLog, Snapshot } from './engine/model/combat_log'
+import { Character, CombatLog, Engine, Snapshot } from 'hedra-engine'
 import { MessageWidgets } from './widgets'
 import {
   usePopupState,

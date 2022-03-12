@@ -1,6 +1,6 @@
 import { FC } from 'react'
 import { Card, CardContent, Typography } from '@mui/material'
-import { Entity } from '../engine/model/entity'
+import { Entity } from 'hedra-engine'
 
 export const EntityCard: FC<{ entity: Entity.Snapshot }> = (props) => {
   return (

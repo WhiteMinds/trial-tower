@@ -1,0 +1,11 @@
+{
+  "include": ["packages/*/src"],
+  "compilerOptions": {
+    "declaration": true,
+    "declarationMap": true,
+    "baseUrl": ".",
+    "paths": {
+      "hedra-engine": ["packages/hedra-engine/src"]
+    }
+  }
+}
