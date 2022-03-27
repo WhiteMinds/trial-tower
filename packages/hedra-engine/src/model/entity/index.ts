@@ -1,4 +1,4 @@
-import { remove } from 'lodash-es'
+import { remove } from 'lodash'
 import { Stage } from '../../stage'
 import { UniqueId } from '../../types'
 import { BooleanT, createUniqueId } from '../../utils'

@@ -1,4 +1,4 @@
-import { random } from 'lodash-es'
+import { random } from 'lodash'
 import * as R from 'ramda'
 import { Stage } from '../../../stage'
 import { createUniqueId } from '../../../utils'

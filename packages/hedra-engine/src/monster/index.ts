@@ -1,4 +1,4 @@
-import { sample } from 'lodash-es'
+import { sample } from 'lodash'
 import { Entity } from '../model/entity'
 import { ClothArmor } from '../model/item/Equip'
 import { TomeOfKnowledge } from '../model/item/Item'

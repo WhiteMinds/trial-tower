@@ -3,7 +3,7 @@ import { Entity } from '../../model/entity'
 import { Item } from '../../model/item'
 import { Team } from './Team'
 import * as R from 'ramda'
-import { sample } from 'lodash-es'
+import { sample } from 'lodash'
 import { Loot, Loot$Item, LootGenerator, LootType } from '../types'
 import { CombatLog, Snapshot } from '../../model/combat_log'
 
