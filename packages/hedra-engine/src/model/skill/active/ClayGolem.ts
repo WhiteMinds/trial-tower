@@ -17,13 +17,13 @@ export class ClayGolem extends Skill {
     return this.level * 10
   }
 
-  use(): boolean {
+  async use(): Promise<boolean> {
     this.assertCombatting()
     this.assertOwner()
 
     const source = this.owner
 
-    const entity = this.stage.createEntity({
+    const entity = await this.stage.createEntity({
       name: '粘土石魔',
       atk: this.atk,
       maxHP: this.maxHP,

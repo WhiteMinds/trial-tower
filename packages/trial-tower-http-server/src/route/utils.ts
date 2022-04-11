@@ -18,7 +18,12 @@ export const tokenPlugin = expressJWT({
   userProperty: TokenPayloadKeyInRequest,
 })
   // TODO: 这样设计不太好，但是先这么糊着以后再调整
-  .unless({ path: ['/api/users', '/api/users/auth'], method: 'POST' })
+  .unless({
+    path: [
+      { url: '/api/users', method: 'POST' },
+      { url: '/api/users/auth', method: 'POST' },
+    ],
+  })
 
 export function createToken(data: TokenPayload): string {
   return jwt.sign(data, JWT_KEY, {

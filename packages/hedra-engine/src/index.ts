@@ -1,46 +1,39 @@
+import { Entity } from './model/entity'
 import { MainStage } from './stage'
 import { Store } from './store'
 import { UniqueId } from './types'
-import { createUniqueId } from './utils'
 
 export * from './stage'
+export * from './store'
 export * from './model/entity'
 export * from './model/combat_log'
 export * from './model/item'
 export * from './model/skill'
 export * from './model/buff'
 
-const StoreKey = {
-  Characters: 'Characters',
-}
-
-const globalStore = new Store()
-
 export class Engine {
   mainStage: MainStage
 
-  static getCharacters(): Character[] {
-    const characters = globalStore.getItem<Character[]>(StoreKey.Characters)
-    return characters ?? []
+  constructor(private store: Store) {
+    this.mainStage = new MainStage(store)
   }
 
-  static createCharacter(data: Omit<Character, 'id'>): Character {
-    const character: Character = {
-      id: createUniqueId(),
+  // loadedCharacters
+
+  async createCharacter(
+    data: Omit<Character, 'id' | 'entityId'>,
+    entityCreator: (stage: MainStage) => Promise<Entity>
+  ): Promise<Character> {
+    const entity = await entityCreator(this.mainStage)
+    const character = await this.store.createCharacter({
+      entityId: entity.id,
       ...data,
-    }
-    globalStore.updateItem<Character[]>(StoreKey.Characters, (characters) => {
-      characters ??= []
-      return [...characters, character]
     })
     return character
   }
 
-  constructor(character: Character) {
-    this.mainStage = new MainStage(
-      character,
-      new Store(`${StoreKey.Characters}/${character.id}/`)
-    )
+  async getCharacter(id: Character['id']): Promise<Character | null> {
+    return this.store.getCharacter(id)
   }
 
   destroy(): void {
@@ -50,5 +43,7 @@ export class Engine {
 
 export interface Character {
   id: UniqueId
+  entityId: UniqueId
+  // name、level 等 entity 属性应该和 entity 同步，放在这里主要是性能优化？
   name: string
 }

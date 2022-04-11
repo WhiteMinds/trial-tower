@@ -162,12 +162,42 @@ engine.mainStage.beginCombat(player, [enemy1, enemy2])
   1. 升级到 yarn v3，使用更完善的 workspace 特性
   2. 回合制自动战斗引擎命名
      1. 暂定为 Hedra（意指多面体）
-  3. 拆分出多个包
+  3. 拆分出多个包实现
      1. common（一些通用的类型、model）
      2. hedra-engine（默认基于 memory 存储）
      3. trial-tower-http-server
+        1. 应该优先实现这个 server，这比 local-server 更适合探索方向，因为它的数据空间和浏览器是分离的，不容易在开发时漏掉一些情况。
+        2. 数据库暂定用 mysql，ORM 用 sequelize，尽量实现类型完整、表的版本前进后退
      4. trial-tower-local-server（基于 indexedDB 或者一些其他的浏览器存储方案）
-     5. trial-tower-web
+     5. trial-tower-web-interface
+  4. hedra-engine 需要支撑基于多种存储的实现
+     1. 一个引擎实例是否应该只负责一个玩家角色实例。
+        1. 单角色实例的话，在角色登出或长期无请求时做卸载比较简单。
+        2. 这意味着引擎不能在启动时全量加载了，除非单角色对应的数据单独存储。
+        3. 排行榜、玩家对战等多角色实例的场景怎么实现？
+           1. 排行榜可能应该在进一步封装的引擎（trial-tower-engine 之类的？）中实现
+        4. 短期内来看应该做成单引擎装载全部角色实例，性能优化可以放到以后再做
+     2. 引擎实例需要角色 id（一个特殊的 entity id？）、存储实现
+        1. 多玩家实例的情况下，不需要角色 id，应该是引擎的调用方持有玩家角色对应的实体 id
+           1. 引擎内部应该要能识别出角色实体？维护一个玩家实体列表？
+     3. 由于序列化的性能影响，不适合每次 update 都全量更新持久化数据，应该只存储变化了的数据（dirty 的）。
+        即使是不在 update 时做持久化，而是放到 engine.destory 时，也最好是仅更改变化了的数据。
+        实现了脏数据的机制后，也更容易对 client 做推送了。
+     4. 看看有没有更好的 item 替代单词，现在这个容易混淆。现在是 GameData 了。
+     5. Server.createCharacter -> Engine.createCharacter -> ServerStore.createCharacter
+        如果 Server 想要传递 userId 给 ServerStore，有几种方向
+        1. Engine 涉及到 Store 的部分与 Store 的所有函数都允许传递一个 context 之类的 unkown 类型的数据，原样交付给 Store 的实现。这个影响比较大。
+        2. Character 脱离 Engine 的领域，作为一个 Server 端的对象，通过 entityId 对应到实际的 Engine.Player 实例。
+        3. Character 的关系设计为允许 userId 为空，创建完成后再由 Server 手动绑定给 User。
+        4. 目前看起来第 3 个方案影响最小最容易实现？
+     6. 现在 Store 的异步会扩散到各个相关的地方，比如 stage.createEntity、skill.use（里面调用了召唤创建实体）、Entity.deserialize（调用了 stage.getItem），有没有什么比较好的处理方案
+        1. CombatStage 所需要的数据应该都已经加载在缓存了，可以单独将 CombatStage 的 API 设计成非异步的。
+           但这样之后可能会出现部分数据没加载在缓存的情况，需要设计预加载相关的能力。
+        2. StoreInterface 不再接受异步 API，数据的创建、更新由 StoreImpl 自己做队列慢慢完成，但是 get 如何处理？
+        3. 看起来是不可规避的，只能接受异步或者使用预加载，但预加载的方案有较大的开发成本，并且会导致一些框架上的设计受限，所以还是准备接受异步扩散。
+           之后做新的引擎时再考虑如何设计成大部分非同步的 API。
+- [ ] 实现构建流程
+  1. 非发布包（server、web）可以试试 esbuild 构建
 - [ ] 实现一个简单的成就系统 + 新手上路（任意怪物击杀 \* 1）成就
   1. 这需要让 MainStage 能够知道 kill event，最好能够更通用的知道 skill event 等
      1. 可以为所有需要让 MainStage 知道的信息，创建特定的事件，比如：

@@ -6,6 +6,7 @@ import * as R from 'ramda'
 import { sample } from 'lodash'
 import { Loot, Loot$Item, LootGenerator, LootType } from '../types'
 import { CombatLog, Snapshot } from '../../model/combat_log'
+import { assert } from '../../utils'
 
 const MaxRoundCount = 99
 // 每次行动需要的进度点数
@@ -16,39 +17,45 @@ export class CombatStage implements Stage {
 
   private loadedEntityMap: Map<Entity['id'], Entity> = new Map()
 
-  getEntity(id: Entity['id']): Entity | null {
+  // TODO: 异步是不是不应该传播到这个 stage 中，因为它从父级复制的数据预期上应该都已经加载完了？
+  // 实现成本应该很高，先做成异步的。
+  async getEntity(id: Entity['id']): Promise<Entity | null> {
     const loadedEntity = this.loadedEntityMap.get(id)
     if (loadedEntity != null) return loadedEntity
 
-    const entityFromMainStage = this.mainStage.getEntity(id)
+    const entityFromMainStage = await this.mainStage.getEntity(id)
     if (entityFromMainStage == null) return null
 
-    const entity = Entity.deserialize(entityFromMainStage.serialize(), this)
+    const entity = await Entity.deserialize(
+      entityFromMainStage.serialize(),
+      this
+    )
     entity.currentHP = entity.maxHP.value
 
     this.loadedEntityMap.set(entity.id, entity)
     return entity
   }
 
-  createEntity(data: Partial<Entity.Serialized>): Entity {
-    const entity = new Entity(this, data)
+  async createEntity(data: Partial<Entity.Serialized>): Promise<Entity> {
+    const entity = new Entity(this)
+    await entity.deserialize({ ...entity.serialize(), ...data })
     entity.currentHP = entity.maxHP.value
     this.loadedEntityMap.set(entity.id, entity)
     // TODO: 通知 stage
     return entity
   }
 
-  destroyEntity(id: Entity['id']): void {
+  async destroyEntity(id: Entity['id']): Promise<void> {
     // TODO: 比如临时创建的怪物实体需要销毁
   }
 
   private loadedItemMap: Map<Item['id'], Item> = new Map()
 
-  getItem(id: Item['id']): Item | null {
+  async getItem(id: Item['id']): Promise<Item | null> {
     const loadedItem = this.loadedItemMap.get(id)
     if (loadedItem != null) return loadedItem
 
-    const itemFromMainStage = this.mainStage.getItem(id)
+    const itemFromMainStage = await this.mainStage.getItem(id)
     if (itemFromMainStage == null) return null
 
     const item = Item.deserialize(itemFromMainStage.serialize(), this)
@@ -58,7 +65,7 @@ export class CombatStage implements Stage {
   }
 
   // TODO: 这里没想好怎么做 createItem 比较合适，就先这样简单实现了
-  registerItem<T extends Item>(item: T): T {
+  async registerItem<T extends Item>(item: T): Promise<T> {
     this.loadedItemMap.set(item.id, item)
     return item
   }
@@ -81,12 +88,19 @@ export class CombatStage implements Stage {
   result: BattleResult | null = null
 
   // 这里防止调用者直接传递 mainStage 实例化的 entity 过来，所以限制使用 id 传递
-  beginCombat(teams: Entity['id'][][]): void {
-    this.teams = teams.map(
-      (memberIds) =>
-        //  TODO: 先给个强制类型转换了，之后调整
-        new Team(memberIds.map((memberId) => this.getEntity(memberId)!))
+  async beginCombat(teams: Entity['id'][][]): Promise<void> {
+    const teamsWithEntityLoaded: Entity[][] = await Promise.all(
+      teams.map((memberIds) =>
+        Promise.all(
+          memberIds.map(async (memberId) => {
+            const entity = await this.getEntity(memberId)
+            assert(entity)
+            return entity
+          })
+        )
+      )
     )
+    this.teams = teamsWithEntityLoaded.map((entities) => new Team(entities))
 
     console.log('# 开始战斗，队伍信息：')
     this.teams.forEach((team, idx) => {

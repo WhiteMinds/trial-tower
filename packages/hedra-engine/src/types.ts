@@ -1,1 +1,1 @@
-export type UniqueId = string
+export type UniqueId = number | string

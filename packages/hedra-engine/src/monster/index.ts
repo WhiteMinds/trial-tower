@@ -13,13 +13,16 @@ interface RandomOpts {
   difficulty?: number
 }
 
-export function createRandomEnemy(stage: MainStage, opts: RandomOpts): Entity {
+export async function createRandomEnemy(
+  stage: MainStage,
+  opts: RandomOpts
+): Promise<Entity> {
   const { level, difficulty = 1 } = opts
 
   const template = sample(templates)
   if (template == null) throw new Error('assert template')
 
-  const entity = stage.createEntity({
+  const entity = await stage.createEntity({
     name: template.name,
     level,
     maxHP: 10 + level * 10,

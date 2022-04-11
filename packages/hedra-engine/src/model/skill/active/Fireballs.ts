@@ -15,7 +15,7 @@ export class Fireballs extends Skill {
     return 1 + this.level
   }
 
-  use(): boolean {
+  async use(): Promise<boolean> {
     this.assertCombatting()
     this.assertOwner()
 

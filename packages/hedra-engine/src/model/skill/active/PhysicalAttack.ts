@@ -15,7 +15,7 @@ export class PhysicalAttack extends Skill {
   readonly canSilent = false
   readonly canDisarm = true
 
-  use(): boolean {
+  async use(): Promise<boolean> {
     this.assertCombatting()
     this.assertOwner()
 

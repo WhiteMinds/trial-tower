@@ -98,7 +98,7 @@ export class Equip extends Item {
     return true
   }
 
-  use(): boolean {
+  async use(): Promise<boolean> {
     this.assertOwner()
     // TODO: 这里需要重复调用 equip 的检查，或者放到 player 中实现
     this.owner.equip(this)

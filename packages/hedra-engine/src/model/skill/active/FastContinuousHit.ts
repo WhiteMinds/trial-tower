@@ -20,7 +20,7 @@ export class FastContinuousHit extends Skill {
     return 4 + this.level
   }
 
-  use(): boolean {
+  async use(): Promise<boolean> {
     this.assertCombatting()
     this.assertOwner()
 

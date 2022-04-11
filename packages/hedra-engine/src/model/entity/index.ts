@@ -79,12 +79,7 @@ export class Entity {
     return this._buffs.slice(0)
   }
 
-  constructor(public stage: Stage, data?: Partial<Entity.Serialized>) {
-    this.deserialize({
-      ...this.serialize(),
-      ...data,
-    })
-  }
+  constructor(public stage: Stage) {}
 
   createSnapshot(): Entity.Snapshot {
     return {
@@ -123,7 +118,7 @@ export class Entity {
     }
   }
 
-  deserialize(data: Entity.Serialized): void {
+  async deserialize(data: Entity.Serialized): Promise<void> {
     this.id = data.id
     this.name = data.name
     this.level = data.level
@@ -135,14 +130,12 @@ export class Entity {
     this.atk.base = data.atk
 
     this._items = []
-    data.itemIds
-      .map((id) => this.stage.getItem(id))
+    ;(await Promise.all(data.itemIds.map((id) => this.stage.getItem(id))))
       .filter(BooleanT())
       .forEach((item) => this.addItem(item))
 
     this._equips = []
-    data.equipIds
-      .map((id) => this.stage.getItem(id))
+    ;(await Promise.all(data.equipIds.map((id) => this.stage.getItem(id))))
       .filter((item): item is Equip => item instanceof Equip)
       .forEach((equip) => this.equip(equip))
 
@@ -152,9 +145,12 @@ export class Entity {
     )
   }
 
-  static deserialize(data: Entity.Serialized, stage: Stage): Entity {
+  static async deserialize(
+    data: Entity.Serialized,
+    stage: Stage
+  ): Promise<Entity> {
     const entity = new Entity(stage)
-    entity.deserialize(data)
+    await entity.deserialize(data)
     return entity
   }
 

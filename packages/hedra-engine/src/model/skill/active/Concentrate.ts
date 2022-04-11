@@ -16,7 +16,7 @@ export class Concentrate extends Skill {
     return 2 + this.level
   }
 
-  use(): boolean {
+  async use(): Promise<boolean> {
     this.assertCombatting()
     this.assertOwner()
 

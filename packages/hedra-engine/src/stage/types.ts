@@ -2,12 +2,12 @@ import { Entity } from '../model/entity'
 import { Item } from '../model/item'
 
 export interface Stage {
-  getEntity(id: Entity['id']): Entity | null
-  createEntity(data: Partial<Entity.Serialized>): Entity
-  destroyEntity(id: Entity['id']): void
+  getEntity(id: Entity['id']): Promise<Entity | null>
+  createEntity(data: Partial<Entity.Serialized>): Promise<Entity>
+  destroyEntity(id: Entity['id']): Promise<void>
 
-  getItem(id: Item['id']): Item | null
-  registerItem<T extends Item>(item: T): T
+  getItem(id: Item['id']): Promise<Item | null>
+  registerItem<T extends Item>(item: T): Promise<T>
 }
 
 // TODO: enum 是不是不应该放在 types.ts 里

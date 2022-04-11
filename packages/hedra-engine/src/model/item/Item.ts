@@ -73,7 +73,7 @@ export class Item {
     this.owner = entity
   }
 
-  use(): boolean {
+  async use(): Promise<boolean> {
     this.assertOwner()
     if (this.stacked <= 0) return false
     this.stacked--
@@ -131,7 +131,7 @@ export class TomeOfKnowledge extends Item {
     return true
   }
 
-  use(): boolean {
+  async use(): Promise<boolean> {
     if (!super.use()) return false
 
     this.assertOwner()

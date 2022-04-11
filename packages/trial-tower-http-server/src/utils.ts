@@ -13,6 +13,13 @@ export function assertStringType(
   assert(typeof data === 'string', msg)
 }
 
+export function assertNumberType(
+  data: unknown,
+  msg?: string
+): asserts data is number {
+  assert(typeof data === 'number', msg)
+}
+
 export function pick<T extends Record<string, any>, U extends keyof T>(
   object: T,
   ...props: U[]

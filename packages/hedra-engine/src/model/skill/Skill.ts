@@ -69,7 +69,7 @@ export class Skill {
   }
 
   // 或者叫 onUse？
-  use(): boolean {
+  async use(): Promise<boolean> {
     return false
   }
 
