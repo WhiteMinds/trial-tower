@@ -162,6 +162,7 @@ export class MainStage implements Stage {
     //   .find((skill) => skill instanceof SoulReaper) as SoulReaper | undefined
     // console.log('灵魂收割者计数器', soulReaper?.killCount)
 
+    // TODO: combatStage.destroy()
     return combatStage.logs
   }
 }

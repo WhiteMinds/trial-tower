@@ -109,3 +109,29 @@ router
       throw err
     }
   })
+
+router.route('/combats').post(async (req, res) => {
+  const payload = getTokenPayload(req)
+
+  const { characterId } = req.body ?? {}
+  assertNumberType(characterId, 'param wrong')
+  const characterModel = await controller.getCharacterAndVerifyByUser(
+    payload.id,
+    characterId
+  )
+  assert(characterModel, 'param wrong')
+
+  const character = await engine.getCharacter(characterModel.id)
+  assert(character)
+  const player = await engine.mainStage.getEntity(character.entityId)
+  assert(player)
+
+  const enemy1 = await engine.mainStage.createRandomEnemyByPlayerLevel(player)
+  const enemy2 = await engine.mainStage.createRandomEnemyByPlayerLevel(player)
+  const combatLogs = await engine.mainStage.beginCombat(player, [
+    enemy1,
+    enemy2,
+  ])
+
+  respond(res, { payload: combatLogs }).status(201)
+})
