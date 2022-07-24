@@ -36,8 +36,8 @@ export class Engine {
     return this.store.getCharacter(id)
   }
 
-  destroy(): void {
-    this.mainStage.saveAllToStore()
+  async destroy(): Promise<void> {
+    await this.mainStage.saveAllToStore()
   }
 }
 

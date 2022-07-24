@@ -30,7 +30,9 @@ export function defineUserModel(sequelize: Sequelize) {
   const attrs: ModelAttributes<UserModel, UserAttrsOnlyDefine> = {
     username: {
       type: DataTypes.STRING,
-      unique: true,
+      // 这里不使用 true 是为了解决 6.x 版本的索引重复建立问题
+      // https://github.com/sequelize/sequelize/issues/9653#issuecomment-660269195
+      unique: 'username',
     },
     password: DataTypes.STRING,
   }

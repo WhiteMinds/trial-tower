@@ -73,19 +73,24 @@ export class MainStage implements Stage {
   // 或许应该把 createEntity 也改成 register？
   async registerItem<T extends Item>(item: T): Promise<T> {
     const serialized = await this.store.createData(item.serialize())
-    const newItem = Item.deserialize(serialized, this)
+    // TODO: 这个 `as T` 会不会有什么隐患？
+    const newItem = Item.deserialize(serialized, this) as T
     this.loadedItemMap.set(newItem.id, newItem)
-    return item
+    return newItem
   }
 
-  saveAllToStore(): void {
-    this.loadedEntityMap.forEach((entity, id) => {
-      this.store.setData<Entity.Serialized>(id, entity.serialize())
-    })
+  async saveAllToStore(): Promise<void> {
+    await Promise.all(
+      Array.from(this.loadedEntityMap.entries()).map(([id, entity]) =>
+        this.store.setData<Entity.Serialized>(id, entity.serialize())
+      )
+    )
 
-    this.loadedItemMap.forEach((item, id) => {
-      this.store.setData<Item.Serialized>(id, item.serialize())
-    })
+    await Promise.all(
+      Array.from(this.loadedItemMap.entries()).map(([id, item]) =>
+        this.store.setData<Item.Serialized>(id, item.serialize())
+      )
+    )
   }
 
   // 只为了战利品做一个新的 Monster 类的话有点不必要，但如果直接放 Entity 上也不方便传递给 CombatStage，

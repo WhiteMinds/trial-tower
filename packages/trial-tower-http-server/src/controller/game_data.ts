@@ -17,11 +17,14 @@ export async function updateGameData(
   id: GameData['id'],
   json: GameData['json']
 ): Promise<void> {
-  await GameData.update(json, {
-    where: {
-      id: {
-        [Op.eq]: id,
+  await GameData.update(
+    { json },
+    {
+      where: {
+        id: {
+          [Op.eq]: id,
+        },
       },
-    },
-  })
+    }
+  )
 }

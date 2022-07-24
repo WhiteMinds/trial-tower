@@ -2,22 +2,22 @@ import { Engine, Store } from 'hedra-engine'
 import * as Hedra from 'hedra-engine'
 import { Router } from 'express'
 import { getTokenPayload, respond } from './utils'
-import { assert, assertNumberType, assertStringType, pick } from '../utils'
+import { assert, assertNumberType, assertStringType, omit } from '../utils'
 import * as controller from '../controller'
 import { UniqueConstraintError } from 'sequelize'
 
 const store: Store<number> = {
   async createData<T extends { id?: number }>(data: T) {
-    const model = await controller.createGameData(data)
+    const model = await controller.createGameData(omit(data, 'id'))
     const newData = { ...(model.json as T), id: model.id }
     return newData
   },
   async setData(key, data) {
-    await controller.updateGameData(key, { ...data, id: key })
+    await controller.updateGameData(key, omit(data, 'id'))
   },
   async getData<T extends { id: number }>(key: number) {
     const model = await controller.getGameData(key)
-    return model ? (model.json as T) : null
+    return model ? ({ ...model.json, id: model.id } as T) : null
   },
   async updateData(key, updater) {
     this.setData(key, updater(await this.getData(key)))
@@ -56,6 +56,22 @@ const store: Store<number> = {
   },
 }
 const engine = new Engine(store)
+
+// TODO: 一个开发时的临时方案
+const saveBeforeExit = async () => {
+  try {
+    console.log('saving engine data')
+    await engine.destroy()
+    console.log('saved engine data')
+  } catch (err) {
+    console.error(err)
+  }
+  process.exit()
+}
+// cmd + c
+process.on('SIGINT', saveBeforeExit)
+// nodemon restart
+process.on('SIGUSR2', saveBeforeExit)
 
 export const router = Router()
 
