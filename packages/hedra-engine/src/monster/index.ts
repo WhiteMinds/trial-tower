@@ -25,8 +25,8 @@ export async function createRandomEnemy(
   const entity = await stage.createEntity({
     name: template.name,
     level,
-    maxHP: 10 + level * 10,
-    atk: 1 + level,
+    maxHP: 10 + level * 5,
+    atk: 1 + Math.round(level / 4),
     speed: 10,
   })
   entity.addSkill(new PhysicalAttack(stage))
@@ -49,6 +49,7 @@ const templates: MonsterTemplate[] = [
       entity.addSkill(new Fireballs(stage))
       stage.setLootGenerator(entity.id, (stage) => {
         const item = new TomeOfKnowledge(stage)
+        // TODO: 这里有坑，没使用 registerItem 返回的 item，而是用了一个临时对象
         stage.registerItem(item)
         return [
           { type: LootType.EXP, payload: 10 },

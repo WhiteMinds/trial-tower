@@ -5,6 +5,7 @@ import { getTokenPayload, respond } from './utils'
 import { assert, assertNumberType, assertStringType, omit } from '../utils'
 import * as controller from '../controller'
 import { UniqueConstraintError } from 'sequelize'
+import { parseUniqueId } from 'packages/hedra-engine/src/utils'
 
 const store: Store<number> = {
   async createData<T extends { id?: number }>(data: T) {
@@ -87,7 +88,12 @@ router
       characterModels.map(async ({ id }) => {
         const character = await engine.getCharacter(id)
         assert(character)
-        return character
+        const entity = await engine.mainStage.getEntity(character.entityId)
+        assert(entity)
+        return {
+          ...character,
+          entity: entity.createSnapshot(),
+        }
       })
     )
 
@@ -113,9 +119,14 @@ router
       const characterModel = await controller.getCharacter(character.id)
       assert(characterModel)
       await user.addCharacter(characterModel.id)
+      const entity = await engine.mainStage.getEntity(character.entityId)
+      assert(entity)
 
       respond(res, {
-        payload: character,
+        payload: {
+          ...character,
+          entity: entity.createSnapshot(),
+        },
       }).status(201)
     } catch (err) {
       if (err instanceof UniqueConstraintError && 'nickname' in err.fields) {
@@ -149,5 +160,47 @@ router.route('/combats').post(async (req, res) => {
     enemy2,
   ])
 
-  respond(res, { payload: combatLogs }).status(201)
+  respond(res, {
+    payload: {
+      combatLogs,
+      player: player.createSnapshot(),
+    },
+  }).status(201)
+})
+
+router.route('/items/:id/use').post(async (req, res) => {
+  const payload = getTokenPayload(req)
+
+  const { characterId } = req.body ?? {}
+  assertNumberType(characterId, 'param wrong')
+  const characterModel = await controller.getCharacterAndVerifyByUser(
+    payload.id,
+    characterId
+  )
+  assert(characterModel, 'param wrong')
+
+  const character = await engine.getCharacter(characterModel.id)
+  assert(character)
+  const player = await engine.mainStage.getEntity(character.entityId)
+  assert(player)
+
+  const item = player.items.find(
+    (item) => item.id === parseUniqueId(req.params.id)
+  )
+  if (item == null) {
+    respond(res, {
+      error: "Can't find item",
+      displayMsg: '未找到使用的物品',
+    }).status(400)
+    return
+  }
+
+  const success = await item.use()
+
+  respond(res, {
+    payload: {
+      success,
+      player: player.createSnapshot(),
+    },
+  }).status(201)
 })

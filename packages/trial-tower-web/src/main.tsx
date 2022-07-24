@@ -1,13 +1,15 @@
 import { Button, Popover, Stack, Typography } from '@mui/material'
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react'
 import ReactDOM from 'react-dom'
-import { Character, CombatLog, Engine, Snapshot } from 'hedra-engine'
+import { CombatLog, Snapshot } from 'hedra-engine'
 import { MessageWidgets } from './widgets'
 import {
   usePopupState,
   bindTrigger,
   bindPopover,
 } from 'material-ui-popup-state/hooks'
+import { Character, gameServerSvc } from './services/GameServerService'
+import { useAsyncFn } from 'react-use'
 
 const App: FC = () => {
   const [character, setCharacter] = useState<Character>()
@@ -22,63 +24,119 @@ const App: FC = () => {
 const CharacterSelectScreen: FC<{
   onSelect?: (character: Character) => void
 }> = (props) => {
-  const characters = useMemo(() => Engine.getCharacters(), [])
+  const [username, setUsername] = useState('test')
+  const [password, setPassword] = useState('test')
+  const [reqStateWithAuth, auth] = useAsyncFn(async () => {
+    const { user } = await gameServerSvc.auth(username, password)
+    void refreshCharacters()
+    return user
+  }, [username, password])
+  const [reqStateWithReg, reg] = useAsyncFn(async () => {
+    const { user } = await gameServerSvc.register(username, password)
+    void refreshCharacters()
+    return user
+  }, [username, password])
+
+  const [reqStateWithList, refreshCharacters] = useAsyncFn(
+    () => gameServerSvc.getCharacters(),
+    []
+  )
+
   const [newCharacterName, setNewCharacterName] = useState('')
+  const [reqStateWithCreate, createNewCharacter] = useAsyncFn(async () => {
+    const character = await gameServerSvc.createCharacter(newCharacterName)
+    // TODO: 先临时这样写下
+    gameServerSvc.character = character
+    props.onSelect?.(character)
+    return character
+  }, [props.onSelect, newCharacterName])
 
-  const createNewCharacter = useCallback(() => {
-    const c = Engine.createCharacter({ name: newCharacterName })
-    props.onSelect?.(c)
-  }, [newCharacterName, props.onSelect])
-
-  // TODO: test code
-  useEffect(() => {
-    if (characters[0]) props.onSelect?.(characters[0])
-  }, [characters])
+  // // TODO: test code
+  // useEffect(() => {
+  //   if (characters[0]) props.onSelect?.(characters[0])
+  // }, [characters])
 
   return (
     <div>
-      <h3>选择已有角色：</h3>
-      {characters.map((c) => (
-        <h4 key={c.id} onClick={() => props.onSelect?.(c)}>
-          {c.name}
-        </h4>
-      ))}
-      <h3>创建新角色</h3>
-      <input
-        value={newCharacterName}
-        onChange={(e) => setNewCharacterName(e.target.value)}
-      />
-      <button onClick={createNewCharacter}>创建</button>
+      {!reqStateWithAuth.value ? (
+        <>
+          <h3>注册登录</h3>
+          <input
+            placeholder="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <br />
+          <input
+            placeholder="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <br />
+          <button disabled={reqStateWithAuth.loading} onClick={auth}>
+            {reqStateWithAuth.loading ? '正在登录' : '登录'}
+          </button>
+          <button disabled={reqStateWithReg.loading} onClick={reg}>
+            {reqStateWithReg.loading ? '正在注册' : '注册'}
+          </button>
+        </>
+      ) : (
+        <>
+          <h3>选择已有角色：</h3>
+          {reqStateWithList.loading
+            ? 'loading'
+            : reqStateWithList.error
+            ? reqStateWithList.error.message
+            : reqStateWithList.value?.map((character) => (
+                <h4
+                  key={character.id}
+                  style={{
+                    color: '-webkit-link',
+                    cursor: 'pointer',
+                    textDecoration: 'underline',
+                  }}
+                  onClick={() => {
+                    // TODO: 先临时这样写下
+                    gameServerSvc.character = character
+                    props.onSelect?.(character)
+                  }}
+                >
+                  {character.name}
+                </h4>
+              ))}
+
+          <h3>创建新角色</h3>
+          <input
+            value={newCharacterName}
+            onChange={(e) => setNewCharacterName(e.target.value)}
+          />
+          <button
+            disabled={reqStateWithCreate.loading}
+            onClick={createNewCharacter}
+          >
+            {reqStateWithCreate.loading ? '正在创建' : '创建'}
+          </button>
+        </>
+      )}
     </div>
   )
 }
 
 const GameScreen: FC<{ character: Character }> = (props) => {
   const { character } = props
-  const engine = useMemo(() => new Engine(character), [character])
-  useEffect(() => {
-    const beforeunload = () => engine.destroy()
-    addEventListener('beforeunload', beforeunload)
-    return () => removeEventListener('beforeunload', beforeunload)
-  }, [engine])
 
-  const [combatLogs, setCombatLogs] = useState<CombatLog[]>([])
-
-  const randomCombat = useCallback(() => {
-    const player = engine.mainStage.getPlayer()
-    const enemy1 = engine.mainStage.createRandomEnemyByPlayerLevel(player)
-    const enemy2 = engine.mainStage.createRandomEnemyByPlayerLevel(player)
-    if (enemy2.name === enemy1.name) enemy2.name += ' 2'
-    const logs = engine.mainStage.beginCombat(player, [enemy1, enemy2])
-    setCombatLogs(logs)
-  }, [])
+  const [reqStateWithCombat, randomCombat] = useAsyncFn(
+    () => gameServerSvc.createRandomCombat(),
+    []
+  )
+  const combatLogs = reqStateWithCombat.value?.combatLogs ?? []
 
   // TODO: test code
   useEffect(() => {
     randomCombat()
   }, [])
 
-  const player = engine.mainStage.getPlayer().createSnapshot()
+  const player = character.entity
   console.log('player snapshot on render', player)
 
   return (
@@ -86,8 +144,8 @@ const GameScreen: FC<{ character: Character }> = (props) => {
       <div>昵称：{player.name}</div>
       <div>等级：{player.level}</div>
       <Stack spacing={2}>
-        <EquipButton engine={engine} />
-        <InventoryButton engine={engine} />
+        <EquipButton />
+        <InventoryButton />
 
         <Button variant="contained" onClick={randomCombat}>
           随机战斗
@@ -102,10 +160,10 @@ const GameScreen: FC<{ character: Character }> = (props) => {
   )
 }
 
-const EquipButton: FC<{ engine: Engine }> = (props) => {
+const EquipButton: FC = () => {
   const popupState = usePopupState({ variant: 'popover', popupId: 'demoMenu' })
 
-  const player = props.engine.mainStage.getPlayer().createSnapshot()
+  const player = gameServerSvc.character!.entity
 
   return (
     <>
@@ -146,11 +204,11 @@ const EquipButton: FC<{ engine: Engine }> = (props) => {
   )
 }
 
-const InventoryButton: FC<{ engine: Engine }> = (props) => {
+const InventoryButton: FC = () => {
   const popupState = usePopupState({ variant: 'popover', popupId: 'demoMenu' })
   const [, rerender] = useRerender()
 
-  const player = props.engine.mainStage.getPlayer().createSnapshot()
+  const player = gameServerSvc.character!.entity
 
   return (
     <>
@@ -176,8 +234,8 @@ const InventoryButton: FC<{ engine: Engine }> = (props) => {
                 <MessageWidgets.Item item={item} /> x{item.stacked}{' '}
                 <Button
                   variant="outlined"
-                  onClick={() => {
-                    props.engine.mainStage.getItem(item.id)?.use()
+                  onClick={async () => {
+                    const { success } = await gameServerSvc.useItem(item.id)
                     rerender()
                   }}
                 >

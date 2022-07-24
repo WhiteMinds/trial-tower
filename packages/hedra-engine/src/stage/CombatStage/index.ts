@@ -102,26 +102,26 @@ export class CombatStage implements Stage {
     )
     this.teams = teamsWithEntityLoaded.map((entities) => new Team(entities))
 
-    console.log('# 开始战斗，队伍信息：')
-    this.teams.forEach((team, idx) => {
-      console.log(`## ${idx + 1} 号队伍成员：`)
-      team.members.forEach((entity) => {
-        console.log(`### ${entity.name}：`)
-        console.log(
-          entity
-            .getSkills()
-            .map((s) => `[LV.${s.level}] ${s.name}: ${s.description}`)
-            .join('\n')
-        )
-        console.log(
-          entity.equips
-            .map((item) => `====== ${item.name} ======\n${item.description}`)
-            .join('\n')
-        )
-        console.log('计算后的攻击值：', entity.atk.value)
-        console.log('计算后的生命值：', entity.maxHP.value)
-      })
-    })
+    // console.log('# 开始战斗，队伍信息：')
+    // this.teams.forEach((team, idx) => {
+    //   console.log(`## ${idx + 1} 号队伍成员：`)
+    //   team.members.forEach((entity) => {
+    //     console.log(`### ${entity.name}：`)
+    //     console.log(
+    //       entity
+    //         .getSkills()
+    //         .map((s) => `[LV.${s.level}] ${s.name}: ${s.description}`)
+    //         .join('\n')
+    //     )
+    //     console.log(
+    //       entity.equips
+    //         .map((item) => `====== ${item.name} ======\n${item.description}`)
+    //         .join('\n')
+    //     )
+    //     console.log('计算后的攻击值：', entity.atk.value)
+    //     console.log('计算后的生命值：', entity.maxHP.value)
+    //   })
+    // })
 
     let preparingEntity: Entity | null = null
     while (this.result == null) {
