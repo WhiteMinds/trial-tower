@@ -3,7 +3,7 @@
  */
 import * as Hedra from 'hedra-engine'
 import axios, { AxiosInstance, AxiosStatic } from 'axios'
-import { assert } from '../utils'
+import { assert } from '../../utils'
 
 const baseReq = axios.create({
   baseURL: 'http://localhost:8085/api',

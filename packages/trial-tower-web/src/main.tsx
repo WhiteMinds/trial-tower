@@ -8,7 +8,10 @@ import {
   bindTrigger,
   bindPopover,
 } from 'material-ui-popup-state/hooks'
-import { Character, gameServerSvc } from './services/GameServerService'
+import {
+  Character,
+  gameServerSvc,
+} from './services/GameServerService/HttpGameServerService'
 import { useAsyncFn } from 'react-use'
 
 const App: FC = () => {
