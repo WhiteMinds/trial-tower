@@ -20,8 +20,8 @@ export const tokenPlugin = expressJWT({
   // TODO: 这样设计不太好，但是先这么糊着以后再调整
   .unless({
     path: [
-      { url: '/api/users', method: 'POST' },
-      { url: '/api/users/auth', method: 'POST' },
+      { url: '/api/users', methods: ['OPTIONS', 'POST'] },
+      { url: '/api/users/auth', methods: ['OPTIONS', 'POST'] },
     ],
   })
 

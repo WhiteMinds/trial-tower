@@ -3,11 +3,17 @@ import express from 'express'
 import morgan from 'morgan'
 import { router } from './route'
 import { tokenPlugin } from './route/utils'
+import cors from 'cors'
 
 const app = express()
 app.use(express.json({ limit: '32mb' }))
 app.use(express.urlencoded({ extended: true }))
 app.use(tokenPlugin)
+app.use(
+  cors({
+    origin: 'http://localhost:3000',
+  })
+)
 
 app.use(morgan('default'))
 app.use('/api', router)
