@@ -8,11 +8,10 @@ import {
   bindTrigger,
   bindPopover,
 } from 'material-ui-popup-state/hooks'
-import {
-  Character,
-  gameServerSvc,
-} from './services/GameServerService/HttpGameServerService'
+import { Character, HttpGameServerService } from './services/GameServerService'
 import { useAsyncFn } from 'react-use'
+import { assert } from './utils'
+import { ServiceContextProvider, useGameServerService } from './services'
 
 const App: FC = () => {
   const [character, setCharacter] = useState<Character>()
@@ -27,14 +26,18 @@ const App: FC = () => {
 const CharacterSelectScreen: FC<{
   onSelect?: (character: Character) => void
 }> = (props) => {
+  const { gameServerSvc, mode, setMode } = useGameServerService()
+
   const [username, setUsername] = useState('test')
   const [password, setPassword] = useState('test')
   const [reqStateWithAuth, auth] = useAsyncFn(async () => {
+    assert(gameServerSvc instanceof HttpGameServerService)
     const { user } = await gameServerSvc.auth(username, password)
     void refreshCharacters()
     return user
   }, [username, password])
   const [reqStateWithReg, reg] = useAsyncFn(async () => {
+    assert(gameServerSvc instanceof HttpGameServerService)
     const { user } = await gameServerSvc.register(username, password)
     void refreshCharacters()
     return user
@@ -61,7 +64,7 @@ const CharacterSelectScreen: FC<{
 
   return (
     <div>
-      {!reqStateWithAuth.value ? (
+      {mode === 'online' && !reqStateWithAuth.value ? (
         <>
           <h3>注册登录</h3>
           <input
@@ -82,6 +85,7 @@ const CharacterSelectScreen: FC<{
           <button disabled={reqStateWithReg.loading} onClick={reg}>
             {reqStateWithReg.loading ? '正在注册' : '注册'}
           </button>
+          <button onClick={() => setMode('local')}>本地游玩</button>
         </>
       ) : (
         <>
@@ -128,10 +132,14 @@ const CharacterSelectScreen: FC<{
 const GameScreen: FC<{ character: Character }> = (props) => {
   const { character } = props
 
-  const [reqStateWithCombat, randomCombat] = useAsyncFn(
-    () => gameServerSvc.createRandomCombat(),
-    []
-  )
+  const { gameServerSvc } = useGameServerService()
+
+  const [reqStateWithCombat, randomCombat] = useAsyncFn(async () => {
+    const res = await gameServerSvc.createRandomCombat()
+    // TODO: 临时写法，后面应该个全局保存状态的地方
+    gameServerSvc.character!.entity = res.player
+    return res
+  }, [])
   const combatLogs = reqStateWithCombat.value?.combatLogs ?? []
 
   // TODO: test code
@@ -164,9 +172,11 @@ const GameScreen: FC<{ character: Character }> = (props) => {
 }
 
 const EquipButton: FC = () => {
-  const popupState = usePopupState({ variant: 'popover', popupId: 'demoMenu' })
+  const { gameServerSvc } = useGameServerService()
 
   const player = gameServerSvc.character!.entity
+
+  const popupState = usePopupState({ variant: 'popover', popupId: 'demoMenu' })
 
   return (
     <>
@@ -208,10 +218,12 @@ const EquipButton: FC = () => {
 }
 
 const InventoryButton: FC = () => {
-  const popupState = usePopupState({ variant: 'popover', popupId: 'demoMenu' })
-  const [, rerender] = useRerender()
+  const { gameServerSvc } = useGameServerService()
 
   const player = gameServerSvc.character!.entity
+
+  const popupState = usePopupState({ variant: 'popover', popupId: 'demoMenu' })
+  const [, rerender] = useRerender()
 
   return (
     <>
@@ -238,7 +250,11 @@ const InventoryButton: FC = () => {
                 <Button
                   variant="outlined"
                   onClick={async () => {
-                    const { success } = await gameServerSvc.useItem(item.id)
+                    const { success, player } = await gameServerSvc.useItem(
+                      item.id
+                    )
+                    // TODO: 临时写法，后面应该个全局保存状态的地方
+                    gameServerSvc.character!.entity = player
                     rerender()
                   }}
                 >
@@ -290,7 +306,9 @@ export namespace useRerender {
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <ServiceContextProvider>
+      <App />
+    </ServiceContextProvider>
   </React.StrictMode>,
   document.getElementById('root')
 )

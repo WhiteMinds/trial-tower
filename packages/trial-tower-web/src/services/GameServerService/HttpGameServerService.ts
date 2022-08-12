@@ -4,6 +4,7 @@
 import * as Hedra from 'hedra-engine'
 import axios, { AxiosInstance, AxiosStatic } from 'axios'
 import { assert } from '../../utils'
+import { Character, GameServerService } from './types'
 
 const baseReq = axios.create({
   baseURL: 'http://localhost:8085/api',
@@ -24,11 +25,7 @@ interface User {
   username: string
 }
 
-export interface Character extends Hedra.Character {
-  entity: Hedra.Entity.Snapshot
-}
-
-class HttpGameServerService {
+export class HttpGameServerService implements GameServerService {
   token?: string
   req: AxiosInstance
 
@@ -97,8 +94,6 @@ class HttpGameServerService {
       characterId: this.character.id,
     })
     assertNoError(data)
-    // TODO: 临时写法，后面应该个全局保存状态的地方
-    this.character.entity = data.payload.player
     return data.payload
   }
 
@@ -113,7 +108,6 @@ class HttpGameServerService {
       characterId: this.character.id,
     })
     assertNoError(data)
-    this.character.entity = data.payload.player
     return data.payload
   }
 }
@@ -126,6 +120,4 @@ function assertNoError<T>(
   }
 }
 
-// class LocalGameServerService
-
-export const gameServerSvc = new HttpGameServerService()
+export const httpGameServerService = new HttpGameServerService()

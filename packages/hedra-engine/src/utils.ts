@@ -5,8 +5,8 @@ export function createUniqueId(): UniqueId {
   return uuid()
 }
 
-export function parseUniqueId(value: number | string): UniqueId {
-  return String(value)
+export function equalUniqueId(value1: UniqueId, value2: UniqueId): boolean {
+  return value1 == value2
 }
 
 export const BooleanT =

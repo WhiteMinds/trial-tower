@@ -5,7 +5,7 @@ import { getTokenPayload, respond } from './utils'
 import { assert, assertNumberType, assertStringType, omit } from '../utils'
 import * as controller from '../controller'
 import { UniqueConstraintError } from 'sequelize'
-import { parseUniqueId } from 'packages/hedra-engine/src/utils'
+import { equalUniqueId } from 'packages/hedra-engine/src/utils'
 
 const store: Store<number> = {
   async createData<T extends { id?: number }>(data: T) {
@@ -184,8 +184,8 @@ router.route('/items/:id/use').post(async (req, res) => {
   const player = await engine.mainStage.getEntity(character.entityId)
   assert(player)
 
-  const item = player.items.find(
-    (item) => item.id === parseUniqueId(req.params.id)
+  const item = player.items.find((item) =>
+    equalUniqueId(item.id, req.params.id)
   )
   if (item == null) {
     respond(res, {
