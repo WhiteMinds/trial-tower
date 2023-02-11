@@ -13,6 +13,7 @@ import { EnhanceConstitution } from '../model/skill/passivity/EnhanceConstitutio
 import { SoulReaper } from '../model/skill/passivity/SoulReaper'
 import { createRandomEnemy } from '../monster'
 import { Store } from '../store'
+import { UniqueId } from '../types'
 import { LootGenerator, LootType, Stage } from './types'
 
 const StoreKey = {
@@ -29,6 +30,7 @@ export class MainStage implements Stage {
     const loadedEntity = this.loadedEntityMap.get(id)
     if (loadedEntity != null) return loadedEntity
 
+    // TODO: 需要一个 loading flag，防止同时执行多次
     const data = await this.store.getData<Entity.Serialized>(id)
     if (data == null) return null
     const entity = await Entity.deserialize(data, this)
@@ -77,6 +79,13 @@ export class MainStage implements Stage {
     const newItem = Item.deserialize(serialized, this) as T
     this.loadedItemMap.set(newItem.id, newItem)
     return newItem
+  }
+
+  dirty<T extends { id: UniqueId }>(target: {
+    id: UniqueId
+    serialize: () => T
+  }) {
+    this.store.setData<T>(target.id, target.serialize())
   }
 
   async saveAllToStore(): Promise<void> {
@@ -152,7 +161,7 @@ export class MainStage implements Stage {
           player.addExp(loot.payload)
           break
         case LootType.Gold:
-          player.gold += loot.payload
+          player.addGold(loot.payload)
           break
         case LootType.Item:
           const item = await this.registerItem(loot.payload)

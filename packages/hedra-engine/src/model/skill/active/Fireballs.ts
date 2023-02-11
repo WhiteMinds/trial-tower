@@ -20,7 +20,6 @@ export class Fireballs extends Skill {
     this.assertOwner()
 
     const source = this.owner
-    const target = this.stage.getFirstAliveEnemy(source)
     const targets = this.stage
       .getAliveEnemies(source)
       .slice(0, this.targetCount)

@@ -1,5 +1,6 @@
 import { Entity } from '../model/entity'
 import { Item } from '../model/item'
+import { UniqueId } from '../types'
 
 export interface Stage {
   getEntity(id: Entity['id']): Promise<Entity | null>
@@ -8,6 +9,11 @@ export interface Stage {
 
   getItem(id: Item['id']): Promise<Item | null>
   registerItem<T extends Item>(item: T): Promise<T>
+
+  dirty<T extends { id: UniqueId }>(target: {
+    id: UniqueId
+    serialize: () => T
+  }): void
 }
 
 // TODO: enum 是不是不应该放在 types.ts 里

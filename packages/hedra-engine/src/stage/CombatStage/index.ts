@@ -81,6 +81,8 @@ export class CombatStage implements Stage {
     return item
   }
 
+  dirty() {}
+
   getLootGenerator(id: Entity['id']): LootGenerator | null {
     return this.mainStage.getLootGenerator(id)
   }

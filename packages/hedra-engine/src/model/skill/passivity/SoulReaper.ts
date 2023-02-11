@@ -61,6 +61,7 @@ export class SoulReaper extends Skill {
 
   onKill(entity: Entity): void {
     this.killCount++
+    this.dirty()
     // TODO: 更新 SoulReaperBuff
     this.assertOwner()
     const target = this.owner

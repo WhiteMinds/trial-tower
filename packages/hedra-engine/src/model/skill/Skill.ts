@@ -57,6 +57,10 @@ export class Skill {
     return skill
   }
 
+  dirty() {
+    this.owner?.dirty()
+  }
+
   // 生命周期
 
   onCasted(entity: Entity) {

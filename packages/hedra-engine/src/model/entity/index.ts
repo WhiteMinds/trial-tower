@@ -28,14 +28,14 @@ export class Entity {
 
   /** 基础属性 */
 
-  strength = new AttrDescriptor(this)
-  constitution = new AttrDescriptor(this)
+  strength = new AttrDescriptor(this, this.dirty.bind(this))
+  constitution = new AttrDescriptor(this, this.dirty.bind(this))
   // 影响行动进度的增加速度
-  speed = new AttrDescriptor(this)
+  speed = new AttrDescriptor(this, this.dirty.bind(this))
 
   /** 衍生属性 */
-  maxHP = new AttrDescriptor$HealthPoint(this)
-  atk = new AttrDescriptor$Attack(this)
+  maxHP = new AttrDescriptor$HealthPoint(this, this.dirty.bind(this))
+  atk = new AttrDescriptor$Attack(this, this.dirty.bind(this))
 
   currentHP: number = 0
 
@@ -129,6 +129,7 @@ export class Entity {
     this.maxHP.base = data.maxHP
     this.atk.base = data.atk
 
+    // TODO: 这里会非预期的触发 dirty，可以考虑加个 deserializing 之类的状态来规避
     this._items = []
     ;(await Promise.all(data.itemIds.map((id) => this.stage.getItem(id))))
       .filter(BooleanT())
@@ -158,6 +159,15 @@ export class Entity {
     return this.currentHP > 0
   }
 
+  dirty() {
+    this.stage.dirty(this)
+  }
+
+  addLevel(amount: number): void {
+    this.level += amount
+    this.dirty()
+  }
+
   addExp(amount: number): void {
     this.exp += amount
     // TODO: 升级曲线之后再做，先固定一个数字
@@ -168,11 +178,18 @@ export class Entity {
       // TODO: 调用生命周期 onLevelUp 之类的
       console.log(`[${this.name}] 升级至 LV.${this.level}`)
     }
+    this.dirty()
+  }
+
+  addGold(amount: number): void {
+    this.gold += amount
+    this.dirty()
   }
 
   addSkill(skill: Skill): void {
     this._skills.push(skill)
     skill.onCasted(this)
+    this.dirty()
   }
 
   grantBuff(buff: Buff): void {
@@ -209,16 +226,19 @@ export class Entity {
     }
     this._items.push(item)
     item.onCasted(this)
+    this.dirty()
   }
 
   removeItem(item: Item): void {
     remove(this._items, item)
+    this.dirty()
   }
 
   equip(item: Equip): void {
     this.removeItem(item)
     this._equips.push(item)
     item.onEquip(this)
+    this.dirty()
   }
 }
 

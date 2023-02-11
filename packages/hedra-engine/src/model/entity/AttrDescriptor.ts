@@ -2,10 +2,17 @@ import { Entity } from '.'
 import { UniqueId } from '../../types'
 
 export class AttrDescriptor {
-  constructor(public entity: Entity) {}
+  constructor(public entity: Entity, private onBaseUpdate?: () => void) {}
 
   // 基础值
-  base = 0
+  _base = 0
+  get base() {
+    return this._base
+  }
+  set base(val) {
+    this._base = val
+    this.onBaseUpdate?.()
+  }
 
   // 衍生值，由（基础值 + 某些属性经过公式计算后的值）所衍生出的结果
   get derived() {

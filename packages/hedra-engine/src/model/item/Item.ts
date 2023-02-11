@@ -63,6 +63,10 @@ export class Item {
     return item
   }
 
+  dirty() {
+    this.stage.dirty(this)
+  }
+
   canUse(): boolean {
     return false
   }
@@ -77,6 +81,7 @@ export class Item {
     this.assertOwner()
     if (this.stacked <= 0) return false
     this.stacked--
+    this.dirty()
     if (this.stacked <= 0) {
       this.owner.removeItem(this)
       // TODO: onDestroy
@@ -89,6 +94,7 @@ export class Item {
     if (this.stacked >= this.maxStackCount) return false
     // TODO: 这里可能会超出 maxStackCount，为了方便先不做处理
     this.stacked += item.stacked
+    this.dirty()
     return true
   }
 
@@ -135,7 +141,7 @@ export class TomeOfKnowledge extends Item {
     if (!super.use()) return false
 
     this.assertOwner()
-    this.owner.level++
+    this.owner.addLevel(1)
     console.log('use', this, this.owner)
     return true
   }
