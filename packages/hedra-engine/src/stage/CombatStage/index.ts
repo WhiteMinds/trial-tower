@@ -15,7 +15,18 @@ const ProgressNeedPoint = 100
 export class CombatStage implements Stage {
   constructor(private mainStage: MainStage) {}
 
-  private loadedEntityMap: Map<Entity['id'], Entity> = new Map()
+  // 在战斗开始前调用，避免战斗过程中所需要的数据状态不是来自同一时期的
+  async prepare(entityIds: Entity['id'][], itemIds: Item['id'][] = []) {
+    for (const id of entityIds) {
+      // 装备和仓库物品会在反序列化时也自动加载
+      await this.getEntity(id)
+    }
+    for (const id of itemIds) {
+      await this.getItem(id)
+    }
+  }
+
+  private loadedEntityMap: Map<Entity['id'], Entity | null> = new Map()
 
   // TODO: 异步是不是不应该传播到这个 stage 中，因为它从父级复制的数据预期上应该都已经加载完了？
   // 实现成本应该很高，先做成异步的。

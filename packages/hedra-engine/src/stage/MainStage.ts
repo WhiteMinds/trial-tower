@@ -143,6 +143,7 @@ export class MainStage implements Stage {
     const combatStage = new CombatStage(this)
     const team1 = [player.id]
     const team2 = enemies.map((entity) => entity.id)
+    await combatStage.prepare([...team1, ...team2])
     await combatStage.beginCombat([team1, team2])
 
     for (const loot of combatStage.loots) {
