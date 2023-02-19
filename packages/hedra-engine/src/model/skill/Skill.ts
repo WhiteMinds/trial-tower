@@ -67,6 +67,9 @@ export class Skill {
     this.owner = entity
   }
 
+  // 只在主舞台的实例中触发
+  async onCombatEnd(combatStage: CombatStage) {}
+
   canUse(): boolean {
     // TODO: 一些技能需求，比如是否装备了武器、能量是否足够消耗等
     return true

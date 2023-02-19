@@ -1,4 +1,4 @@
-import { Engine, Store } from 'hedra-engine'
+import { createAchievementPlugin, Engine, Store } from 'hedra-engine'
 import * as Hedra from 'hedra-engine'
 import { Router } from 'express'
 import { getTokenPayload, respond } from './utils'
@@ -56,7 +56,8 @@ const store: Store<number> = {
     this.setCharacter(key, updater(await this.getCharacter(key)))
   },
 }
-const engine = new Engine(store)
+const achievementPlugin = createAchievementPlugin(store)
+const engine = new Engine(store, [achievementPlugin])
 
 // TODO: 一个开发时的临时方案
 const saveBeforeExit = async () => {

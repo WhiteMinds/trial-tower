@@ -12,8 +12,10 @@ import { PhysicalAttack } from '../model/skill/active/PhysicalAttack'
 import { EnhanceConstitution } from '../model/skill/passivity/EnhanceConstitution'
 import { SoulReaper } from '../model/skill/passivity/SoulReaper'
 import { createRandomEnemy } from '../monster'
+import { EnginePlugin } from '../plugins'
 import { Store } from '../store'
 import { UniqueId } from '../types'
+import { assert } from '../utils'
 import { LootGenerator, LootType, Stage } from './types'
 
 const StoreKey = {
@@ -22,7 +24,7 @@ const StoreKey = {
 }
 
 export class MainStage implements Stage {
-  constructor(private store: Store) {}
+  constructor(private store: Store, private plugins: EnginePlugin[]) {}
 
   private loadedEntityMap: Map<Entity['id'], Entity> = new Map()
 
@@ -170,12 +172,33 @@ export class MainStage implements Stage {
       }
     }
 
-    // TODO: 这里先硬编码查询下，之后要同步数据到 MainStage 中
-    // const soulReaper = combatStage
-    //   .getEntity(player.id)
-    //   ?.getSkills()
-    //   .find((skill) => skill instanceof SoulReaper) as SoulReaper | undefined
-    // console.log('灵魂收割者计数器', soulReaper?.killCount)
+    // 触发各个生命周期
+
+    // TODO: 目前先简单点，events 直接从 logs 里硬编码生成，之后再调整
+    const killEvents = combatStage.logs
+      .filter(
+        (log): log is [Entity.Snapshot, string, Entity.Snapshot] =>
+          log[1] === '击杀了'
+      )
+      .map((log) =>
+        Promise.all([
+          combatStage.getEntity(log[0].id),
+          combatStage.getEntity(log[2].id),
+        ])
+      )
+    for await (const [killer, target] of killEvents) {
+      assert(killer)
+      assert(target)
+      for (const plugin of this.plugins) {
+        await plugin.onKill?.(killer, target)
+      }
+    }
+
+    for (const skill of player.getSkills()) {
+      await skill.onCombatEnd(combatStage)
+    }
+
+    // TODO: trigger events from logs
 
     // TODO: combatStage.destroy()
     return combatStage.logs

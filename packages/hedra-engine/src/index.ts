@@ -1,4 +1,5 @@
 import { Entity } from './model/entity'
+import { EnginePlugin } from './plugins'
 import { MainStage } from './stage'
 import { Store } from './store'
 import { UniqueId } from './types'
@@ -10,12 +11,13 @@ export * from './model/combat_log'
 export * from './model/item'
 export * from './model/skill'
 export * from './model/buff'
+export * from './plugins'
 
 export class Engine {
   mainStage: MainStage
 
-  constructor(private store: Store) {
-    this.mainStage = new MainStage(store)
+  constructor(private store: Store, plugins: EnginePlugin[] = []) {
+    this.mainStage = new MainStage(store, plugins)
   }
 
   // loadedCharacters

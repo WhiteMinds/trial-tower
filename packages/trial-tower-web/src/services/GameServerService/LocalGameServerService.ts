@@ -60,7 +60,8 @@ const store: Hedra.Store<number> = {
     this.setCharacter(key, updater(await this.getCharacter(key)))
   },
 }
-const engine = new Hedra.Engine(store)
+const achievementPlugin = Hedra.createAchievementPlugin(store)
+const engine = new Hedra.Engine(store, [achievementPlugin])
 
 class LocalGameServerService implements GameServerService {
   character?: Character

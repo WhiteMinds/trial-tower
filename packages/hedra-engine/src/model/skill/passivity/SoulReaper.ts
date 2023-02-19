@@ -1,4 +1,4 @@
-import { Stage } from '../../../stage'
+import { CombatStage, Stage } from '../../../stage'
 import { createUniqueId } from '../../../utils'
 import { EnhanceConstitutionBuff, SoulReaperBuff } from '../../buff'
 import { GrantBuffEffect } from '../../effect'
@@ -53,6 +53,19 @@ export class SoulReaper extends Skill {
     )
 
     effect.cast(this.stage, target)
+  }
+
+  async onCombatEnd(combatStage: CombatStage) {
+    this.assertOwner()
+
+    const instanceInCombatStage = (await combatStage.getEntity(this.owner.id))
+      ?.getSkills()
+      .find((skill): skill is SoulReaper => skill instanceof SoulReaper)
+    if (!instanceInCombatStage) return
+
+    // TODO: refactor to `this.upgradeStats(instanceInCombatStage)` ?
+    this.killCount = instanceInCombatStage.killCount
+    this.dirty()
   }
 
   canUse(): boolean {
