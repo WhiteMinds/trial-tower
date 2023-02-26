@@ -8,6 +8,8 @@
 
 ## 当前的一些效果展示：
 
+![Snapshot](https://user-images.githubusercontent.com/9160743/221410899-3520d31f-e141-4ade-939d-824725823bc4.png)
+
 ```javascript
 const engine = new Engine(character)
 const player = engine.mainStage.getPlayer()
@@ -160,7 +162,7 @@ engine.mainStage.beginCombat(player, [enemy1, enemy2])
 - [x] 实现装备栏 UI
 - [x] 实现玩家仓库 UI
 - [x] 实现数据保存
-- [ ] 支持 C / S 模式，本地单人游玩时也采用模拟 Server
+- [x] 支持 C / S 模式，本地单人游玩时也采用模拟 Server
   1. 升级到 yarn v3，使用更完善的 workspace 特性
   2. 回合制自动战斗引擎命名
      1. 暂定为 Hedra（意指多面体）
@@ -200,7 +202,7 @@ engine.mainStage.beginCombat(player, [enemy1, enemy2])
            之后做新的引擎时再考虑如何设计成大部分非同步的 API。
 - [ ] 实现构建流程
   1. 非发布包（server、web）可以试试 esbuild 构建
-- [ ] 实现一个简单的成就系统 + 新手上路（任意怪物击杀 \* 1）成就
+- [x] 实现一个简单的成就系统 + 新手上路（任意怪物击杀 \* 1）成就
   1. 这需要让 MainStage 能够知道 kill event，最好能够更通用的知道 skill event 等
      1. 可以为所有需要让 MainStage 知道的信息，创建特定的事件，比如：
         CombatStage.events = [KillEvent, SkillEvent]
@@ -209,3 +211,4 @@ engine.mainStage.beginCombat(player, [enemy1, enemy2])
            成就系统也可以用类似的方案，在 CombatStage 初始化一个实例，结束后由 MainStage 来做合并。
      2. 提供一个机制可以让外部直接 hook 进 CombatStage 的生命周期，比如 onKill，其实有点类似于 EventEmitter 的感觉，都是基于 callback 的形式。
         但 callback 会导致调用的时机和产生的结果没那么可控，比如调用 callback 之后进入统计，然后战斗过程因为一些原因终止了（比如报错了），应该回滚 callback 的改动，这意味着 callback 要提供 unsub 之类的。最好还是能直接将整个统计的过程放在战斗完全结束之后。
+- [ ] 初步完善 UI

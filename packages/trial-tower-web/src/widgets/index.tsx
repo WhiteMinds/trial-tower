@@ -1,4 +1,4 @@
-import { FC } from 'react'
+import { CSSProperties, FC } from 'react'
 import { Entity, Item, Loot, LootType, Skill } from 'hedra-engine'
 import MouseOverPopover from '../MouseOverPopover'
 import { EntityCard } from './EntityCard'
@@ -23,21 +23,24 @@ const MessageWidget$Entity: FC<{
 
 const MessageWidget$Skill: FC<{
   skill: Skill.Snapshot
+  style?: CSSProperties
 }> = (props) => {
   return (
     <MouseOverPopover
       popupContent={<SkillCard skill={props.skill} />}
       style={{
         margin: '0 8px',
+        ...props.style,
       }}
     >
-      [{props.skill.name}]
+      {props.children ?? `[${props.skill.name}]`}
     </MouseOverPopover>
   )
 }
 
 const MessageWidget$Item: FC<{
   item: Item.Snapshot
+  style?: CSSProperties
 }> = (props) => {
   return (
     <MouseOverPopover
@@ -45,9 +48,10 @@ const MessageWidget$Item: FC<{
       style={{
         margin: '0 8px',
         color: '#873688',
+        ...props.style,
       }}
     >
-      [{props.item.name}]
+      {props.children ?? `[${props.item.name}]`}
     </MouseOverPopover>
   )
 }

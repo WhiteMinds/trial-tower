@@ -1,7 +1,31 @@
-import { Button, Popover, Stack, Typography } from '@mui/material'
+import {
+  Avatar,
+  Button,
+  Box,
+  Card,
+  CardContent,
+  CardHeader,
+  Popover,
+  LinearProgress,
+  Stack,
+  Typography,
+  Tabs,
+  Tab,
+  Divider,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+  FormControlLabel,
+  Switch,
+} from '@mui/material'
+import '@fontsource/roboto/300.css'
+import '@fontsource/roboto/400.css'
+import '@fontsource/roboto/500.css'
+import '@fontsource/roboto/700.css'
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react'
 import ReactDOM from 'react-dom'
-import { CombatLog, Snapshot } from 'hedra-engine'
+import { CombatLog, Entity, Snapshot } from 'hedra-engine'
 import { MessageWidgets } from './widgets'
 import {
   usePopupState,
@@ -10,8 +34,12 @@ import {
 } from 'material-ui-popup-state/hooks'
 import { Character, HttpGameServerService } from './services/GameServerService'
 import { useAsyncFn } from 'react-use'
-import { assert } from './utils'
+import { assert, assertNumberType } from './utils'
 import { ServiceContextProvider, useGameServerService } from './services'
+import { getItemAssetComp, getSkillAssetComp } from './assets'
+import './style/app.css'
+import { LoadingButton } from '@mui/lab'
+import IconCombat from '@mui/icons-material/GpsFixed'
 
 const App: FC = () => {
   const [character, setCharacter] = useState<Character>()
@@ -61,6 +89,18 @@ const CharacterSelectScreen: FC<{
   // useEffect(() => {
   //   if (characters[0]) props.onSelect?.(characters[0])
   // }, [characters])
+
+  // TODO: test code
+  useEffect(() => {
+    // if (true) return
+    if (mode !== 'local') {
+      setMode('local')
+    } else if (newCharacterName === '') {
+      setNewCharacterName('test')
+    } else {
+      createNewCharacter()
+    }
+  }, [mode, newCharacterName])
 
   return (
     <div>
@@ -133,140 +173,322 @@ const GameScreen: FC<{ character: Character }> = (props) => {
   const { character } = props
 
   const { gameServerSvc } = useGameServerService()
+  const [layer, setLayer] = useState(1)
 
   const [reqStateWithCombat, randomCombat] = useAsyncFn(async () => {
+    // TODO: 通过 layer 改变难度
     const res = await gameServerSvc.createRandomCombat()
     // TODO: 临时写法，后面应该个全局保存状态的地方
     gameServerSvc.character!.entity = res.player
     return res
   }, [])
-  const combatLogs = reqStateWithCombat.value?.combatLogs ?? []
+  const fullCombatLogs = reqStateWithCombat.value?.combatLogs ?? []
+  const [combatLogs, setCombatLogs] = useState<CombatLog[]>([])
+  const [combatLogPrinting, setCombatLogPrinting] = useState(false)
+  const [autoCombat, setAutoCombat] = useState(true)
+
+  const player = character.entity
+  const [currentHP, setCurrentHP] = useState(player.maxHP)
+  useEffect(() => setCurrentHP(player.maxHP), [player.maxHP])
+
+  useEffect(() => {
+    if (fullCombatLogs.length === 0) return
+    setCombatLogs([])
+    setCombatLogPrinting(true)
+
+    let idx = 0
+    const printOnce = () => {
+      const log = fullCombatLogs[idx++]
+      setCombatLogs((combatLogs) => [...combatLogs, log])
+      const newPlayerState = log.find(
+        (frag): frag is Entity.Snapshot =>
+          typeof frag !== 'string' &&
+          frag.snapshotType === 'Entity' &&
+          frag.id === player.id
+      )
+      if (newPlayerState) {
+        setCurrentHP(newPlayerState.currentHP)
+      }
+      if (idx >= fullCombatLogs.length) {
+        setCombatLogPrinting(false)
+        clearInterval(timer)
+        // TODO: 临时写法
+        setAutoCombat((autoCombat) => {
+          if (autoCombat) randomCombat()
+          return autoCombat
+        })
+      }
+    }
+
+    printOnce()
+    const timer = setInterval(printOnce, 100)
+    return () => {
+      setCombatLogPrinting(false)
+      clearInterval(timer)
+    }
+  }, [fullCombatLogs])
 
   // TODO: test code
   useEffect(() => {
     randomCombat()
   }, [])
 
-  const player = character.entity
-  console.log('player snapshot on render', player)
+  const [tab, setTab] = useState(0)
+  const handleTabChange = (event: unknown, newValue: number) => {
+    setTab(newValue)
+  }
+
+  const [, rerender] = useRerender()
+  const useItem = useCallback(
+    async (item) => {
+      const { success, player } = await gameServerSvc.useItem(item.id)
+      // TODO: 临时写法，后面应该个全局保存状态的地方
+      gameServerSvc.character!.entity = player
+      rerender()
+    },
+    [gameServerSvc, rerender]
+  )
 
   return (
-    <div>
-      <div>昵称：{player.name}</div>
-      <div>等级：{player.level}</div>
-      <Stack spacing={2}>
-        <EquipButton />
-        <InventoryButton />
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 16,
+        height: '100%',
+        padding: 16,
+        boxSizing: 'border-box',
+      }}
+    >
+      <div style={{ display: 'flex', gap: 16 }}>
+        <Card sx={{ minWidth: 240 }}>
+          <CardHeader
+            avatar={<Avatar aria-label="recipe">{player.name}</Avatar>}
+            title={`${player.name} (LV. ${player.level})`}
+            subheader={`${player.gold} Gold`}
+          />
+          <CardContent style={{ paddingTop: 0 }}>
+            <Typography variant="body2" color="red">
+              HP ({currentHP} / {player.maxHP})
+            </Typography>
+            <LinearProgress
+              variant="determinate"
+              color="error"
+              value={Math.round((currentHP / player.maxHP) * 100)}
+            />
+            <Typography variant="body2" color="green" style={{ marginTop: 8 }}>
+              Exp ({player.exp} / 100)
+            </Typography>
+            <LinearProgress
+              variant="determinate"
+              color="success"
+              value={(player.exp / 100) * 100}
+            />
+            {/* TODO: 属性放到右侧面板 */}
+            {/* 剩余属性点 */}
+            <Stack spacing={1} style={{ marginTop: 12 }}>
+              <Typography variant="body2">力量：{player.strength}</Typography>
+              <Typography variant="body2">
+                体质：{player.constitution}
+              </Typography>
+              <Typography variant="body2">速度：{player.speed}</Typography>
+              <Typography variant="body2">攻击：{player.atk}</Typography>
+            </Stack>
+            <Divider style={{ marginTop: 8 }} />
+            <Stack direction="row" spacing={1} style={{ marginTop: 8 }}>
+              {player.equips.map((equip) => {
+                const Icon = getItemAssetComp(equip)
+                return (
+                  <MessageWidgets.Item
+                    key={equip.id}
+                    item={equip}
+                    style={{ margin: '' }}
+                  >
+                    <div style={{ width: 32, height: 32 }}>
+                      <Icon
+                        style={{ width: '100%', border: '1px solid #aaa' }}
+                      />
+                    </div>
+                  </MessageWidgets.Item>
+                )
+              })}
+              {new Array(5).fill(0).map(() => {
+                return (
+                  <div
+                    style={{ width: 32, height: 32, border: '1px solid #aaa' }}
+                  />
+                )
+              })}
+            </Stack>
+          </CardContent>
+        </Card>
 
-        <Button variant="contained" onClick={randomCombat}>
-          随机战斗
-        </Button>
-      </Stack>
-      {combatLogs.map((log, idx) => (
-        <p key={idx}>
-          <CombatLogView log={log} />
-        </p>
-      ))}
+        <Card style={{ flex: 1 }}>
+          <Box
+            sx={{
+              flexGrow: 1,
+              bgcolor: 'background.paper',
+              display: 'flex',
+              height: '100%',
+            }}
+          >
+            <Tabs
+              orientation="vertical"
+              variant="scrollable"
+              value={tab}
+              onChange={handleTabChange}
+              aria-label="Vertical tabs example"
+              sx={{ borderRight: 1, borderColor: 'divider' }}
+            >
+              <Tab label="背包" {...a11yProps(0)} />
+              <Tab label="技能" {...a11yProps(1)} />
+            </Tabs>
+            <TabPanel value={tab} index={0}>
+              <Stack direction="row" spacing={2}>
+                {player.items.map((item) => {
+                  const Icon = getItemAssetComp(item)
+                  return (
+                    <MessageWidgets.Item
+                      key={item.id}
+                      item={item}
+                      style={{ margin: '' }}
+                    >
+                      <div style={{ width: 32, height: 32 }}>
+                        <Icon
+                          style={{
+                            width: '100%',
+                            border: '1px solid #aaa',
+                            boxSizing: 'border-box',
+                          }}
+                        />
+                      </div>
+                    </MessageWidgets.Item>
+                  )
+                })}
+              </Stack>
+            </TabPanel>
+            <TabPanel value={tab} index={1}>
+              <Stack direction="row" spacing={2}>
+                {player.skills.map((skill) => {
+                  const Icon = getSkillAssetComp(skill)
+                  return (
+                    <MessageWidgets.Skill
+                      key={skill.templateId}
+                      skill={skill}
+                      style={{ margin: '' }}
+                    >
+                      <div style={{ width: 32, height: 32 }}>
+                        <Icon
+                          style={{
+                            width: '100%',
+                            border: '1px solid #aaa',
+                            boxSizing: 'border-box',
+                          }}
+                        />
+                      </div>
+                    </MessageWidgets.Skill>
+                  )
+                })}
+              </Stack>
+            </TabPanel>
+          </Box>
+        </Card>
+      </div>
+
+      <Card style={{ flex: 1, padding: '0 16px 16px 16px', overflow: 'auto' }}>
+        <div
+          style={{
+            position: 'sticky',
+            top: 0,
+            display: 'flex',
+            gap: 16,
+            background: 'inherit',
+            padding: '16px 0',
+            borderBottom: '1px solid #eee',
+          }}
+        >
+          <FormControl sx={{ minWidth: 120 }}>
+            <InputLabel id="layers-select">塔层</InputLabel>
+            <Select
+              labelId="layers-select"
+              value={layer}
+              label="塔层"
+              size="small"
+              onChange={(event) => {
+                assertNumberType(event.target.value)
+                setLayer(event.target.value)
+              }}
+            >
+              {new Array(10).fill(0).map((val, idx) => (
+                <MenuItem value={idx + 1}>第 {idx + 1} 层</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <LoadingButton
+            variant="contained"
+            loading={combatLogPrinting}
+            loadingPosition="start"
+            startIcon={<IconCombat />}
+            sx={{ minWidth: 140 }}
+            onClick={randomCombat}
+          >
+            随机战斗
+          </LoadingButton>
+
+          <FormControlLabel
+            control={
+              <Switch
+                checked={autoCombat}
+                onChange={(e) => setAutoCombat(e.target.checked)}
+              />
+            }
+            label="自动连续战斗"
+          />
+        </div>
+
+        {/* TODO: 在新增时自动滚动 */}
+        {combatLogs.map((log, idx) => (
+          <div key={idx} style={{ margin: '8px 0' }}>
+            <CombatLogView log={log} />
+          </div>
+        ))}
+      </Card>
     </div>
   )
 }
 
-const EquipButton: FC = () => {
-  const { gameServerSvc } = useGameServerService()
+interface TabPanelProps {
+  children?: React.ReactNode
+  index: number
+  value: number
+}
 
-  const player = gameServerSvc.character!.entity
-
-  const popupState = usePopupState({ variant: 'popover', popupId: 'demoMenu' })
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props
 
   return (
-    <>
-      <Button variant="contained" {...bindTrigger(popupState)}>
-        装备栏
-      </Button>
-      <Popover
-        {...bindPopover(popupState)}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'center',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'center',
-        }}
-      >
-        <div style={{ padding: 16, minWidth: 200 }}>
-          <Stack>
-            {player.equips.map((equip) => (
-              <div key={equip.id}>
-                {/* TODO: 这里显示 slot 之类的 */}
-                <MessageWidgets.Item item={equip} />
-                <Button
-                  variant="outlined"
-                  onClick={() => {
-                    // TODO: player.unEquip
-                  }}
-                >
-                  卸下
-                </Button>
-              </div>
-            ))}
-          </Stack>
-        </div>
-      </Popover>
-    </>
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`vertical-tabpanel-${index}`}
+      aria-labelledby={`vertical-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ p: 3 }}>
+          <Typography>{children}</Typography>
+        </Box>
+      )}
+    </div>
   )
 }
 
-const InventoryButton: FC = () => {
-  const { gameServerSvc } = useGameServerService()
-
-  const player = gameServerSvc.character!.entity
-
-  const popupState = usePopupState({ variant: 'popover', popupId: 'demoMenu' })
-  const [, rerender] = useRerender()
-
-  return (
-    <>
-      <Button variant="contained" {...bindTrigger(popupState)}>
-        背包（{player.items.length}）
-      </Button>
-      <Popover
-        {...bindPopover(popupState)}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'center',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'center',
-        }}
-      >
-        <div style={{ padding: 16, minWidth: 200 }}>
-          <Typography>库存：</Typography>
-          <Stack>
-            {player.items.map((item) => (
-              <div key={item.id}>
-                <MessageWidgets.Item item={item} /> x{item.stacked}{' '}
-                <Button
-                  variant="outlined"
-                  onClick={async () => {
-                    const { success, player } = await gameServerSvc.useItem(
-                      item.id
-                    )
-                    // TODO: 临时写法，后面应该个全局保存状态的地方
-                    gameServerSvc.character!.entity = player
-                    rerender()
-                  }}
-                >
-                  使用
-                </Button>
-              </div>
-            ))}
-          </Stack>
-        </div>
-      </Popover>
-    </>
-  )
+function a11yProps(index: number) {
+  return {
+    id: `vertical-tab-${index}`,
+    'aria-controls': `vertical-tabpanel-${index}`,
+  }
 }
 
 const CombatLogView: FC<{ log: CombatLog }> = (props) => {

@@ -2,7 +2,7 @@ import { Item, TomeOfKnowledge } from './Item'
 import { ClothArmor, Equip, FireWand, WoodenSword } from './Equip'
 import { ItemTemplateId } from './ItemTemplateId'
 
-export { Item, Equip }
+export { ItemTemplateId, Item, Equip }
 
 export const ItemTemplateMap: Record<ItemTemplateId, typeof Item> = {
   [ItemTemplateId.Base]: Item,

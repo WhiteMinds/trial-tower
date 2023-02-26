@@ -32,6 +32,7 @@ export class Item {
     return {
       snapshotType: 'Item',
       id: this.id,
+      templateId: this.templateId,
       name: this.name,
       description: this.description,
       stacked: this.stacked,
@@ -119,6 +120,7 @@ export namespace Item {
   export interface Snapshot {
     snapshotType: 'Item'
     id: UniqueId
+    templateId: ItemTemplateId
     name: string
     description: string
     stacked: number

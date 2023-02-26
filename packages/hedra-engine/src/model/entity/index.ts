@@ -88,6 +88,7 @@ export class Entity {
       name: this.name,
       level: this.level,
       exp: this.exp,
+      gold: this.gold,
       strength: this.strength.value,
       constitution: this.constitution.value,
       speed: this.speed.value,
@@ -269,6 +270,7 @@ export namespace Entity {
     name: string
     level: number
     exp: number
+    gold: number
     strength: number
     constitution: number
     speed: number

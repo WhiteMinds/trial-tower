@@ -8,7 +8,7 @@ import { SoulReaper } from './passivity/SoulReaper'
 import { Skill } from './Skill'
 import { SkillTemplateId } from './SkillTemplateId'
 
-export { Skill }
+export { SkillTemplateId, Skill }
 
 export const SkillTemplateMap: Record<SkillTemplateId, typeof Skill> = {
   [SkillTemplateId.Base]: Skill,
