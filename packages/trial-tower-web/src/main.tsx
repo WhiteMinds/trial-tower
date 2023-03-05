@@ -18,81 +18,73 @@ import {
   FormControl,
   FormControlLabel,
   Switch,
+  Paper,
 } from '@mui/material'
 import '@fontsource/roboto/300.css'
 import '@fontsource/roboto/400.css'
 import '@fontsource/roboto/500.css'
 import '@fontsource/roboto/700.css'
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react'
+import React, {
+  FC,
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import ReactDOM from 'react-dom'
 import { CombatLog, Entity, Snapshot } from 'hedra-engine'
 import { MessageWidgets } from './widgets'
-import {
-  usePopupState,
-  bindTrigger,
-  bindPopover,
-} from 'material-ui-popup-state/hooks'
-import { Character, HttpGameServerService } from './services/GameServerService'
 import { useAsyncFn } from 'react-use'
 import { assert, assertNumberType } from './utils'
-import { ServiceContextProvider, useGameServerService } from './services'
+import { ServiceContextProvider, useGameService } from './services'
 import { getItemAssetComp, getSkillAssetComp } from './assets'
 import './style/app.css'
 import { LoadingButton } from '@mui/lab'
 import IconCombat from '@mui/icons-material/GpsFixed'
+import { HttpGameServer } from './services/GameService/servers/HttpGameServer'
+import { useBehaviorSubject } from './hooks/useBehaviorSubject'
 
 const App: FC = () => {
-  const [character, setCharacter] = useState<Character>()
-
-  return character == null ? (
-    <CharacterSelectScreen onSelect={setCharacter} />
-  ) : (
-    <GameScreen character={character} />
-  )
+  const { gameSvc } = useGameService()
+  const character = useBehaviorSubject(gameSvc.character$)
+  console.log('character', character)
+  return character == null ? <CharacterSelectScreen /> : <GameScreen />
 }
 
-const CharacterSelectScreen: FC<{
-  onSelect?: (character: Character) => void
-}> = (props) => {
-  const { gameServerSvc, mode, setMode } = useGameServerService()
+const CharacterSelectScreen: FC<{}> = (props) => {
+  const { gameSvc, mode, setMode } = useGameService()
 
   const [username, setUsername] = useState('test')
   const [password, setPassword] = useState('test')
   const [reqStateWithAuth, auth] = useAsyncFn(async () => {
-    assert(gameServerSvc instanceof HttpGameServerService)
-    const { user } = await gameServerSvc.auth(username, password)
+    assert(gameSvc instanceof HttpGameServer)
+    const { user } = await gameSvc.auth(username, password)
     void refreshCharacters()
     return user
-  }, [username, password])
+  }, [gameSvc, username, password])
   const [reqStateWithReg, reg] = useAsyncFn(async () => {
-    assert(gameServerSvc instanceof HttpGameServerService)
-    const { user } = await gameServerSvc.register(username, password)
+    assert(gameSvc instanceof HttpGameServer)
+    const { user } = await gameSvc.register(username, password)
     void refreshCharacters()
     return user
-  }, [username, password])
+  }, [gameSvc, username, password])
 
   const [reqStateWithList, refreshCharacters] = useAsyncFn(
-    () => gameServerSvc.getCharacters(),
-    []
+    () => gameSvc.getCharacters(),
+    [gameSvc]
   )
 
   const [newCharacterName, setNewCharacterName] = useState('')
   const [reqStateWithCreate, createNewCharacter] = useAsyncFn(async () => {
-    const character = await gameServerSvc.createCharacter(newCharacterName)
-    // TODO: 先临时这样写下
-    gameServerSvc.character = character
-    props.onSelect?.(character)
+    const character = await gameSvc.createCharacter(newCharacterName)
+    gameSvc.updateCharacter(character)
     return character
-  }, [props.onSelect, newCharacterName])
-
-  // // TODO: test code
-  // useEffect(() => {
-  //   if (characters[0]) props.onSelect?.(characters[0])
-  // }, [characters])
+  }, [gameSvc, newCharacterName])
 
   // TODO: test code
   useEffect(() => {
-    // if (true) return
+    if (true) return
     if (mode !== 'local') {
       setMode('local')
     } else if (newCharacterName === '') {
@@ -143,9 +135,7 @@ const CharacterSelectScreen: FC<{
                     textDecoration: 'underline',
                   }}
                   onClick={() => {
-                    // TODO: 先临时这样写下
-                    gameServerSvc.character = character
-                    props.onSelect?.(character)
+                    gameSvc.updateCharacter(character)
                   }}
                 >
                   {character.name}
@@ -169,86 +159,7 @@ const CharacterSelectScreen: FC<{
   )
 }
 
-const GameScreen: FC<{ character: Character }> = (props) => {
-  const { character } = props
-
-  const { gameServerSvc } = useGameServerService()
-  const [layer, setLayer] = useState(1)
-
-  const [reqStateWithCombat, randomCombat] = useAsyncFn(async () => {
-    // TODO: 通过 layer 改变难度
-    const res = await gameServerSvc.createRandomCombat()
-    // TODO: 临时写法，后面应该个全局保存状态的地方
-    gameServerSvc.character!.entity = res.player
-    return res
-  }, [])
-  const fullCombatLogs = reqStateWithCombat.value?.combatLogs ?? []
-  const [combatLogs, setCombatLogs] = useState<CombatLog[]>([])
-  const [combatLogPrinting, setCombatLogPrinting] = useState(false)
-  const [autoCombat, setAutoCombat] = useState(true)
-
-  const player = character.entity
-  const [currentHP, setCurrentHP] = useState(player.maxHP)
-  useEffect(() => setCurrentHP(player.maxHP), [player.maxHP])
-
-  useEffect(() => {
-    if (fullCombatLogs.length === 0) return
-    setCombatLogs([])
-    setCombatLogPrinting(true)
-
-    let idx = 0
-    const printOnce = () => {
-      const log = fullCombatLogs[idx++]
-      setCombatLogs((combatLogs) => [...combatLogs, log])
-      const newPlayerState = log.find(
-        (frag): frag is Entity.Snapshot =>
-          typeof frag !== 'string' &&
-          frag.snapshotType === 'Entity' &&
-          frag.id === player.id
-      )
-      if (newPlayerState) {
-        setCurrentHP(newPlayerState.currentHP)
-      }
-      if (idx >= fullCombatLogs.length) {
-        setCombatLogPrinting(false)
-        clearInterval(timer)
-        // TODO: 临时写法
-        setAutoCombat((autoCombat) => {
-          if (autoCombat) randomCombat()
-          return autoCombat
-        })
-      }
-    }
-
-    printOnce()
-    const timer = setInterval(printOnce, 100)
-    return () => {
-      setCombatLogPrinting(false)
-      clearInterval(timer)
-    }
-  }, [fullCombatLogs])
-
-  // TODO: test code
-  useEffect(() => {
-    randomCombat()
-  }, [])
-
-  const [tab, setTab] = useState(0)
-  const handleTabChange = (event: unknown, newValue: number) => {
-    setTab(newValue)
-  }
-
-  const [, rerender] = useRerender()
-  const useItem = useCallback(
-    async (item) => {
-      const { success, player } = await gameServerSvc.useItem(item.id)
-      // TODO: 临时写法，后面应该个全局保存状态的地方
-      gameServerSvc.character!.entity = player
-      rerender()
-    },
-    [gameServerSvc, rerender]
-  )
-
+const GameScreen: FC<{}> = memo((props) => {
   return (
     <div
       style={{
@@ -260,203 +171,327 @@ const GameScreen: FC<{ character: Character }> = (props) => {
         boxSizing: 'border-box',
       }}
     >
-      <div style={{ display: 'flex', gap: 16 }}>
-        <Card sx={{ minWidth: 240 }}>
-          <CardHeader
-            avatar={<Avatar aria-label="recipe">{player.name}</Avatar>}
-            title={`${player.name} (LV. ${player.level})`}
-            subheader={`${player.gold} Gold`}
+      <PlayerPanel />
+
+      <CombatPanel />
+    </div>
+  )
+})
+
+const PlayerPanel: FC<{}> = (props) => {
+  const { gameSvc } = useGameService()
+
+  const character = useBehaviorSubject(gameSvc.character$)
+  const player = character?.entity
+  const [currentHP, setCurrentHP] = useState(0)
+  useEffect(() => setCurrentHP(player?.maxHP ?? 0), [player?.maxHP])
+  const combatEntities = useBehaviorSubject(gameSvc.combatEntities$)
+  useEffect(() => {
+    if (player == null) return
+    const { currentHP } = combatEntities.find(({ id }) => id === player.id) ?? {
+      currentHP: player.maxHP,
+    }
+    setCurrentHP(currentHP)
+  }, [combatEntities])
+
+  const [tab, setTab] = useState(0)
+  const handleTabChange = (event: unknown, newValue: number) => {
+    setTab(newValue)
+  }
+
+  if (player == null) return null
+
+  return (
+    <div style={{ display: 'flex', gap: 16 }}>
+      <Card sx={{ minWidth: 240 }}>
+        <CardHeader
+          avatar={<Avatar aria-label="recipe">{player.name}</Avatar>}
+          title={`${player.name} (LV. ${player.level})`}
+          subheader={`${player.gold} Gold`}
+        />
+        <CardContent style={{ paddingTop: 0 }}>
+          <Typography variant="body2" color="red">
+            HP ({currentHP} / {player.maxHP})
+          </Typography>
+          <LinearProgress
+            variant="determinate"
+            color="error"
+            value={Math.round((currentHP / player.maxHP) * 100)}
           />
-          <CardContent style={{ paddingTop: 0 }}>
-            <Typography variant="body2" color="red">
-              HP ({currentHP} / {player.maxHP})
-            </Typography>
-            <LinearProgress
-              variant="determinate"
-              color="error"
-              value={Math.round((currentHP / player.maxHP) * 100)}
-            />
-            <Typography variant="body2" color="green" style={{ marginTop: 8 }}>
-              Exp ({player.exp} / 100)
-            </Typography>
-            <LinearProgress
-              variant="determinate"
-              color="success"
-              value={(player.exp / 100) * 100}
-            />
-            {/* TODO: 属性放到右侧面板 */}
-            {/* 剩余属性点 */}
-            <Stack spacing={1} style={{ marginTop: 12 }}>
-              <Typography variant="body2">力量：{player.strength}</Typography>
-              <Typography variant="body2">
-                体质：{player.constitution}
-              </Typography>
-              <Typography variant="body2">速度：{player.speed}</Typography>
-              <Typography variant="body2">攻击：{player.atk}</Typography>
-            </Stack>
-            <Divider style={{ marginTop: 8 }} />
-            <Stack direction="row" spacing={1} style={{ marginTop: 8 }}>
-              {player.equips.map((equip) => {
-                const Icon = getItemAssetComp(equip)
+          <Typography variant="body2" color="green" style={{ marginTop: 8 }}>
+            Exp ({player.exp} / 100)
+          </Typography>
+          <LinearProgress
+            variant="determinate"
+            color="success"
+            value={(player.exp / 100) * 100}
+          />
+          {/* TODO: 属性放到右侧面板 */}
+          {/* 剩余属性点 */}
+          <Stack spacing={1} style={{ marginTop: 12 }}>
+            <Typography variant="body2">力量：{player.strength}</Typography>
+            <Typography variant="body2">体质：{player.constitution}</Typography>
+            <Typography variant="body2">速度：{player.speed}</Typography>
+            <Typography variant="body2">攻击：{player.atk}</Typography>
+          </Stack>
+          <Divider style={{ marginTop: 8 }} />
+          <Stack direction="row" spacing={1} style={{ marginTop: 8 }}>
+            {player.equips.map((equip) => {
+              const Icon = getItemAssetComp(equip)
+              return (
+                <MessageWidgets.Item
+                  key={equip.id}
+                  item={equip}
+                  style={{ margin: '' }}
+                >
+                  <div style={{ width: 32, height: 32 }}>
+                    <Icon style={{ width: '100%', border: '1px solid #aaa' }} />
+                  </div>
+                </MessageWidgets.Item>
+              )
+            })}
+            {new Array(5).fill(0).map((_, i) => {
+              return (
+                <div
+                  key={i}
+                  style={{ width: 32, height: 32, border: '1px solid #aaa' }}
+                />
+              )
+            })}
+          </Stack>
+        </CardContent>
+      </Card>
+
+      <Card style={{ flex: 1 }}>
+        <Box
+          sx={{
+            flexGrow: 1,
+            bgcolor: 'background.paper',
+            display: 'flex',
+            height: '100%',
+          }}
+        >
+          <Tabs
+            orientation="vertical"
+            variant="scrollable"
+            value={tab}
+            onChange={handleTabChange}
+            aria-label="Vertical tabs example"
+            sx={{ borderRight: 1, borderColor: 'divider' }}
+          >
+            <Tab label="背包" {...a11yProps(0)} />
+            <Tab label="技能" {...a11yProps(1)} />
+          </Tabs>
+          <TabPanel value={tab} index={0}>
+            <Stack direction="row" spacing={2}>
+              {player.items.map((item) => {
+                const Icon = getItemAssetComp(item)
                 return (
                   <MessageWidgets.Item
-                    key={equip.id}
-                    item={equip}
+                    key={item.id}
+                    item={item}
                     style={{ margin: '' }}
                   >
                     <div style={{ width: 32, height: 32 }}>
                       <Icon
-                        style={{ width: '100%', border: '1px solid #aaa' }}
+                        style={{
+                          width: '100%',
+                          border: '1px solid #aaa',
+                          boxSizing: 'border-box',
+                        }}
                       />
                     </div>
                   </MessageWidgets.Item>
                 )
               })}
-              {new Array(5).fill(0).map(() => {
+            </Stack>
+          </TabPanel>
+          <TabPanel value={tab} index={1}>
+            <Stack direction="row" spacing={2}>
+              {player.skills.map((skill) => {
+                const Icon = getSkillAssetComp(skill)
                 return (
-                  <div
-                    style={{ width: 32, height: 32, border: '1px solid #aaa' }}
-                  />
+                  <MessageWidgets.Skill
+                    key={skill.templateId}
+                    skill={skill}
+                    style={{ margin: '' }}
+                  >
+                    <div style={{ width: 32, height: 32 }}>
+                      <Icon
+                        style={{
+                          width: '100%',
+                          border: '1px solid #aaa',
+                          boxSizing: 'border-box',
+                        }}
+                      />
+                    </div>
+                  </MessageWidgets.Skill>
                 )
               })}
             </Stack>
-          </CardContent>
-        </Card>
-
-        <Card style={{ flex: 1 }}>
-          <Box
-            sx={{
-              flexGrow: 1,
-              bgcolor: 'background.paper',
-              display: 'flex',
-              height: '100%',
-            }}
-          >
-            <Tabs
-              orientation="vertical"
-              variant="scrollable"
-              value={tab}
-              onChange={handleTabChange}
-              aria-label="Vertical tabs example"
-              sx={{ borderRight: 1, borderColor: 'divider' }}
-            >
-              <Tab label="背包" {...a11yProps(0)} />
-              <Tab label="技能" {...a11yProps(1)} />
-            </Tabs>
-            <TabPanel value={tab} index={0}>
-              <Stack direction="row" spacing={2}>
-                {player.items.map((item) => {
-                  const Icon = getItemAssetComp(item)
-                  return (
-                    <MessageWidgets.Item
-                      key={item.id}
-                      item={item}
-                      style={{ margin: '' }}
-                    >
-                      <div style={{ width: 32, height: 32 }}>
-                        <Icon
-                          style={{
-                            width: '100%',
-                            border: '1px solid #aaa',
-                            boxSizing: 'border-box',
-                          }}
-                        />
-                      </div>
-                    </MessageWidgets.Item>
-                  )
-                })}
-              </Stack>
-            </TabPanel>
-            <TabPanel value={tab} index={1}>
-              <Stack direction="row" spacing={2}>
-                {player.skills.map((skill) => {
-                  const Icon = getSkillAssetComp(skill)
-                  return (
-                    <MessageWidgets.Skill
-                      key={skill.templateId}
-                      skill={skill}
-                      style={{ margin: '' }}
-                    >
-                      <div style={{ width: 32, height: 32 }}>
-                        <Icon
-                          style={{
-                            width: '100%',
-                            border: '1px solid #aaa',
-                            boxSizing: 'border-box',
-                          }}
-                        />
-                      </div>
-                    </MessageWidgets.Skill>
-                  )
-                })}
-              </Stack>
-            </TabPanel>
-          </Box>
-        </Card>
-      </div>
-
-      <Card style={{ flex: 1, padding: '0 16px 16px 16px', overflow: 'auto' }}>
-        <div
-          style={{
-            position: 'sticky',
-            top: 0,
-            display: 'flex',
-            gap: 16,
-            background: 'inherit',
-            padding: '16px 0',
-            borderBottom: '1px solid #eee',
-          }}
-        >
-          <FormControl sx={{ minWidth: 120 }}>
-            <InputLabel id="layers-select">塔层</InputLabel>
-            <Select
-              labelId="layers-select"
-              value={layer}
-              label="塔层"
-              size="small"
-              onChange={(event) => {
-                assertNumberType(event.target.value)
-                setLayer(event.target.value)
-              }}
-            >
-              {new Array(10).fill(0).map((val, idx) => (
-                <MenuItem value={idx + 1}>第 {idx + 1} 层</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          <LoadingButton
-            variant="contained"
-            loading={combatLogPrinting}
-            loadingPosition="start"
-            startIcon={<IconCombat />}
-            sx={{ minWidth: 140 }}
-            onClick={randomCombat}
-          >
-            随机战斗
-          </LoadingButton>
-
-          <FormControlLabel
-            control={
-              <Switch
-                checked={autoCombat}
-                onChange={(e) => setAutoCombat(e.target.checked)}
-              />
-            }
-            label="自动连续战斗"
-          />
-        </div>
-
-        {/* TODO: 在新增时自动滚动 */}
-        {combatLogs.map((log, idx) => (
-          <div key={idx} style={{ margin: '8px 0' }}>
-            <CombatLogView log={log} />
-          </div>
-        ))}
+          </TabPanel>
+        </Box>
       </Card>
     </div>
   )
 }
+
+const CombatPanel: FC<{}> = memo((props) => {
+  return (
+    <Card style={{ flex: 1, padding: '0 16px 16px 16px', overflow: 'auto' }}>
+      <div
+        style={{
+          position: 'sticky',
+          top: 0,
+          borderBottom: '1px solid #eee',
+          background: '#fff',
+        }}
+      >
+        <CombatControl />
+
+        <Divider />
+
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 16,
+            padding: '16px 0',
+          }}
+        >
+          <CombatEntityList />
+        </div>
+      </div>
+
+      <CombatLogList />
+    </Card>
+  )
+})
+
+const CombatControl: FC = memo(() => {
+  const { gameSvc } = useGameService()
+
+  const [layer, setLayer] = useState(1)
+  const [autoCombat, setAutoCombat] = useState(false)
+  useEffect(() => gameSvc.autoCombat$.next(autoCombat), [gameSvc, autoCombat])
+
+  // TODO: 通过 layer 改变难度
+  const randomCombat = useCallback(
+    () => gameSvc.createRandomCombat(),
+    [gameSvc]
+  )
+  const isCombatting = useBehaviorSubject(gameSvc.isCombatting$)
+
+  // TODO: test code
+  useEffect(() => {
+    randomCombat()
+  }, [])
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        gap: 16,
+        padding: '16px 0',
+      }}
+    >
+      <FormControl sx={{ minWidth: 120 }}>
+        <InputLabel id="layers-select">塔层</InputLabel>
+        <Select
+          labelId="layers-select"
+          value={layer}
+          label="塔层"
+          size="small"
+          onChange={(event) => {
+            assertNumberType(event.target.value)
+            setLayer(event.target.value)
+          }}
+        >
+          {new Array(10).fill(0).map((val, idx) => (
+            <MenuItem key={idx} value={idx + 1}>
+              第 {idx + 1} 层
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+
+      <LoadingButton
+        variant="contained"
+        loading={isCombatting}
+        loadingPosition="start"
+        startIcon={<IconCombat />}
+        sx={{ minWidth: 140 }}
+        onClick={randomCombat}
+      >
+        随机战斗
+      </LoadingButton>
+
+      <FormControlLabel
+        control={
+          <Switch
+            checked={autoCombat}
+            onChange={(e) => setAutoCombat(e.target.checked)}
+          />
+        }
+        label="自动连续战斗"
+      />
+    </div>
+  )
+})
+
+const CombatEntityList: FC = memo(() => {
+  const { gameSvc } = useGameService()
+  const combatEntities = useBehaviorSubject(gameSvc.combatEntities$)
+
+  return (
+    <>
+      {combatEntities.map((entity) => (
+        <CombatEntityView key={entity.id} entity={entity} />
+      ))}
+    </>
+  )
+})
+
+const CombatEntityView: FC<{ entity: Entity.Snapshot }> = memo(({ entity }) => {
+  return (
+    <Paper
+      key={entity.id}
+      elevation={0}
+      style={{
+        minWidth: 160,
+        padding: 8,
+        background: '#fefefe',
+        border: '1px solid #eee',
+      }}
+    >
+      <Typography variant="body1">{entity.name}</Typography>
+      <Typography variant="body2" color="red">
+        HP ({entity.currentHP} / {entity.maxHP})
+      </Typography>
+      <LinearProgress
+        variant="determinate"
+        color="error"
+        value={Math.round((entity.currentHP / entity.maxHP) * 100)}
+      />
+    </Paper>
+  )
+})
+
+const CombatLogList: FC = memo(() => {
+  const { gameSvc } = useGameService()
+  const combatLogs = useBehaviorSubject(gameSvc.combatLogs$)
+
+  return (
+    <>
+      {/* TODO: 在新增时自动滚动 */}
+      {combatLogs.map((log, idx) => (
+        <div key={idx} style={{ margin: '8px 0' }}>
+          <CombatLogView log={log} />
+        </div>
+      ))}
+    </>
+  )
+})
 
 interface TabPanelProps {
   children?: React.ReactNode
@@ -477,7 +512,7 @@ function TabPanel(props: TabPanelProps) {
     >
       {value === index && (
         <Box sx={{ p: 3 }}>
-          <Typography>{children}</Typography>
+          <Typography component={'div'}>{children}</Typography>
         </Box>
       )}
     </div>
@@ -491,7 +526,7 @@ function a11yProps(index: number) {
   }
 }
 
-const CombatLogView: FC<{ log: CombatLog }> = (props) => {
+const CombatLogView: FC<{ log: CombatLog }> = memo((props) => {
   return (
     <>
       {props.log.map((item, idx) => {
@@ -500,7 +535,7 @@ const CombatLogView: FC<{ log: CombatLog }> = (props) => {
       })}
     </>
   )
-}
+})
 
 const SnapshotCard: FC<{ snapshot: Snapshot }> = (props) => {
   switch (props.snapshot.snapshotType) {

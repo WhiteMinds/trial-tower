@@ -1,5 +1,5 @@
 import { createContext, FC, useContext, useState } from 'react'
-import { GameServerService, getGameServerService } from './GameServerService'
+import { GameService, getGameService } from './GameService'
 
 function createDefaultContextValue<T>(contextName: string): T {
   return new Proxy(
@@ -31,14 +31,14 @@ export const ServiceContextProvider: FC = (props) => {
   )
 }
 
-export function useGameServerService(): {
-  gameServerSvc: GameServerService
+export function useGameService(): {
+  gameSvc: GameService
   mode: 'online' | 'local'
   setMode: (mode: 'online' | 'local') => void
 } {
   const { mode, setMode } = useContext(ServiceContext)
 
-  const gameServerSvc = getGameServerService(mode)
+  const gameServerSvc = getGameService(mode)
 
-  return { mode, setMode, gameServerSvc }
+  return { mode, setMode, gameSvc: gameServerSvc }
 }

@@ -3,8 +3,8 @@
  */
 import * as Hedra from 'hedra-engine'
 import axios, { AxiosInstance, AxiosStatic } from 'axios'
-import { assert } from '../../utils'
-import { Character, GameServerService } from './types'
+import { assert } from '../../../utils'
+import { Character, GameServer } from './types'
 
 const baseReq = axios.create({
   baseURL: 'http://localhost:8085/api',
@@ -25,7 +25,7 @@ interface User {
   username: string
 }
 
-export class HttpGameServerService implements GameServerService {
+export class HttpGameServer implements GameServer {
   token?: string
   req: AxiosInstance
 
@@ -119,5 +119,3 @@ function assertNoError<T>(
     throw new Error(data.displayMsg ?? data.error)
   }
 }
-
-export const httpGameServerService = new HttpGameServerService()

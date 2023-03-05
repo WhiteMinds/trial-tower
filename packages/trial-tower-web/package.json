@@ -16,10 +16,12 @@
     "axios": "^0.26.1",
     "lodash": "^4.17.21",
     "material-ui-popup-state": "^2.0.0",
+    "observable-hooks": "^4.2.1",
     "ramda": "^0.28.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-use": "^17.3.2",
+    "rxjs": "^7.8.0",
     "uuid": "^8.3.2"
   },
   "devDependencies": {

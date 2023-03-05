@@ -1,6 +1,6 @@
 import * as Hedra from 'hedra-engine'
 
-export interface GameServerService {
+export interface GameServer {
   character?: Character
   createCharacter(name: string): Promise<Character>
   getCharacters(): Promise<Character[]>
@@ -17,3 +17,5 @@ export interface GameServerService {
 export interface Character extends Hedra.Character {
   entity: Hedra.Entity.Snapshot
 }
+
+export type GameServerMode = 'local' | 'online'

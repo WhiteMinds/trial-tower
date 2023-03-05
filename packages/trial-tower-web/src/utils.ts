@@ -33,3 +33,7 @@ export function omit<T extends Record<string, any>, U extends keyof T>(
 ): Omit<T, U> {
   return _.omit(object, ...props)
 }
+
+export function sleep(time: number) {
+  return new Promise<void>((resolve) => setTimeout(resolve, time))
+}

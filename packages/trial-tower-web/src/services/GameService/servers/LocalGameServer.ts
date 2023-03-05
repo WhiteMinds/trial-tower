@@ -1,6 +1,6 @@
 import * as Hedra from 'hedra-engine'
-import { assert, assertNumberType, omit } from '../../utils'
-import { Character, GameServerService } from './types'
+import { assert, assertNumberType, omit } from '../../../utils'
+import { Character, GameServer } from './types'
 
 // TODO: 暂时做成内存存储，之后可以改成 indexedDB 的
 
@@ -63,7 +63,7 @@ const store: Hedra.Store<number> = {
 const achievementPlugin = Hedra.createAchievementPlugin(store)
 const engine = new Hedra.Engine(store, [achievementPlugin])
 
-class LocalGameServerService implements GameServerService {
+export class LocalGameServer implements GameServer {
   character?: Character
 
   async createCharacter(name: string) {
@@ -133,5 +133,3 @@ class LocalGameServerService implements GameServerService {
     }
   }
 }
-
-export const localGameServerService = new LocalGameServerService()
