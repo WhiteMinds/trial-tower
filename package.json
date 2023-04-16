@@ -6,7 +6,8 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "cd packages/trial-tower-web/ && yarn dev"
+    "dev": "cd packages/trial-tower-web/ && yarn dev",
+    "postinstall": "husky install"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.58.0",
@@ -14,6 +15,8 @@
     "eslint": "^8.38.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-import": "^2.27.5",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.2.1",
     "prettier": "^2.8.7"
   }
 }
