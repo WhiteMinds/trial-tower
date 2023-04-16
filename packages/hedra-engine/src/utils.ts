@@ -1,5 +1,5 @@
-import { UniqueId } from './types'
 import { v4 as uuid } from 'uuid'
+import { UniqueId } from './types'
 
 export function createUniqueId(): UniqueId {
   return uuid()

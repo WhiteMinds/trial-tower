@@ -1,9 +1,9 @@
 import './prepare'
 import express from 'express'
 import morgan from 'morgan'
+import cors from 'cors'
 import { router } from './route'
 import { tokenPlugin } from './route/utils'
-import cors from 'cors'
 
 const app = express()
 app.use(express.json({ limit: '32mb' }))

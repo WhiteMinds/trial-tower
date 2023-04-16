@@ -1,7 +1,7 @@
 import { FC, HTMLAttributes, useState } from 'react'
 import { Popover } from '@mui/material'
 
-const MouseOverPopover: FC<
+export const MouseOverPopover: FC<
   {
     popupContent: React.ReactNode
   } & HTMLAttributes<HTMLSpanElement>
@@ -45,5 +45,3 @@ const MouseOverPopover: FC<
     </span>
   )
 }
-
-export default MouseOverPopover

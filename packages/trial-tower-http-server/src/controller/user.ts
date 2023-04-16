@@ -1,5 +1,5 @@
-import { User } from '../model'
 import { Op } from 'sequelize'
+import { User } from '../model'
 
 export async function createUser(username: string, password: string): Promise<User> {
   return User.create({

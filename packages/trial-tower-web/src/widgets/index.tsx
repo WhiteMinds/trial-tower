@@ -1,6 +1,6 @@
 import { CSSProperties, FC } from 'react'
 import { Entity, Item, Loot, LootType, Skill } from 'hedra-engine'
-import MouseOverPopover from '../MouseOverPopover'
+import { MouseOverPopover } from '../MouseOverPopover'
 import { EntityCard } from './EntityCard'
 import { ItemCard } from './ItemCard'
 import { SkillCard } from './SkillCard'

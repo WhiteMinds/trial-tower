@@ -1,10 +1,10 @@
 import { ComponentProps, FC } from 'react'
+// TODO: 这个东西应该由更高级的封装提供（比如基于引擎封装出试炼之塔游戏），目前先放在引擎，并直接在前端使用
+import { ItemTemplateId } from 'hedra-engine'
 import { ReactComponent as IconBook } from './book.svg'
 import { ReactComponent as IconWand } from './wand.svg'
 import { ReactComponent as IconSword } from './sword.svg'
 import { ReactComponent as IconClothArmor } from './cloth_armor.svg'
-// TODO: 这个东西应该由更高级的封装提供（比如基于引擎封装出试炼之塔游戏），目前先放在引擎，并直接在前端使用
-import { ItemTemplateId } from 'hedra-engine'
 
 export const ItemAssetMap: Record<ItemTemplateId, FC<ComponentProps<'svg'> & { title?: string }>> = {
   [ItemTemplateId.Base]: IconSword,
