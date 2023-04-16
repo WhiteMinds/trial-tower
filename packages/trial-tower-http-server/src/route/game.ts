@@ -95,7 +95,7 @@ router
           ...character,
           entity: entity.createSnapshot(),
         }
-      })
+      }),
     )
 
     respond(res, { payload: characters })
@@ -114,7 +114,7 @@ router
         {
           name,
         },
-        async (stage) => stage.createNewPlayerEntity(name)
+        async stage => stage.createNewPlayerEntity(name),
       )
       assertNumberType(character.id)
       const characterModel = await controller.getCharacter(character.id)
@@ -143,10 +143,7 @@ router.route('/combats').post(async (req, res) => {
 
   const { characterId } = req.body ?? {}
   assertNumberType(characterId, 'param wrong')
-  const characterModel = await controller.getCharacterAndVerifyByUser(
-    payload.id,
-    characterId
-  )
+  const characterModel = await controller.getCharacterAndVerifyByUser(payload.id, characterId)
   assert(characterModel, 'param wrong')
 
   const character = await engine.getCharacter(characterModel.id)
@@ -156,10 +153,7 @@ router.route('/combats').post(async (req, res) => {
 
   const enemy1 = await engine.mainStage.createRandomEnemyByPlayerLevel(player)
   const enemy2 = await engine.mainStage.createRandomEnemyByPlayerLevel(player)
-  const combatLogs = await engine.mainStage.beginCombat(player, [
-    enemy1,
-    enemy2,
-  ])
+  const combatLogs = await engine.mainStage.beginCombat(player, [enemy1, enemy2])
 
   respond(res, {
     payload: {
@@ -174,10 +168,7 @@ router.route('/items/:id/use').post(async (req, res) => {
 
   const { characterId } = req.body ?? {}
   assertNumberType(characterId, 'param wrong')
-  const characterModel = await controller.getCharacterAndVerifyByUser(
-    payload.id,
-    characterId
-  )
+  const characterModel = await controller.getCharacterAndVerifyByUser(payload.id, characterId)
   assert(characterModel, 'param wrong')
 
   const character = await engine.getCharacter(characterModel.id)
@@ -185,9 +176,7 @@ router.route('/items/:id/use').post(async (req, res) => {
   const player = await engine.mainStage.getEntity(character.entityId)
   assert(player)
 
-  const item = player.items.find((item) =>
-    equalUniqueId(item.id, req.params.id)
-  )
+  const item = player.items.find(item => equalUniqueId(item.id, req.params.id))
   if (item == null) {
     respond(res, {
       error: "Can't find item",

@@ -8,10 +8,7 @@ import { ReactComponent as IconFireballs } from './fireballs.svg'
 import { ReactComponent as IconClayGolem } from './clay_golem.svg'
 import { SkillTemplateId } from 'hedra-engine'
 
-export const SkillAssetMap: Record<
-  SkillTemplateId,
-  FC<ComponentProps<'svg'> & { title?: string }>
-> = {
+export const SkillAssetMap: Record<SkillTemplateId, FC<ComponentProps<'svg'> & { title?: string }>> = {
   [SkillTemplateId.Base]: IconPhysicalAttack,
   [SkillTemplateId.PhysicalAttack]: IconPhysicalAttack,
   [SkillTemplateId.Concentrate]: IconConcentrate,

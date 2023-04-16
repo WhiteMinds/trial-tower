@@ -20,9 +20,7 @@ export class Fireballs extends Skill {
     this.assertOwner()
 
     const source = this.owner
-    const targets = this.stage
-      .getAliveEnemies(source)
-      .slice(0, this.targetCount)
+    const targets = this.stage.getAliveEnemies(source).slice(0, this.targetCount)
 
     const effectGroupId = createUniqueId()
     const stage = this.stage
@@ -31,18 +29,16 @@ export class Fireballs extends Skill {
       source.createSnapshot(),
       '对',
       // TODO: 要注入顿号分隔
-      ...targets.map((t) => t.createSnapshot()),
+      ...targets.map(t => t.createSnapshot()),
       '释放',
       this.createSnapshot(),
     ]
     this.stage.logs.push(log)
 
-    const damages = targets.map((target) => {
+    const damages = targets.map(target => {
       const damage = new DamageEffect(stage, source, effectGroupId)
       damage.baseValue = source.atk.value
-      source
-        .getBuffs()
-        .forEach((buff) => buff.onCaptureEffectsSending([damage]))
+      source.getBuffs().forEach(buff => buff.onCaptureEffectsSending([damage]))
       return damage
     })
     const damageValues = damages.map((damage, idx) => {

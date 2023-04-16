@@ -23,13 +23,7 @@ export class PhysicalAttack extends Skill {
     const target = this.stage.getFirstAliveEnemy(source)
     if (target == null) return false
 
-    const log: CombatLog = [
-      source.createSnapshot(),
-      '对',
-      target.createSnapshot(),
-      '释放',
-      this.createSnapshot(),
-    ]
+    const log: CombatLog = [source.createSnapshot(), '对', target.createSnapshot(), '释放', this.createSnapshot()]
     this.stage.logs.push(log)
 
     const effectGroupId = createUniqueId()
@@ -38,7 +32,7 @@ export class PhysicalAttack extends Skill {
     damage.canAddAttackEffect = true
 
     // TODO: emit effects created, stage.emit('useSkill', skill, effects)
-    source.getBuffs().forEach((buff) => buff.onCaptureEffectsSending([damage]))
+    source.getBuffs().forEach(buff => buff.onCaptureEffectsSending([damage]))
     // TODO: apply effects, combine(baseValue() + modifiers())
     const damageValue = damage.cast(this.stage, target)
     log.push(`造成 ${damageValue} 伤害，剩余 hp ${target.currentHP}`)

@@ -36,12 +36,7 @@ export class Equip extends Item {
   }
   get description() {
     // TODO: 这些需求、属性到时候要放到视图层里做，这里应该只是放对于装备的介绍之类的
-    return [
-      ...getRequiredTexts(this.required),
-      '',
-      ...getAttrBonusTexts(this),
-      ...getSkillBonusTexts(this),
-    ].join('\n')
+    return [...getRequiredTexts(this.required), '', ...getAttrBonusTexts(this), ...getSkillBonusTexts(this)].join('\n')
   }
 
   readonly canStacked = false
@@ -81,17 +76,11 @@ export class Equip extends Item {
       return false
     }
 
-    if (
-      this.required.str != null &&
-      this.required.str > this.owner.strength.value
-    ) {
+    if (this.required.str != null && this.required.str > this.owner.strength.value) {
       return false
     }
 
-    if (
-      this.required.con != null &&
-      this.required.con > this.owner.constitution.value
-    ) {
+    if (this.required.con != null && this.required.con > this.owner.constitution.value) {
       return false
     }
 
@@ -146,7 +135,7 @@ function getRequiredTexts(required: EquipRequired): string[] {
 
   return Object.keys(required)
     .filter((key): key is keyof EquipRequired => key in map)
-    .map((key) => `${map[key]}：${required[key]}`)
+    .map(key => `${map[key]}：${required[key]}`)
 }
 
 function getAttrBonusTexts(item: Equip): string[] {
@@ -160,19 +149,16 @@ function getAttrBonusTexts(item: Equip): string[] {
 
   // TODO: 这里的类型和实现问题很大，之后再调整
   return Object.keys(map)
-    .map((key) => {
+    .map(key => {
       const value = item[key as keyof Equip] as AttrModifier | undefined
       if (value == null) return []
 
       const arr = []
       if ('add' in value || 'per' in value) {
-        if (value.add != null)
-          arr.push(`${map[key as keyof Equip]} +${value.add}`)
-        if (value.per != null)
-          arr.push(`${map[key as keyof Equip]} +${value.per * 100}%`)
+        if (value.add != null) arr.push(`${map[key as keyof Equip]} +${value.add}`)
+        if (value.per != null) arr.push(`${map[key as keyof Equip]} +${value.per * 100}%`)
       } else if ('fixed' in value) {
-        if (value.fixed != null)
-          arr.push(`${map[key as keyof Equip]} 固定为 ${value.fixed}`)
+        if (value.fixed != null) arr.push(`${map[key as keyof Equip]} 固定为 ${value.fixed}`)
       }
       return arr
     })
@@ -181,10 +167,7 @@ function getAttrBonusTexts(item: Equip): string[] {
 
 function getSkillBonusTexts(item: Equip): string[] {
   return item.skillModifiers.map(
-    (modifier) =>
-      `${new SkillTemplateMap[modifier.skillTemplateId](item.stage).name} +${
-        modifier.upgradeLevel
-      }`
+    modifier => `${new SkillTemplateMap[modifier.skillTemplateId](item.stage).name} +${modifier.upgradeLevel}`,
   )
 }
 
@@ -245,7 +228,5 @@ export class FireWand extends Equip {
 
   atkModifier = { add: 1 }
 
-  skillModifiers = [
-    { skillTemplateId: SkillTemplateId.Fireballs, upgradeLevel: 1 },
-  ]
+  skillModifiers = [{ skillTemplateId: SkillTemplateId.Fireballs, upgradeLevel: 1 }]
 }

@@ -38,9 +38,9 @@ function createSvcInstance(mode: GameServerMode): GameService {
 
       this.sub = new Subscription()
       this.sub.add(
-        this.character$.subscribe((character) => {
+        this.character$.subscribe(character => {
           this.character = character ?? undefined
-        })
+        }),
       )
     }
 
@@ -50,8 +50,7 @@ function createSvcInstance(mode: GameServerMode): GameService {
     }
 
     async createRandomCombat() {
-      if (this.isCombatting$.value)
-        throw new Error('Cant create combat in combatting')
+      if (this.isCombatting$.value) throw new Error('Cant create combat in combatting')
       this.isCombatting$.next(true)
       const result = await super.createRandomCombat()
       this.startCombatResultPrint(result).finally(() => {
@@ -75,10 +74,7 @@ function createSvcInstance(mode: GameServerMode): GameService {
     }
 
     // TODO: 应该只能单例，并且支持中途强制停止
-    async startCombatResultPrint({
-      combatLogs,
-      player,
-    }: Awaited<ReturnType<GameServer['createRandomCombat']>>) {
+    async startCombatResultPrint({ combatLogs, player }: Awaited<ReturnType<GameServer['createRandomCombat']>>) {
       this.combatLogs$.next([])
       this.combatEntities$.next([])
 
@@ -86,12 +82,11 @@ function createSvcInstance(mode: GameServerMode): GameService {
         this.combatLogs$.next([...this.combatLogs$.value, combatLog])
 
         const entitiesFromLog = combatLog.filter(
-          (frag): frag is Entity.Snapshot =>
-            typeof frag !== 'string' && frag.snapshotType === 'Entity'
+          (frag): frag is Entity.Snapshot => typeof frag !== 'string' && frag.snapshotType === 'Entity',
         )
         if (entitiesFromLog.length > 0) {
           const newEntities: Entity.Snapshot[] = [...this.combatEntities$.value]
-          entitiesFromLog.forEach((entity) => {
+          entitiesFromLog.forEach(entity => {
             const oldIdx = newEntities.findIndex(({ id }) => id === entity.id)
             if (oldIdx !== -1) {
               newEntities[oldIdx] = entity

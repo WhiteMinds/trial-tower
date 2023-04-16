@@ -24,7 +24,7 @@ export class Engine {
 
   async createCharacter(
     data: Omit<Character, 'id' | 'entityId'>,
-    entityCreator: (stage: MainStage) => Promise<Entity>
+    entityCreator: (stage: MainStage) => Promise<Entity>,
   ): Promise<Character> {
     const entity = await entityCreator(this.mainStage)
     const character = await this.store.createCharacter({

@@ -47,9 +47,7 @@ export class MainStage implements Stage {
       ...data,
     }
     // TODO: 如果要优化的话，可以考虑不立刻写入存储，而是等引擎销毁时再写入？
-    const serialized = await this.store.createData<Entity.Serialized>(
-      finialData
-    )
+    const serialized = await this.store.createData<Entity.Serialized>(finialData)
     const entity = await Entity.deserialize(serialized, this)
     this.loadedEntityMap.set(entity.id, entity)
     // TODO: 通知 stage
@@ -83,24 +81,21 @@ export class MainStage implements Stage {
     return newItem
   }
 
-  dirty<T extends { id: UniqueId }>(target: {
-    id: UniqueId
-    serialize: () => T
-  }) {
+  dirty<T extends { id: UniqueId }>(target: { id: UniqueId; serialize: () => T }) {
     this.store.setData<T>(target.id, target.serialize())
   }
 
   async saveAllToStore(): Promise<void> {
     await Promise.all(
       Array.from(this.loadedEntityMap.entries()).map(([id, entity]) =>
-        this.store.setData<Entity.Serialized>(id, entity.serialize())
-      )
+        this.store.setData<Entity.Serialized>(id, entity.serialize()),
+      ),
     )
 
     await Promise.all(
       Array.from(this.loadedItemMap.entries()).map(([id, item]) =>
-        this.store.setData<Item.Serialized>(id, item.serialize())
-      )
+        this.store.setData<Item.Serialized>(id, item.serialize()),
+      ),
     )
   }
 
@@ -153,7 +148,7 @@ export class MainStage implements Stage {
     // TODO: 调用战斗模拟器
     const combatStage = new CombatStage(this)
     const team1 = [player.id]
-    const team2 = enemies.map((entity) => entity.id)
+    const team2 = enemies.map(entity => entity.id)
     await combatStage.prepare([...team1, ...team2])
     await combatStage.beginCombat([team1, team2])
 
@@ -175,16 +170,8 @@ export class MainStage implements Stage {
 
     // TODO: 目前先简单点，events 直接从 logs 里硬编码生成，之后再调整
     const killEvents = combatStage.logs
-      .filter(
-        (log): log is [Entity.Snapshot, string, Entity.Snapshot] =>
-          log[1] === '击杀了'
-      )
-      .map((log) =>
-        Promise.all([
-          combatStage.getEntity(log[0].id),
-          combatStage.getEntity(log[2].id),
-        ])
-      )
+      .filter((log): log is [Entity.Snapshot, string, Entity.Snapshot] => log[1] === '击杀了')
+      .map(log => Promise.all([combatStage.getEntity(log[0].id), combatStage.getEntity(log[2].id)]))
     for await (const [killer, target] of killEvents) {
       assert(killer)
       assert(target)

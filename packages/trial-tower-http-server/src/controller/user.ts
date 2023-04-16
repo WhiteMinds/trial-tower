@@ -1,10 +1,7 @@
 import { User } from '../model'
 import { Op } from 'sequelize'
 
-export async function createUser(
-  username: string,
-  password: string
-): Promise<User> {
+export async function createUser(username: string, password: string): Promise<User> {
   return User.create({
     username,
     password,
@@ -15,10 +12,7 @@ export async function getUser(id: User['id']): Promise<User | null> {
   return User.findByPk(id)
 }
 
-export async function getUserByAuth(
-  username: string,
-  password: string
-): Promise<User | null> {
+export async function getUserByAuth(username: string, password: string): Promise<User | null> {
   const user = await User.findOne({
     where: {
       username: {

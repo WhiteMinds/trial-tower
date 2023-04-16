@@ -37,10 +37,7 @@ export class CombatStage implements Stage {
     const entityFromMainStage = await this.mainStage.getEntity(id)
     if (entityFromMainStage == null) return null
 
-    const entity = await Entity.deserialize(
-      entityFromMainStage.serialize(),
-      this
-    )
+    const entity = await Entity.deserialize(entityFromMainStage.serialize(), this)
     entity.currentHP = entity.maxHP.value
 
     this.loadedEntityMap.set(entity.id, entity)
@@ -103,17 +100,17 @@ export class CombatStage implements Stage {
   // 这里防止调用者直接传递 mainStage 实例化的 entity 过来，所以限制使用 id 传递
   async beginCombat(teams: Entity['id'][][]): Promise<void> {
     const teamsWithEntityLoaded: Entity[][] = await Promise.all(
-      teams.map((memberIds) =>
+      teams.map(memberIds =>
         Promise.all(
-          memberIds.map(async (memberId) => {
+          memberIds.map(async memberId => {
             const entity = await this.getEntity(memberId)
             assert(entity)
             return entity
-          })
-        )
-      )
+          }),
+        ),
+      ),
     )
-    this.teams = teamsWithEntityLoaded.map((entities) => new Team(entities))
+    this.teams = teamsWithEntityLoaded.map(entities => new Team(entities))
 
     // console.log('# 开始战斗，队伍信息：')
     // this.teams.forEach((team, idx) => {
@@ -164,19 +161,13 @@ export class CombatStage implements Stage {
     }
 
     const log: CombatLog = [
-      `战斗${
-        this.result === BattleResult.Win
-          ? '胜利'
-          : this.result === BattleResult.Lose
-          ? '失败'
-          : '超时'
-      }`,
+      `战斗${this.result === BattleResult.Win ? '胜利' : this.result === BattleResult.Lose ? '失败' : '超时'}`,
     ]
     if (this.loots.length > 0) {
       log.push(
         '，战利品：',
         // TODO: 需要注入顿号分隔
-        ...this.loots.map((l) => Loot.createSnapshot(l))
+        ...this.loots.map(l => Loot.createSnapshot(l)),
       )
     }
     this.logs.push(log)
@@ -196,7 +187,7 @@ export class CombatStage implements Stage {
     if (!team) return
 
     // TODO: 这里需要过滤出可用技能
-    const skill = sample(actor.getSkills().filter((skill) => skill.canUse()))
+    const skill = sample(actor.getSkills().filter(skill => skill.canUse()))
     if (!skill) {
       // 跳过
       return
@@ -211,10 +202,7 @@ export class CombatStage implements Stage {
     const battleStarter = this.getBattleStarter()
     if (battleStarter == null) throw new Error('assert battleStarter')
 
-    const enemyTeamsHasAlive = R.any(
-      R.prop('isAnyoneAlive'),
-      this.getOtherTeams(battleStarter)
-    )
+    const enemyTeamsHasAlive = R.any(R.prop('isAnyoneAlive'), this.getOtherTeams(battleStarter))
     if (!enemyTeamsHasAlive) {
       this.result = BattleResult.Win
       return
@@ -227,7 +215,7 @@ export class CombatStage implements Stage {
   }
 
   getNextPreparingEntity(prev: Entity | null): Entity | null {
-    const entities = this.getAliveEntities().filter((e) => e.speed.value > 0)
+    const entities = this.getAliveEntities().filter(e => e.speed.value > 0)
     if (entities.length === 0) return null
     if (!prev) return entities[0]
 
@@ -248,18 +236,14 @@ export class CombatStage implements Stage {
     const getActionableEntitiesSortedByDescendProgress = R.compose(
       R.map(R.prop('entity')),
       R.sortWith<EntityWithProgress>([R.descend(R.prop('progress'))]),
-      R.filter<EntityWithProgress>(
-        ({ progress }) => progress >= ProgressNeedPoint
-      ),
-      R.map<Entity, EntityWithProgress>((entity) => ({
+      R.filter<EntityWithProgress>(({ progress }) => progress >= ProgressNeedPoint),
+      R.map<Entity, EntityWithProgress>(entity => ({
         entity,
         progress: this.getBattlingState(entity).progress,
-      }))
+      })),
     )
 
-    const actionableEntities = getActionableEntitiesSortedByDescendProgress(
-      this.getAliveEntities()
-    )
+    const actionableEntities = getActionableEntitiesSortedByDescendProgress(this.getAliveEntities())
     return R.head(actionableEntities) ?? null
   }
 
@@ -283,11 +267,7 @@ export class CombatStage implements Stage {
     const battleStarter = this.getBattleStarter()
     if (battleStarter == null) throw new Error('assert battleStarter')
 
-    const log: CombatLog = [
-      source.createSnapshot(),
-      '击杀了',
-      target.createSnapshot(),
-    ]
+    const log: CombatLog = [source.createSnapshot(), '击杀了', target.createSnapshot()]
     if (!battleStarter.contains(target)) {
       const loots = this.generateLoots(target)
       if (loots.length > 0) {
@@ -295,27 +275,27 @@ export class CombatStage implements Stage {
         log.push(
           '，战利品：',
           // TODO: 需要注入顿号分隔
-          ...loots.map((l) => Loot.createSnapshot(l))
+          ...loots.map(l => Loot.createSnapshot(l)),
         )
       }
     }
     this.logs.push(log)
 
-    source.getSkills().forEach((skill) => skill.onKill(target))
+    source.getSkills().forEach(skill => skill.onKill(target))
   }
 
   // utils
 
   getEntities(): Entity[] {
-    return this.teams.map((team) => team.members).flat()
+    return this.teams.map(team => team.members).flat()
   }
 
   getAliveEntities(): Entity[] {
-    return this.getEntities().filter((entity) => entity.isAlive)
+    return this.getEntities().filter(entity => entity.isAlive)
   }
 
   getBelongTeam(entity: Entity): Team | null {
-    return R.find((team) => team.contains(entity), this.teams) ?? null
+    return R.find(team => team.contains(entity), this.teams) ?? null
   }
 
   getTeammates(entity: Entity): Entity[] {
@@ -328,10 +308,7 @@ export class CombatStage implements Stage {
   getOtherTeams(entity: Entity): Team[]
   getOtherTeams(entityOrTeam: Entity | Team): Team[]
   getOtherTeams(entityOrTeam: Entity | Team): Team[] {
-    const selfTeam =
-      entityOrTeam instanceof Entity
-        ? this.getBelongTeam(entityOrTeam)
-        : entityOrTeam
+    const selfTeam = entityOrTeam instanceof Entity ? this.getBelongTeam(entityOrTeam) : entityOrTeam
 
     const isNotSelf = R.compose(R.not, R.equals(selfTeam))
     return R.filter(isNotSelf, this.teams)
@@ -343,17 +320,15 @@ export class CombatStage implements Stage {
 
   getEnemies(...args: Parameters<CombatStage['getOtherTeams']>): Entity[] {
     return this.getOtherTeams(...args)
-      .map((t) => t.members)
+      .map(t => t.members)
       .flat()
   }
 
   getAliveEnemies(...args: Parameters<CombatStage['getEnemies']>): Entity[] {
-    return R.filter((e) => e.isAlive, this.getEnemies(...args))
+    return R.filter(e => e.isAlive, this.getEnemies(...args))
   }
 
-  getFirstAliveEnemy(
-    ...args: Parameters<CombatStage['getAliveEnemies']>
-  ): Entity | null {
+  getFirstAliveEnemy(...args: Parameters<CombatStage['getAliveEnemies']>): Entity | null {
     return R.head(this.getAliveEnemies(...args)) ?? null
   }
 }

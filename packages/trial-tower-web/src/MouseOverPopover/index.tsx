@@ -5,13 +5,11 @@ const MouseOverPopover: FC<
   {
     popupContent: React.ReactNode
   } & HTMLAttributes<HTMLSpanElement>
-> = (props) => {
+> = props => {
   const { popupContent, children, ...spanAttrs } = props
   const [anchorEl, setAnchorEl] = useState<HTMLElement>()
 
-  const handlePopoverOpen = (
-    event: React.MouseEvent<HTMLElement, MouseEvent>
-  ) => {
+  const handlePopoverOpen = (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
     setAnchorEl(event.currentTarget)
   }
 
@@ -22,11 +20,7 @@ const MouseOverPopover: FC<
   const open = Boolean(anchorEl)
 
   return (
-    <span
-      {...spanAttrs}
-      onMouseEnter={handlePopoverOpen}
-      onMouseLeave={handlePopoverClose}
-    >
+    <span {...spanAttrs} onMouseEnter={handlePopoverOpen} onMouseLeave={handlePopoverClose}>
       {children}
 
       <Popover

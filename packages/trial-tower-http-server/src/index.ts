@@ -12,7 +12,7 @@ app.use(tokenPlugin)
 app.use(
   cors({
     origin: 'http://localhost:3000',
-  })
+  }),
 )
 
 app.use(morgan('default'))

@@ -2,7 +2,7 @@ import { FC } from 'react'
 import { Card, CardContent, Typography } from '@mui/material'
 import { Entity, Skill } from 'hedra-engine'
 
-export const SkillCard: FC<{ skill: Skill.Snapshot }> = (props) => {
+export const SkillCard: FC<{ skill: Skill.Snapshot }> = props => {
   return (
     <Card sx={{ minWidth: 275 }}>
       <CardContent>

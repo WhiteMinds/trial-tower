@@ -4,7 +4,7 @@ import { getUser } from './user'
 
 export async function createCharacter(
   nickname: Character['nickname'],
-  entityId: Character['entityId']
+  entityId: Character['entityId'],
 ): Promise<Character> {
   return Character.create({
     nickname,
@@ -12,15 +12,13 @@ export async function createCharacter(
   })
 }
 
-export async function getCharacter(
-  id: Character['id']
-): Promise<Character | null> {
+export async function getCharacter(id: Character['id']): Promise<Character | null> {
   return Character.findByPk(id)
 }
 
 export async function getCharacterAndVerifyByUser(
   userId: User['id'],
-  characterId: Character['id']
+  characterId: Character['id'],
 ): Promise<Character | null> {
   const user = await getUser(userId)
   if (!user?.hasCharacter(characterId)) return null
@@ -28,10 +26,7 @@ export async function getCharacterAndVerifyByUser(
   return character ?? null
 }
 
-export async function updateCharacter(
-  id: Character['id'],
-  attrs: Partial<Character>
-): Promise<void> {
+export async function updateCharacter(id: Character['id'], attrs: Partial<Character>): Promise<void> {
   await Character.update(attrs, {
     where: {
       id: {

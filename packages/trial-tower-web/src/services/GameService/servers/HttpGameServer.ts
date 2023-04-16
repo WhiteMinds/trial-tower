@@ -37,9 +37,7 @@ export class HttpGameServer implements GameServer {
   }
 
   async register(username: string, password: string) {
-    const { data } = await this.req.post<
-      ResponseData<{ user: User; token: string }>
-    >('/users', {
+    const { data } = await this.req.post<ResponseData<{ user: User; token: string }>>('/users', {
       username,
       password,
     })
@@ -48,9 +46,7 @@ export class HttpGameServer implements GameServer {
   }
 
   async auth(username: string, password: string) {
-    const { data } = await this.req.post<
-      ResponseData<{ user: User; token: string }>
-    >('/users/auth', {
+    const { data } = await this.req.post<ResponseData<{ user: User; token: string }>>('/users/auth', {
       username,
       password,
     })
@@ -65,20 +61,15 @@ export class HttpGameServer implements GameServer {
   }
 
   async createCharacter(name: string) {
-    const { data } = await this.req.post<ResponseData<Character>>(
-      '/game/characters',
-      {
-        name,
-      }
-    )
+    const { data } = await this.req.post<ResponseData<Character>>('/game/characters', {
+      name,
+    })
     assertNoError(data)
     return data.payload
   }
 
   async getCharacters() {
-    const { data } = await this.req.get<ResponseData<Character[]>>(
-      '/game/characters'
-    )
+    const { data } = await this.req.get<ResponseData<Character[]>>('/game/characters')
     assertNoError(data)
     return data.payload
   }
@@ -112,9 +103,7 @@ export class HttpGameServer implements GameServer {
   }
 }
 
-function assertNoError<T>(
-  data: ResponseData<T>
-): asserts data is { payload: T } {
+function assertNoError<T>(data: ResponseData<T>): asserts data is { payload: T } {
   if ('error' in data) {
     throw new Error(data.displayMsg ?? data.error)
   }

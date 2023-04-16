@@ -24,9 +24,7 @@ export function createAchievementPlugin(store: Store): EnginePlugin & {
     async onKill(killer, target) {
       // TODO: assert killer is player
       const achievements = await this.getPlayerAchievements(killer)
-      const newbieAchievement = achievements.find(
-        (a): a is NewbieAchievement => a instanceof NewbieAchievement
-      )
+      const newbieAchievement = achievements.find((a): a is NewbieAchievement => a instanceof NewbieAchievement)
       assert(newbieAchievement)
       newbieAchievement.onKill()
     },
@@ -63,11 +61,7 @@ class NewbieAchievement {
     if (this.killCount >= this.needKillCount) {
       this.completionTime = Date.now()
     }
-    console.log(
-      'NewbieAchievement on kill',
-      this.killCount,
-      this.completionTime
-    )
+    console.log('NewbieAchievement on kill', this.killCount, this.completionTime)
     // TODO: this.dirty
   }
 }

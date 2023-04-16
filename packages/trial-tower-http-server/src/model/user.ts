@@ -56,7 +56,7 @@ export function defineUserModel(sequelize: Sequelize) {
     {
       modelName: modelCtor.name,
       sequelize,
-    }
+    },
   )
 
   return modelCtor

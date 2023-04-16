@@ -28,14 +28,10 @@ export class DamageEffect implements Effect {
   // 魔法攻击，对应的处理可能是魔抗之类的
   isMagic = false
 
-  constructor(
-    public stage: CombatStage,
-    public source: Entity,
-    public groupId: UniqueId
-  ) {}
+  constructor(public stage: CombatStage, public source: Entity, public groupId: UniqueId) {}
 
   calcValue(target: Entity) {
-    this.modifiers.forEach((modifier) => modifier(target, this))
+    this.modifiers.forEach(modifier => modifier(target, this))
     return Math.floor(this.baseValue * this.multiplier)
   }
 
@@ -70,7 +66,7 @@ export class GrantBuffEffect implements Effect {
   constructor(public groupId: UniqueId, public buff: Buff) {}
 
   cast(stage: Stage, target: Entity): boolean {
-    this.modifiers.forEach((modifier) => modifier(target, this))
+    this.modifiers.forEach(modifier => modifier(target, this))
     target.grantBuff(this.buff)
     return true
   }

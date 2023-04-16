@@ -7,7 +7,7 @@ import { SkillCard } from './SkillCard'
 
 const MessageWidget$Entity: FC<{
   entity: Entity.Snapshot
-}> = (props) => {
+}> = props => {
   return (
     <MouseOverPopover
       popupContent={<EntityCard entity={props.entity} />}
@@ -24,7 +24,7 @@ const MessageWidget$Entity: FC<{
 const MessageWidget$Skill: FC<{
   skill: Skill.Snapshot
   style?: CSSProperties
-}> = (props) => {
+}> = props => {
   return (
     <MouseOverPopover
       popupContent={<SkillCard skill={props.skill} />}
@@ -41,7 +41,7 @@ const MessageWidget$Skill: FC<{
 const MessageWidget$Item: FC<{
   item: Item.Snapshot
   style?: CSSProperties
-}> = (props) => {
+}> = props => {
   return (
     <MouseOverPopover
       popupContent={<ItemCard item={props.item} />}
@@ -58,7 +58,7 @@ const MessageWidget$Item: FC<{
 
 const MessageWidget$Loot: FC<{
   loot: Loot.Snapshot
-}> = (props) => {
+}> = props => {
   switch (props.loot.type) {
     case LootType.EXP:
       return <>[经验值 x {props.loot.payload}]</>

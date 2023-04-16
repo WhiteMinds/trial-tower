@@ -53,8 +53,7 @@ export class Item {
   }
 
   static deserialize(data: Item.Serialized, stage: Stage): Item {
-    const hasCustomDeserialize =
-      ItemTemplateMap[data.templateId].deserialize !== this.deserialize
+    const hasCustomDeserialize = ItemTemplateMap[data.templateId].deserialize !== this.deserialize
     if (hasCustomDeserialize) {
       return ItemTemplateMap[data.templateId].deserialize(data, stage)
     }
@@ -101,9 +100,7 @@ export class Item {
 
   // utils
 
-  assertOwner(
-    errMsg = 'Cannot pass assertOwner'
-  ): asserts this is this & { owner: Entity } {
+  assertOwner(errMsg = 'Cannot pass assertOwner'): asserts this is this & { owner: Entity } {
     if (this.owner == null) {
       throw new Error(errMsg)
     }

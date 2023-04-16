@@ -47,8 +47,7 @@ export class Skill {
   }
 
   static deserialize(data: Skill.Serialized, stage: Stage): Skill {
-    const hasCustomDeserialize =
-      SkillTemplateMap[data.templateId].deserialize !== this.deserialize
+    const hasCustomDeserialize = SkillTemplateMap[data.templateId].deserialize !== this.deserialize
     if (hasCustomDeserialize) {
       return SkillTemplateMap[data.templateId].deserialize(data, stage)
     }
@@ -85,20 +84,14 @@ export class Skill {
 
   // utils
 
-  assertCombatStage(
-    errMsg = 'Cannot pass assertCombatStage'
-  ): asserts this is this & { stage: CombatStage } {
+  assertCombatStage(errMsg = 'Cannot pass assertCombatStage'): asserts this is this & { stage: CombatStage } {
     if (!(this.stage instanceof CombatStage)) throw new Error(errMsg)
   }
   assertCombatting(): asserts this is this & { stage: CombatStage } {
-    this.assertCombatStage(
-      `The ${this.templateId} skill can only be used in combat`
-    )
+    this.assertCombatStage(`The ${this.templateId} skill can only be used in combat`)
   }
 
-  assertOwner(
-    errMsg = 'Cannot pass assertOwner'
-  ): asserts this is this & { owner: Entity } {
+  assertOwner(errMsg = 'Cannot pass assertOwner'): asserts this is this & { owner: Entity } {
     if (this.owner == null) {
       throw new Error(errMsg)
     }

@@ -10,7 +10,7 @@ export const sequelize = new Sequelize(
   {
     dialect: 'mysql',
     logging: (body, options) => console.debug(body),
-  }
+  },
 )
 
 type ExtractInstanceType<T> = T extends { new (): infer C } ? C : never

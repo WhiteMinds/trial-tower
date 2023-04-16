@@ -10,10 +10,7 @@ export interface Stage {
   getItem(id: Item['id']): Promise<Item | null>
   registerItem<T extends Item>(item: T): Promise<T>
 
-  dirty<T extends { id: UniqueId }>(target: {
-    id: UniqueId
-    serialize: () => T
-  }): void
+  dirty<T extends { id: UniqueId }>(target: { id: UniqueId; serialize: () => T }): void
 }
 
 // TODO: enum 是不是不应该放在 types.ts 里
@@ -45,11 +42,7 @@ export type LootGenerator = (stage: Stage, entity: Entity) => Loot[]
 export namespace Loot {
   export type Snapshot = {
     snapshotType: 'Loot'
-  } & (
-    | Loot$EXP
-    | Loot$Gold
-    | (Pick<Loot$Item, 'type'> & { payload: Item.Snapshot })
-  )
+  } & (Loot$EXP | Loot$Gold | (Pick<Loot$Item, 'type'> & { payload: Item.Snapshot }))
 
   export function createSnapshot(loot: Loot): Loot.Snapshot {
     if (loot.type === LootType.Item) {

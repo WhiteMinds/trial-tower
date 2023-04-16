@@ -2,7 +2,7 @@ import { FC } from 'react'
 import { Card, CardContent, Typography } from '@mui/material'
 import { Entity } from 'hedra-engine'
 
-export const EntityCard: FC<{ entity: Entity.Snapshot }> = (props) => {
+export const EntityCard: FC<{ entity: Entity.Snapshot }> = props => {
   return (
     <Card sx={{ minWidth: 275 }}>
       <CardContent>
@@ -22,11 +22,7 @@ export const EntityCard: FC<{ entity: Entity.Snapshot }> = (props) => {
 
         {props.entity.buffs.length > 0 && (
           <>
-            <Typography
-              sx={{ fontSize: 14, marginTop: 1 }}
-              color="textSecondary"
-              gutterBottom
-            >
+            <Typography sx={{ fontSize: 14, marginTop: 1 }} color="textSecondary" gutterBottom>
               Buffs:
             </Typography>
             {props.entity.buffs.map((buff, idx) => (

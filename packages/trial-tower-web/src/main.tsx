@@ -24,14 +24,7 @@ import '@fontsource/roboto/300.css'
 import '@fontsource/roboto/400.css'
 import '@fontsource/roboto/500.css'
 import '@fontsource/roboto/700.css'
-import React, {
-  FC,
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
+import React, { FC, memo, useCallback, useEffect, useMemo, useState } from 'react'
 import ReactDOM from 'react-dom'
 import { CombatLog, Entity, Snapshot } from 'hedra-engine'
 import { MessageWidgets } from './widgets'
@@ -52,7 +45,7 @@ const App: FC = () => {
   return character == null ? <CharacterSelectScreen /> : <GameScreen />
 }
 
-const CharacterSelectScreen: FC = (props) => {
+const CharacterSelectScreen: FC = props => {
   const { gameSvc, mode, setMode } = useGameService()
 
   const [username, setUsername] = useState('test')
@@ -70,10 +63,7 @@ const CharacterSelectScreen: FC = (props) => {
     return user
   }, [gameSvc, username, password])
 
-  const [reqStateWithList, refreshCharacters] = useAsyncFn(
-    () => gameSvc.getCharacters(),
-    [gameSvc]
-  )
+  const [reqStateWithList, refreshCharacters] = useAsyncFn(() => gameSvc.getCharacters(), [gameSvc])
 
   const [newCharacterName, setNewCharacterName] = useState('')
   const [reqStateWithCreate, createNewCharacter] = useAsyncFn(async () => {
@@ -99,17 +89,9 @@ const CharacterSelectScreen: FC = (props) => {
       {mode === 'online' && !reqStateWithAuth.value ? (
         <>
           <h3>注册登录</h3>
-          <input
-            placeholder="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
+          <input placeholder="username" value={username} onChange={e => setUsername(e.target.value)} />
           <br />
-          <input
-            placeholder="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+          <input placeholder="password" value={password} onChange={e => setPassword(e.target.value)} />
           <br />
           <button disabled={reqStateWithAuth.loading} onClick={auth}>
             {reqStateWithAuth.loading ? '正在登录' : '登录'}
@@ -126,7 +108,7 @@ const CharacterSelectScreen: FC = (props) => {
             ? 'loading'
             : reqStateWithList.error
             ? reqStateWithList.error.message
-            : reqStateWithList.value?.map((character) => (
+            : reqStateWithList.value?.map(character => (
                 <h4
                   key={character.id}
                   style={{
@@ -143,14 +125,8 @@ const CharacterSelectScreen: FC = (props) => {
               ))}
 
           <h3>创建新角色</h3>
-          <input
-            value={newCharacterName}
-            onChange={(e) => setNewCharacterName(e.target.value)}
-          />
-          <button
-            disabled={reqStateWithCreate.loading}
-            onClick={createNewCharacter}
-          >
+          <input value={newCharacterName} onChange={e => setNewCharacterName(e.target.value)} />
+          <button disabled={reqStateWithCreate.loading} onClick={createNewCharacter}>
             {reqStateWithCreate.loading ? '正在创建' : '创建'}
           </button>
         </>
@@ -159,7 +135,7 @@ const CharacterSelectScreen: FC = (props) => {
   )
 }
 
-const GameScreen: FC = memo((props) => {
+const GameScreen: FC = memo(props => {
   return (
     <div
       style={{
@@ -178,7 +154,7 @@ const GameScreen: FC = memo((props) => {
   )
 })
 
-const PlayerPanel: FC = (props) => {
+const PlayerPanel: FC = props => {
   const { gameSvc } = useGameService()
 
   const character = useBehaviorSubject(gameSvc.character$)
@@ -213,19 +189,11 @@ const PlayerPanel: FC = (props) => {
           <Typography variant="body2" color="red">
             HP ({currentHP} / {player.maxHP})
           </Typography>
-          <LinearProgress
-            variant="determinate"
-            color="error"
-            value={Math.round((currentHP / player.maxHP) * 100)}
-          />
+          <LinearProgress variant="determinate" color="error" value={Math.round((currentHP / player.maxHP) * 100)} />
           <Typography variant="body2" color="green" style={{ marginTop: 8 }}>
             Exp ({player.exp} / 100)
           </Typography>
-          <LinearProgress
-            variant="determinate"
-            color="success"
-            value={(player.exp / 100) * 100}
-          />
+          <LinearProgress variant="determinate" color="success" value={(player.exp / 100) * 100} />
           {/* TODO: 属性放到右侧面板 */}
           {/* 剩余属性点 */}
           <Stack spacing={1} style={{ marginTop: 12 }}>
@@ -236,14 +204,10 @@ const PlayerPanel: FC = (props) => {
           </Stack>
           <Divider style={{ marginTop: 8 }} />
           <Stack direction="row" spacing={1} style={{ marginTop: 8 }}>
-            {player.equips.map((equip) => {
+            {player.equips.map(equip => {
               const Icon = getItemAssetComp(equip)
               return (
-                <MessageWidgets.Item
-                  key={equip.id}
-                  item={equip}
-                  style={{ margin: '' }}
-                >
+                <MessageWidgets.Item key={equip.id} item={equip} style={{ margin: '' }}>
                   <div style={{ width: 32, height: 32 }}>
                     <Icon style={{ width: '100%', border: '1px solid #aaa' }} />
                   </div>
@@ -251,12 +215,7 @@ const PlayerPanel: FC = (props) => {
               )
             })}
             {new Array(5).fill(0).map((_, i) => {
-              return (
-                <div
-                  key={i}
-                  style={{ width: 32, height: 32, border: '1px solid #aaa' }}
-                />
-              )
+              return <div key={i} style={{ width: 32, height: 32, border: '1px solid #aaa' }} />
             })}
           </Stack>
         </CardContent>
@@ -284,14 +243,10 @@ const PlayerPanel: FC = (props) => {
           </Tabs>
           <TabPanel value={tab} index={0}>
             <Stack direction="row" spacing={2}>
-              {player.items.map((item) => {
+              {player.items.map(item => {
                 const Icon = getItemAssetComp(item)
                 return (
-                  <MessageWidgets.Item
-                    key={item.id}
-                    item={item}
-                    style={{ margin: '' }}
-                  >
+                  <MessageWidgets.Item key={item.id} item={item} style={{ margin: '' }}>
                     <div style={{ width: 32, height: 32 }}>
                       <Icon
                         style={{
@@ -308,14 +263,10 @@ const PlayerPanel: FC = (props) => {
           </TabPanel>
           <TabPanel value={tab} index={1}>
             <Stack direction="row" spacing={2}>
-              {player.skills.map((skill) => {
+              {player.skills.map(skill => {
                 const Icon = getSkillAssetComp(skill)
                 return (
-                  <MessageWidgets.Skill
-                    key={skill.templateId}
-                    skill={skill}
-                    style={{ margin: '' }}
-                  >
+                  <MessageWidgets.Skill key={skill.templateId} skill={skill} style={{ margin: '' }}>
                     <div style={{ width: 32, height: 32 }}>
                       <Icon
                         style={{
@@ -336,7 +287,7 @@ const PlayerPanel: FC = (props) => {
   )
 }
 
-const CombatPanel: FC = memo((props) => {
+const CombatPanel: FC = memo(props => {
   return (
     <Card style={{ flex: 1, padding: '0 16px 16px 16px', overflow: 'auto' }}>
       <div
@@ -376,10 +327,7 @@ const CombatControl: FC = memo(() => {
   useEffect(() => gameSvc.autoCombat$.next(autoCombat), [gameSvc, autoCombat])
 
   // TODO: 通过 layer 改变难度
-  const randomCombat = useCallback(
-    () => gameSvc.createRandomCombat(),
-    [gameSvc]
-  )
+  const randomCombat = useCallback(() => gameSvc.createRandomCombat(), [gameSvc])
   const isCombatting = useBehaviorSubject(gameSvc.isCombatting$)
 
   // TODO: test code
@@ -402,7 +350,7 @@ const CombatControl: FC = memo(() => {
           value={layer}
           label="塔层"
           size="small"
-          onChange={(event) => {
+          onChange={event => {
             assertNumberType(event.target.value)
             setLayer(event.target.value)
           }}
@@ -427,12 +375,7 @@ const CombatControl: FC = memo(() => {
       </LoadingButton>
 
       <FormControlLabel
-        control={
-          <Switch
-            checked={autoCombat}
-            onChange={(e) => setAutoCombat(e.target.checked)}
-          />
-        }
+        control={<Switch checked={autoCombat} onChange={e => setAutoCombat(e.target.checked)} />}
         label="自动连续战斗"
       />
     </div>
@@ -445,7 +388,7 @@ const CombatEntityList: FC = memo(() => {
 
   return (
     <>
-      {combatEntities.map((entity) => (
+      {combatEntities.map(entity => (
         <CombatEntityView key={entity.id} entity={entity} />
       ))}
     </>
@@ -468,11 +411,7 @@ const CombatEntityView: FC<{ entity: Entity.Snapshot }> = memo(({ entity }) => {
       <Typography variant="body2" color="red">
         HP ({entity.currentHP} / {entity.maxHP})
       </Typography>
-      <LinearProgress
-        variant="determinate"
-        color="error"
-        value={Math.round((entity.currentHP / entity.maxHP) * 100)}
-      />
+      <LinearProgress variant="determinate" color="error" value={Math.round((entity.currentHP / entity.maxHP) * 100)} />
     </Paper>
   )
 })
@@ -526,7 +465,7 @@ function a11yProps(index: number) {
   }
 }
 
-const CombatLogView: FC<{ log: CombatLog }> = memo((props) => {
+const CombatLogView: FC<{ log: CombatLog }> = memo(props => {
   return (
     <>
       {props.log.map((item, idx) => {
@@ -537,7 +476,7 @@ const CombatLogView: FC<{ log: CombatLog }> = memo((props) => {
   )
 })
 
-const SnapshotCard: FC<{ snapshot: Snapshot }> = (props) => {
+const SnapshotCard: FC<{ snapshot: Snapshot }> = props => {
   switch (props.snapshot.snapshotType) {
     case 'Entity':
       return <MessageWidgets.Entity entity={props.snapshot} />
@@ -567,5 +506,5 @@ ReactDOM.render(
       <App />
     </ServiceContextProvider>
   </React.StrictMode>,
-  document.getElementById('root')
+  document.getElementById('root'),
 )

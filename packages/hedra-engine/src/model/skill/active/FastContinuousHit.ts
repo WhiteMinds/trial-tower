@@ -38,23 +38,13 @@ export class FastContinuousHit extends Skill {
     })
 
     // 不能在 onCaptureEffectsSending 之后 createSnapshot，因为可能会造成数据变化
-    const log: CombatLog = [
-      source.createSnapshot(),
-      '对',
-      target.createSnapshot(),
-      '释放',
-      this.createSnapshot(),
-    ]
+    const log: CombatLog = [source.createSnapshot(), '对', target.createSnapshot(), '释放', this.createSnapshot()]
     this.stage.logs.push(log)
 
-    source.getBuffs().forEach((buff) => buff.onCaptureEffectsSending(damages))
+    source.getBuffs().forEach(buff => buff.onCaptureEffectsSending(damages))
 
-    const damageValues = damages.map((damage) =>
-      damage.cast(this.stage, target)
-    )
-    log.push(
-      `造成 ${damageValues.join('、')} 伤害，剩余 hp ${target.currentHP}`
-    )
+    const damageValues = damages.map(damage => damage.cast(this.stage, target))
+    log.push(`造成 ${damageValues.join('、')} 伤害，剩余 hp ${target.currentHP}`)
 
     return true
   }

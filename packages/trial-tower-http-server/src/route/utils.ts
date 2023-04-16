@@ -39,9 +39,7 @@ export function getTokenPayload<T extends Request>(req: T): TokenPayload {
   return req[TokenPayloadKeyInRequest]
 }
 
-function hasTokenPayload<T extends Request>(
-  req: T
-): req is T & { [TokenPayloadKeyInRequest]: TokenPayload } {
+function hasTokenPayload<T extends Request>(req: T): req is T & { [TokenPayloadKeyInRequest]: TokenPayload } {
   return TokenPayloadKeyInRequest in req
 }
 

@@ -28,10 +28,7 @@ export class EnhanceConstitution extends Skill {
     const target = this.owner
 
     const effectGroupId = createUniqueId()
-    const effect = new GrantBuffEffect(
-      effectGroupId,
-      new EnhanceConstitutionBuff(target, this.enhancePctCount)
-    )
+    const effect = new GrantBuffEffect(effectGroupId, new EnhanceConstitutionBuff(target, this.enhancePctCount))
 
     effect.cast(this.stage, target)
   }

@@ -6,11 +6,7 @@ import { Buff } from '../buff'
 import { Equip, Item } from '../item'
 import { Skill, SkillTemplateMap } from '../skill'
 import { SkillTemplateId } from '../skill/SkillTemplateId'
-import {
-  AttrDescriptor,
-  AttrDescriptor$Attack,
-  AttrDescriptor$HealthPoint,
-} from './AttrDescriptor'
+import { AttrDescriptor, AttrDescriptor$Attack, AttrDescriptor$HealthPoint } from './AttrDescriptor'
 
 export interface SkillModifier {
   skillTemplateId: SkillTemplateId
@@ -59,13 +55,9 @@ export class Entity {
 
   skillModifiers: SkillModifier[] = []
   addSkillModifier(skillModifier: SkillModifier): void {
-    const existedSkill = this.getSkills().find(
-      ({ templateId }) => templateId === skillModifier.skillTemplateId
-    )
+    const existedSkill = this.getSkills().find(({ templateId }) => templateId === skillModifier.skillTemplateId)
     if (existedSkill == null) {
-      const skill = new SkillTemplateMap[skillModifier.skillTemplateId](
-        this.stage
-      )
+      const skill = new SkillTemplateMap[skillModifier.skillTemplateId](this.stage)
       skill.level = skillModifier.upgradeLevel
       this.addSkill(skill)
       return
@@ -95,10 +87,10 @@ export class Entity {
       maxHP: this.maxHP.value,
       atk: this.atk.value,
       currentHP: this.currentHP,
-      items: this.items.map((i) => i.createSnapshot()),
-      equips: this.equips.map((e) => e.createSnapshot()),
-      skills: this.getSkills().map((s) => s.createSnapshot()),
-      buffs: this.getBuffs().map((b) => b.createSnapshot()),
+      items: this.items.map(i => i.createSnapshot()),
+      equips: this.equips.map(e => e.createSnapshot()),
+      skills: this.getSkills().map(s => s.createSnapshot()),
+      buffs: this.getBuffs().map(b => b.createSnapshot()),
     }
   }
 
@@ -115,7 +107,7 @@ export class Entity {
       atk: this.atk.base,
       itemIds: this.items.map(({ id }) => id),
       equipIds: this.equips.map(({ id }) => id),
-      skills: this.getSkills().map((skill) => skill.serialize()),
+      skills: this.getSkills().map(skill => skill.serialize()),
     }
   }
 
@@ -132,25 +124,20 @@ export class Entity {
 
     // TODO: 这里会非预期的触发 dirty，可以考虑加个 deserializing 之类的状态来规避
     this._items = []
-    ;(await Promise.all(data.itemIds.map((id) => this.stage.getItem(id))))
+    ;(await Promise.all(data.itemIds.map(id => this.stage.getItem(id))))
       .filter(BooleanT())
-      .forEach((item) => this.addItem(item))
+      .forEach(item => this.addItem(item))
 
     this._equips = []
-    ;(await Promise.all(data.equipIds.map((id) => this.stage.getItem(id))))
+    ;(await Promise.all(data.equipIds.map(id => this.stage.getItem(id))))
       .filter((item): item is Equip => item instanceof Equip)
-      .forEach((equip) => this.equip(equip))
+      .forEach(equip => this.equip(equip))
 
     this._skills = []
-    data.skills.forEach((skillData) =>
-      this.addSkill(Skill.deserialize(skillData, this.stage))
-    )
+    data.skills.forEach(skillData => this.addSkill(Skill.deserialize(skillData, this.stage)))
   }
 
-  static async deserialize(
-    data: Entity.Serialized,
-    stage: Stage
-  ): Promise<Entity> {
+  static async deserialize(data: Entity.Serialized, stage: Stage): Promise<Entity> {
     const entity = new Entity(stage)
     await entity.deserialize(data)
     return entity
@@ -202,9 +189,9 @@ export class Entity {
     // 如果有多个，则按顺序调用，直到其中一个返回 true 时终止
     const existedBuffs = this.getBuffs().filter(
       // TODO: 这个判断可能会出问题，因为可能有 buff 继承自另一个 buff 实现
-      (existedBuff) => existedBuff instanceof buff.constructor
+      existedBuff => existedBuff instanceof buff.constructor,
     )
-    const mixed = existedBuffs.find((existedBuff) => existedBuff.mixing(buff))
+    const mixed = existedBuffs.find(existedBuff => existedBuff.mixing(buff))
     if (mixed) return
 
     this._buffs.push(buff)
@@ -217,9 +204,7 @@ export class Entity {
 
   addItem(item: Item): void {
     // TODO: 没有检查是否已存在
-    const sameTemplateItems = this._items.filter(
-      ({ templateId }) => templateId === item.templateId
-    )
+    const sameTemplateItems = this._items.filter(({ templateId }) => templateId === item.templateId)
     for (let i = 0; i < sameTemplateItems.length; i++) {
       if (sameTemplateItems[i].mixing(item)) {
         return

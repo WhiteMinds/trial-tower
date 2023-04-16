@@ -24,16 +24,9 @@ export class Concentrate extends Skill {
     const target = this.owner
 
     const effectGroupId = createUniqueId()
-    const effect = new GrantBuffEffect(
-      effectGroupId,
-      new ConcentrateBuff(target, this.enhanceCount)
-    )
+    const effect = new GrantBuffEffect(effectGroupId, new ConcentrateBuff(target, this.enhanceCount))
 
-    this.stage.logs.push([
-      source.createSnapshot(),
-      '释放',
-      this.createSnapshot(),
-    ])
+    this.stage.logs.push([source.createSnapshot(), '释放', this.createSnapshot()])
     effect.cast(this.stage, target)
 
     return true

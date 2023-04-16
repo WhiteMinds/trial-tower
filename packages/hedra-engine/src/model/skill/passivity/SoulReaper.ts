@@ -47,10 +47,7 @@ export class SoulReaper extends Skill {
     const target = this.owner
 
     const effectGroupId = createUniqueId()
-    const effect = new GrantBuffEffect(
-      effectGroupId,
-      new SoulReaperBuff(target, this.increasedCount)
-    )
+    const effect = new GrantBuffEffect(effectGroupId, new SoulReaperBuff(target, this.increasedCount))
 
     effect.cast(this.stage, target)
   }
@@ -80,10 +77,7 @@ export class SoulReaper extends Skill {
     const target = this.owner
 
     const effectGroupId = createUniqueId()
-    const effect = new GrantBuffEffect(
-      effectGroupId,
-      new SoulReaperBuff(target, this.increasedCount)
-    )
+    const effect = new GrantBuffEffect(effectGroupId, new SoulReaperBuff(target, this.increasedCount))
 
     effect.cast(this.stage, target)
   }

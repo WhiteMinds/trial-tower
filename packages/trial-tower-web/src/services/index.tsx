@@ -8,7 +8,7 @@ function createDefaultContextValue<T>(contextName: string): T {
       get() {
         throw new Error(`${contextName} must wrapped by provider`)
       },
-    }
+    },
   ) as T
 }
 
@@ -17,7 +17,7 @@ export const ServiceContext = createContext<{
   setMode: (mode: 'online' | 'local') => void
 }>(createDefaultContextValue('ServiceContext'))
 
-export const ServiceContextProvider: FC = (props) => {
+export const ServiceContextProvider: FC = props => {
   const [mode, setMode] = useState<'online' | 'local'>('online')
   return (
     <ServiceContext.Provider

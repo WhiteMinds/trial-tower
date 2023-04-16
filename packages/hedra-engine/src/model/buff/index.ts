@@ -67,7 +67,7 @@ export class ConcentrateBuff extends Buff {
   }
 
   onCaptureEffectsSending(effects: Effect[]) {
-    effects.forEach((effect) => {
+    effects.forEach(effect => {
       if (!(effect instanceof DamageEffect)) return
       if (effect.source !== this.owner) return
 
@@ -152,9 +152,7 @@ export class SoulReaperBuff extends Buff {
     // 或者直接修改 this.maxHPModifier 的值？
     const idx = this.owner.maxHP.modifiers.indexOf(this.maxHPModifier)
     if (idx === -1) {
-      throw new Error(
-        'Cant call SoulReaperBuff.changeEnhanceCount before casted'
-      )
+      throw new Error('Cant call SoulReaperBuff.changeEnhanceCount before casted')
     }
     this.owner.maxHP.modifiers.splice(idx, 1)
     this.maxHPModifier = {

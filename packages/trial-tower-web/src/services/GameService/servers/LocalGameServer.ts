@@ -16,10 +16,7 @@ function createGameData(data: Record<string, unknown>) {
   return { ...data, id }
 }
 
-function createCharacter(
-  nickname: Hedra.Character['name'],
-  entityId: Hedra.Character['entityId']
-) {
+function createCharacter(nickname: Hedra.Character['name'], entityId: Hedra.Character['entityId']) {
   // TODO: dup nickname check
   const id = characterAutoIncrementId++
   characterMap[id] = { id, entityId, name: nickname }
@@ -73,7 +70,7 @@ export class LocalGameServer implements GameServer {
       {
         name,
       },
-      async (stage) => stage.createNewPlayerEntity(name)
+      async stage => stage.createNewPlayerEntity(name),
     )
     const entity = await engine.mainStage.getEntity(character.entityId)
     assert(entity)
@@ -86,12 +83,10 @@ export class LocalGameServer implements GameServer {
 
   async getCharacters() {
     return Promise.all(
-      Object.values(characterMap).map(async (character) => ({
+      Object.values(characterMap).map(async character => ({
         ...character,
-        entity: (await engine.mainStage.getEntity(
-          character.entityId
-        ))!.createSnapshot(),
-      }))
+        entity: (await engine.mainStage.getEntity(character.entityId))!.createSnapshot(),
+      })),
     )
   }
 
@@ -104,10 +99,7 @@ export class LocalGameServer implements GameServer {
 
     const enemy1 = await engine.mainStage.createRandomEnemyByPlayerLevel(player)
     const enemy2 = await engine.mainStage.createRandomEnemyByPlayerLevel(player)
-    const combatLogs = await engine.mainStage.beginCombat(player, [
-      enemy1,
-      enemy2,
-    ])
+    const combatLogs = await engine.mainStage.beginCombat(player, [enemy1, enemy2])
 
     return {
       combatLogs,
@@ -122,7 +114,7 @@ export class LocalGameServer implements GameServer {
     const player = await engine.mainStage.getEntity(character.entityId)
     assert(player)
 
-    const item = player.items.find((item) => item.id === itemId)
+    const item = player.items.find(item => item.id === itemId)
     assert(item, '未找到使用的物品')
 
     const success = await item.use()

@@ -13,10 +13,7 @@ interface RandomOpts {
   difficulty?: number
 }
 
-export async function createRandomEnemy(
-  stage: MainStage,
-  opts: RandomOpts
-): Promise<Entity> {
+export async function createRandomEnemy(stage: MainStage, opts: RandomOpts): Promise<Entity> {
   const { level, difficulty = 1 } = opts
 
   const template = sample(templates)
@@ -47,7 +44,7 @@ const templates: MonsterTemplate[] = [
     name: '🦊',
     mutation(entity, stage) {
       entity.addSkill(new Fireballs(stage))
-      stage.setLootGenerator(entity.id, (stage) => {
+      stage.setLootGenerator(entity.id, stage => {
         const item = new TomeOfKnowledge(stage)
         // TODO: 这里有坑，没使用 registerItem 返回的 item，而是用了一个临时对象
         stage.registerItem(item)
