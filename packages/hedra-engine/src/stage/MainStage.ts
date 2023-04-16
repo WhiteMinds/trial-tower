@@ -166,8 +166,7 @@ export class MainStage implements Stage {
           player.addGold(loot.payload)
           break
         case LootType.Item:
-          const item = await this.registerItem(loot.payload)
-          player.addItem(item)
+          player.addItem(await this.registerItem(loot.payload))
           break
       }
     }

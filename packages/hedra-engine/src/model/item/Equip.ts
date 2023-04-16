@@ -150,7 +150,7 @@ function getRequiredTexts(required: EquipRequired): string[] {
 }
 
 function getAttrBonusTexts(item: Equip): string[] {
-  let map: Partial<Record<keyof Equip, string>> = {
+  const map: Partial<Record<keyof Equip, string>> = {
     strModifier: '力量',
     conModifier: '体质',
     speedModifier: '速度',

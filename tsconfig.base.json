@@ -1,5 +1,5 @@
 {
-  "include": ["packages/*/src"],
+  "include": [".eslintrc.cjs", "packages/*/src", "packages/*/*.ts"],
   "compilerOptions": {
     "declaration": true,
     "declarationMap": true,

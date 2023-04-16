@@ -12,11 +12,11 @@ export class Buff {
   }
 
   // 战斗时使用
-  remainingRound: number = 0
+  remainingRound = 0
   // 非战斗时使用
-  endTime: number = Date.now()
+  endTime = Date.now()
 
-  stacked: number = 1
+  stacked = 1
 
   // TODO: owner 是不是应该在 onCasted 时才赋予？
   constructor(public owner: Entity) {}

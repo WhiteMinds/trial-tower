@@ -25,7 +25,7 @@ export class Skill {
   readonly canDisarm: boolean = false
   // TODO: 上面两个属性理论上应该和 canUse 挂钩
 
-  level: number = 1
+  level = 1
 
   constructor(public stage: Stage) {}
 

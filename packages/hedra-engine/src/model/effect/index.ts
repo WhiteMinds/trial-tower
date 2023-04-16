@@ -13,10 +13,10 @@ export interface Effect {
 export class DamageEffect implements Effect {
   modifiers: ((target: Entity, effect: this) => void)[] = []
 
-  baseValue: number = 0
+  baseValue = 0
   // 这里先设计的简单点，effect modifier 要倍乘 value 数值时直接改这里，这样就
   // 不用做成类似 AttrDescriptor 的模式了。
-  multiplier: number = 1
+  multiplier = 1
 
   // 伤害的属性类型，如果多种属性应该是多个 Effect 实例
   property: DamageProperty = DamageProperty.None

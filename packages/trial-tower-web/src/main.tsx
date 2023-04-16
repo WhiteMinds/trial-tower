@@ -52,7 +52,7 @@ const App: FC = () => {
   return character == null ? <CharacterSelectScreen /> : <GameScreen />
 }
 
-const CharacterSelectScreen: FC<{}> = (props) => {
+const CharacterSelectScreen: FC = (props) => {
   const { gameSvc, mode, setMode } = useGameService()
 
   const [username, setUsername] = useState('test')
@@ -84,7 +84,7 @@ const CharacterSelectScreen: FC<{}> = (props) => {
 
   // TODO: test code
   useEffect(() => {
-    if (true) return
+    if (!import.meta.env.AUTO_LOCAL) return
     if (mode !== 'local') {
       setMode('local')
     } else if (newCharacterName === '') {
@@ -159,7 +159,7 @@ const CharacterSelectScreen: FC<{}> = (props) => {
   )
 }
 
-const GameScreen: FC<{}> = memo((props) => {
+const GameScreen: FC = memo((props) => {
   return (
     <div
       style={{
@@ -178,7 +178,7 @@ const GameScreen: FC<{}> = memo((props) => {
   )
 })
 
-const PlayerPanel: FC<{}> = (props) => {
+const PlayerPanel: FC = (props) => {
   const { gameSvc } = useGameService()
 
   const character = useBehaviorSubject(gameSvc.character$)
@@ -336,7 +336,7 @@ const PlayerPanel: FC<{}> = (props) => {
   )
 }
 
-const CombatPanel: FC<{}> = memo((props) => {
+const CombatPanel: FC = memo((props) => {
   return (
     <Card style={{ flex: 1, padding: '0 16px 16px 16px', overflow: 'auto' }}>
       <div

@@ -19,12 +19,12 @@ export interface SkillModifier {
 
 export class Entity {
   id: UniqueId = createUniqueId()
-  name: string = 'UnnamedEntity'
+  name = 'UnnamedEntity'
 
-  level: number = 1
+  level = 1
   // TODO: 经验值和金币看起来是 player 独有的属性，可能应该单独实现一个类，不过有些成本暂时不搞
-  exp: number = 0
-  gold: number = 0
+  exp = 0
+  gold = 0
 
   /** 基础属性 */
 
@@ -37,7 +37,7 @@ export class Entity {
   maxHP = new AttrDescriptor$HealthPoint(this, this.dirty.bind(this))
   atk = new AttrDescriptor$Attack(this, this.dirty.bind(this))
 
-  currentHP: number = 0
+  currentHP = 0
 
   private _equips: Equip[] = []
   get equips(): Equip[] {
