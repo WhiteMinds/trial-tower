@@ -1,4 +1,4 @@
-import * as Hedra from 'hedra-engine'
+import * as Hedra from 'trial-tower-engine'
 import { assert, assertNumberType, omit } from '../../../utils'
 import { Character, GameServer } from './types'
 
@@ -58,7 +58,7 @@ const store: Hedra.Store<number> = {
   },
 }
 const achievementPlugin = Hedra.createAchievementPlugin(store)
-const engine = new Hedra.Engine(store, [achievementPlugin])
+const engine = new Hedra.TrialTowerEngine(store, [achievementPlugin])
 
 export class LocalGameServer implements GameServer {
   character?: Character

@@ -1,4 +1,4 @@
-import { Item, Skill } from 'hedra-engine'
+import { Item, Skill } from 'trial-tower-engine'
 import { ItemAssetMap } from './items'
 import { SkillAssetMap } from './skills'
 

@@ -1,9 +1,7 @@
 import { CombatStage } from '.'
-import { Character } from '..'
-import { CombatLog, Snapshot } from '../model/combat_log'
+import { CombatLog } from '../model/combat_log'
 import { Entity } from '../model/entity'
 import { Item } from '../model/item'
-import { ClothArmor, FireWand } from '../model/item/Equip'
 import { ClayGolem } from '../model/skill/active/ClayGolem'
 import { Concentrate } from '../model/skill/active/Concentrate'
 import { FastContinuousHit } from '../model/skill/active/FastContinuousHit'
@@ -133,10 +131,10 @@ export class MainStage implements Stage {
     const soulReaper = new SoulReaper(this)
     soulReaper.killCount = 10
     newPlayer.addSkill(soulReaper)
-    const sword = await this.registerItem(new FireWand(this))
-    newPlayer.equip(sword)
-    const armor = await this.registerItem(new ClothArmor(this))
-    newPlayer.equip(armor)
+    // const sword = await this.registerItem(new FireWand(this))
+    // newPlayer.equip(sword)
+    // const armor = await this.registerItem(new ClothArmor(this))
+    // newPlayer.equip(armor)
     return newPlayer
   }
 

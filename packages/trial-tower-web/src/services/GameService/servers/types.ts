@@ -1,4 +1,4 @@
-import * as Hedra from 'hedra-engine'
+import * as Hedra from 'trial-tower-engine'
 
 export interface GameServer {
   character?: Character

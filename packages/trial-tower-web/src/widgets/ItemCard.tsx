@@ -1,6 +1,6 @@
 import { FC } from 'react'
 import { Card, CardContent, Typography } from '@mui/material'
-import { Item } from 'hedra-engine'
+import { Item } from 'trial-tower-engine'
 
 export const ItemCard: FC<{ item: Item.Snapshot }> = props => {
   return (

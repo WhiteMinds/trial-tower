@@ -1,7 +1,7 @@
 /**
  * 这里要做成多种实现，然后用 DI 看情况提供不同的实现的单例出去
  */
-import * as Hedra from 'hedra-engine'
+import * as Hedra from 'trial-tower-engine'
 import axios, { AxiosInstance, AxiosStatic } from 'axios'
 import { assert } from '../../../utils'
 import { Character, GameServer } from './types'

@@ -1,5 +1,5 @@
 import { BehaviorSubject, Subscription } from 'rxjs'
-import { CombatLog, Entity, Item } from 'hedra-engine'
+import { CombatLog, Entity, Item } from 'trial-tower-engine'
 import { GameServerMode, GameServer, Character } from './servers/types'
 import { HttpGameServer } from './servers/HttpGameServer'
 import { LocalGameServer } from './servers/LocalGameServer'

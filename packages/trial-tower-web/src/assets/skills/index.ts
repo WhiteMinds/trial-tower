@@ -1,5 +1,5 @@
 import { ComponentProps, FC } from 'react'
-import { SkillTemplateId } from 'hedra-engine'
+import { SkillTemplateId } from 'trial-tower-engine'
 import { ReactComponent as IconPhysicalAttack } from './physical_attack.svg'
 import { ReactComponent as IconConcentrate } from './concentrate.svg'
 import { ReactComponent as IconFastContinuousHit } from './fast_continuous_hit.svg'

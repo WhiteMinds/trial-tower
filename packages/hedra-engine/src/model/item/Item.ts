@@ -1,13 +1,13 @@
-import { ItemTemplateMap } from '.'
+import { ItemRegistry } from '.'
 import { Stage } from '../../stage'
 import { UniqueId } from '../../types'
 import { createUniqueId } from '../../utils'
 import { Entity } from '../entity'
-import { ItemTemplateId } from './ItemTemplateId'
+
+type TemplateId = number
 
 export class Item {
-  // 该属性会在初始化时被自动处理，所以都默认给 Base 就行
-  static templateId = ItemTemplateId.Base
+  static templateId: TemplateId = -1
   get templateId() {
     return (this.constructor as typeof Item).templateId
   }
@@ -53,12 +53,12 @@ export class Item {
   }
 
   static deserialize(data: Item.Serialized, stage: Stage): Item {
-    const hasCustomDeserialize = ItemTemplateMap[data.templateId].deserialize !== this.deserialize
+    const hasCustomDeserialize = ItemRegistry[data.templateId].deserialize !== this.deserialize
     if (hasCustomDeserialize) {
-      return ItemTemplateMap[data.templateId].deserialize(data, stage)
+      return ItemRegistry[data.templateId].deserialize(data, stage)
     }
 
-    const item = new ItemTemplateMap[data.templateId](stage)
+    const item = new ItemRegistry[data.templateId](stage)
     item.deserialize(data)
     return item
   }
@@ -110,38 +110,16 @@ export class Item {
 export namespace Item {
   export interface Serialized {
     id: UniqueId
-    templateId: ItemTemplateId
+    templateId: TemplateId
     stacked: number
   }
 
   export interface Snapshot {
     snapshotType: 'Item'
     id: UniqueId
-    templateId: ItemTemplateId
+    templateId: TemplateId
     name: string
     description: string
     stacked: number
-  }
-}
-
-export class TomeOfKnowledge extends Item {
-  get name() {
-    return '知识之书'
-  }
-  get description() {
-    return '使用后提升 1 个等级'
-  }
-
-  canUse(): boolean {
-    return true
-  }
-
-  async use(): Promise<boolean> {
-    if (!super.use()) return false
-
-    this.assertOwner()
-    this.owner.addLevel(1)
-    console.log('use', this, this.owner)
-    return true
   }
 }

@@ -22,6 +22,7 @@
     "react-dom": "^17.0.2",
     "react-use": "^17.3.2",
     "rxjs": "^7.8.0",
+    "trial-tower-engine": "workspace:^",
     "uuid": "^8.3.2"
   },
   "devDependencies": {

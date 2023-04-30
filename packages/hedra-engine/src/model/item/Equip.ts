@@ -5,7 +5,7 @@ import { AttrModifier } from '../entity/AttrDescriptor'
 import { SkillTemplateMap } from '../skill'
 import { SkillTemplateId } from '../skill/SkillTemplateId'
 
-interface EquipRequired {
+export interface EquipRequired {
   level?: number
   str?: number
   con?: number
@@ -28,6 +28,7 @@ export enum EquipSlot {
 
 // 相对于 Item，它特别的地方在于它的 use 固定为调度 player 的 equip，并且有一些特殊的生命周期
 export class Equip extends Item {
+  // TODO: 或许应该将 EquipSlot 改成联合 string 类型或者 number 类型，这样可以支持自定义的装备槽
   get slot(): EquipSlot {
     return EquipSlot.MainHead
   }
@@ -169,64 +170,4 @@ function getSkillBonusTexts(item: Equip): string[] {
   return item.skillModifiers.map(
     modifier => `${new SkillTemplateMap[modifier.skillTemplateId](item.stage).name} +${modifier.upgradeLevel}`,
   )
-}
-
-export class WoodenSword extends Equip {
-  get slot(): EquipSlot {
-    return EquipSlot.MainHead
-  }
-  get name() {
-    return '木剑'
-  }
-  get description(): string {
-    return `木质的剑\n${super.description}`
-  }
-  get required(): EquipRequired {
-    return {
-      level: 1,
-    }
-  }
-
-  atkModifier = { add: 1 }
-}
-
-export class ClothArmor extends Equip {
-  get slot(): EquipSlot {
-    return EquipSlot.Body
-  }
-  get name() {
-    return '布甲'
-  }
-  get description(): string {
-    return `布质的甲\n${super.description}`
-  }
-  get required(): EquipRequired {
-    return {
-      level: 1,
-    }
-  }
-
-  conModifier = { add: 5 }
-  maxHPModifier = { per: 0.1 }
-}
-
-export class FireWand extends Equip {
-  get slot(): EquipSlot {
-    return EquipSlot.MainHead
-  }
-  get name() {
-    return '火魔杖'
-  }
-  get description(): string {
-    return `着火的木质魔杖？\n${super.description}`
-  }
-  get required(): EquipRequired {
-    return {
-      level: 1,
-    }
-  }
-
-  atkModifier = { add: 1 }
-
-  skillModifiers = [{ skillTemplateId: SkillTemplateId.Fireballs, upgradeLevel: 1 }]
 }

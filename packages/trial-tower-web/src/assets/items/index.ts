@@ -1,6 +1,5 @@
 import { ComponentProps, FC } from 'react'
-// TODO: 这个东西应该由更高级的封装提供（比如基于引擎封装出试炼之塔游戏），目前先放在引擎，并直接在前端使用
-import { ItemTemplateId } from 'hedra-engine'
+import { ItemTemplateId } from 'trial-tower-engine'
 import { ReactComponent as IconBook } from './book.svg'
 import { ReactComponent as IconWand } from './wand.svg'
 import { ReactComponent as IconSword } from './sword.svg'

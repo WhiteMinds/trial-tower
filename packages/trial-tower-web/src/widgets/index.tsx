@@ -1,5 +1,5 @@
 import { CSSProperties, FC } from 'react'
-import { Entity, Item, Loot, LootType, Skill } from 'hedra-engine'
+import { Entity, Item, Loot, LootType, Skill } from 'trial-tower-engine'
 import { MouseOverPopover } from '../MouseOverPopover'
 import { EntityCard } from './EntityCard'
 import { ItemCard } from './ItemCard'

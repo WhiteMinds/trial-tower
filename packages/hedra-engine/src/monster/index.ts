@@ -1,7 +1,5 @@
 import { sample } from 'lodash'
 import { Entity } from '../model/entity'
-import { ClothArmor } from '../model/item/Equip'
-import { TomeOfKnowledge } from '../model/item/Item'
 import { FastContinuousHit } from '../model/skill/active/FastContinuousHit'
 import { Fireballs } from '../model/skill/active/Fireballs'
 import { PhysicalAttack } from '../model/skill/active/PhysicalAttack'
@@ -44,15 +42,15 @@ const templates: MonsterTemplate[] = [
     name: '🦊',
     mutation(entity, stage) {
       entity.addSkill(new Fireballs(stage))
-      stage.setLootGenerator(entity.id, stage => {
-        const item = new TomeOfKnowledge(stage)
-        // TODO: 这里有坑，没使用 registerItem 返回的 item，而是用了一个临时对象
-        stage.registerItem(item)
-        return [
-          { type: LootType.EXP, payload: 10 },
-          { type: LootType.Item, payload: item },
-        ]
-      })
+      // stage.setLootGenerator(entity.id, stage => {
+      //   const item = new TomeOfKnowledge(stage)
+      //   // TODO: 这里有坑，没使用 registerItem 返回的 item，而是用了一个临时对象
+      //   stage.registerItem(item)
+      //   return [
+      //     { type: LootType.EXP, payload: 10 },
+      //     { type: LootType.Item, payload: item },
+      //   ]
+      // })
     },
   },
   {
@@ -68,14 +66,14 @@ const templates: MonsterTemplate[] = [
     name: '🐻️',
     mutation(entity, stage) {
       entity.maxHP.base *= 2
-      stage.setLootGenerator(entity.id, () => {
-        const item = new ClothArmor(stage)
-        stage.registerItem(item)
-        return [
-          { type: LootType.EXP, payload: 100 },
-          { type: LootType.Item, payload: item },
-        ]
-      })
+      // stage.setLootGenerator(entity.id, () => {
+      //   const item = new ClothArmor(stage)
+      //   stage.registerItem(item)
+      //   return [
+      //     { type: LootType.EXP, payload: 100 },
+      //     { type: LootType.Item, payload: item },
+      //   ]
+      // })
     },
   },
 ]
