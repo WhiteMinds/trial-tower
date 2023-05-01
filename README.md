@@ -1,4 +1,4 @@
-![](https://img.shields.io/github/license/WhiteMinds/trial-tower) ![](https://img.shields.io/github/languages/top/WhiteMinds/trial-tower) ![](https://img.shields.io/github/repo-size/WhiteMinds/trial-tower) ![](https://img.shields.io/github/contributors/WhiteMinds/trial-tower)
+![](https://img.shields.io/github/license/WhiteMinds/trial-tower) ![](https://img.shields.io/github/languages/top/WhiteMinds/trial-tower) ![](https://img.shields.io/npm/v/hedra-engine?label=hedra-engine) ![](https://img.shields.io/bundlephobia/minzip/hedra-engine)
 
 <div align="center">
   <div align="center">

@@ -1,5 +1,6 @@
 {
   "name": "trial-tower-http-server",
+  "private": true,
   "version": "0.1.0",
   "description": "trial-tower-http-server",
   "main": "dist/index.js",

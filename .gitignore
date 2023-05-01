@@ -89,8 +89,9 @@ typings/
 # nuxt.js build output
 .nuxt
 
-# rollup.js default build output
+# rollup.js default build output and other build output
 dist/
+lib/
 
 # Serverless directories
 .serverless/

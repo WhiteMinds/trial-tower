@@ -1,9 +1,19 @@
 {
   "name": "hedra-engine",
   "version": "0.1.0",
-  "main": "dist/index.js",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "lib/index.js",
+  "module": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": "https://github.com/WhiteMinds/trial-tower",
+  "author": "WhiteMind",
+  "license": "MIT",
   "dependencies": {
     "lodash": "^4.17.21",
     "ramda": "^0.28.0",
