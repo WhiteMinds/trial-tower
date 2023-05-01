@@ -1,9 +1,6 @@
-import { CombatStage, Stage } from '../../../stage'
-import { createUniqueId } from '../../../utils'
-import { EnhanceConstitutionBuff, SoulReaperBuff } from '../../buff'
-import { GrantBuffEffect } from '../../effect'
-import { Entity } from '../../entity'
-import { Skill } from '../Skill'
+import { Skill, Stage, Entity, GrantBuffEffect, CombatStage } from 'hedra-engine'
+import { SoulReaperBuff } from '../../buffs'
+import { createUniqueId } from '../../utils'
 
 export class SoulReaper extends Skill {
   get name() {

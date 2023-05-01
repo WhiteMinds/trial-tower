@@ -70,7 +70,7 @@ export class LocalGameServer implements GameServer {
       {
         name,
       },
-      async stage => stage.createNewPlayerEntity(name),
+      async stage => engine.createNewPlayerEntity(name),
     )
     const entity = await engine.mainStage.getEntity(character.entityId)
     assert(entity)
@@ -97,8 +97,8 @@ export class LocalGameServer implements GameServer {
     const player = await engine.mainStage.getEntity(character.entityId)
     assert(player)
 
-    const enemy1 = await engine.mainStage.createRandomEnemyByPlayerLevel(player)
-    const enemy2 = await engine.mainStage.createRandomEnemyByPlayerLevel(player)
+    const enemy1 = await engine.createRandomEnemyByPlayerLevel(player)
+    const enemy2 = await engine.createRandomEnemyByPlayerLevel(player)
     const combatLogs = await engine.mainStage.beginCombat(player, [enemy1, enemy2])
 
     return {

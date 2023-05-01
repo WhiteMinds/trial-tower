@@ -1,8 +1,8 @@
-import { createAchievementPlugin, Engine, Store } from 'hedra-engine'
-import * as Hedra from 'hedra-engine'
+import { createAchievementPlugin, TrialTowerEngine, equalUniqueId, Store } from 'trial-tower-engine'
+import * as Hedra from 'trial-tower-engine'
 import { Router } from 'express'
 import { UniqueConstraintError } from 'sequelize'
-import { equalUniqueId } from 'packages/hedra-engine/src/utils'
+// import { equalUniqueId } from 'packages/hedra-engine/src/utils'
 import { getTokenPayload, respond } from './utils'
 import { assert, assertNumberType, assertStringType, omit } from '../utils'
 import * as controller from '../controller'
@@ -57,7 +57,7 @@ const store: Store<number> = {
   },
 }
 const achievementPlugin = createAchievementPlugin(store)
-const engine = new Engine(store, [achievementPlugin])
+const engine = new TrialTowerEngine(store, [achievementPlugin])
 
 // TODO: 一个开发时的临时方案
 const saveBeforeExit = async () => {
@@ -114,7 +114,7 @@ router
         {
           name,
         },
-        async stage => stage.createNewPlayerEntity(name),
+        async stage => engine.createNewPlayerEntity(name),
       )
       assertNumberType(character.id)
       const characterModel = await controller.getCharacter(character.id)
@@ -151,8 +151,8 @@ router.route('/combats').post(async (req, res) => {
   const player = await engine.mainStage.getEntity(character.entityId)
   assert(player)
 
-  const enemy1 = await engine.mainStage.createRandomEnemyByPlayerLevel(player)
-  const enemy2 = await engine.mainStage.createRandomEnemyByPlayerLevel(player)
+  const enemy1 = await engine.createRandomEnemyByPlayerLevel(player)
+  const enemy2 = await engine.createRandomEnemyByPlayerLevel(player)
   const combatLogs = await engine.mainStage.beginCombat(player, [enemy1, enemy2])
 
   respond(res, {

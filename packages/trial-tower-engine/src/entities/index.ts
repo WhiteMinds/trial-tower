@@ -1,10 +1,10 @@
+import { MainStage, Entity, LootType } from 'hedra-engine'
 import { sample } from 'lodash'
-import { Entity } from '../model/entity'
-import { FastContinuousHit } from '../model/skill/active/FastContinuousHit'
-import { Fireballs } from '../model/skill/active/Fireballs'
-import { PhysicalAttack } from '../model/skill/active/PhysicalAttack'
-import { MainStage, Stage } from '../stage'
-import { LootType } from '../stage/types'
+import { PhysicalAttack } from '../skills/active/PhysicalAttack'
+import { Fireballs } from '../skills/active/Fireballs'
+import { FastContinuousHit } from '../skills/active/FastContinuousHit'
+import { ClothArmor } from '../items/equip/ClothArmor'
+import { TomeOfKnowledge } from '../items/common/TomeOfKnowledge'
 
 interface RandomOpts {
   level: number
@@ -42,15 +42,15 @@ const templates: MonsterTemplate[] = [
     name: '🦊',
     mutation(entity, stage) {
       entity.addSkill(new Fireballs(stage))
-      // stage.setLootGenerator(entity.id, stage => {
-      //   const item = new TomeOfKnowledge(stage)
-      //   // TODO: 这里有坑，没使用 registerItem 返回的 item，而是用了一个临时对象
-      //   stage.registerItem(item)
-      //   return [
-      //     { type: LootType.EXP, payload: 10 },
-      //     { type: LootType.Item, payload: item },
-      //   ]
-      // })
+      stage.setLootGenerator(entity.id, stage => {
+        const item = new TomeOfKnowledge(stage)
+        // TODO: 这里有坑，没使用 registerItem 返回的 item，而是用了一个临时对象
+        stage.registerItem(item)
+        return [
+          { type: LootType.EXP, payload: 10 },
+          { type: LootType.Item, payload: item },
+        ]
+      })
     },
   },
   {
@@ -66,14 +66,14 @@ const templates: MonsterTemplate[] = [
     name: '🐻️',
     mutation(entity, stage) {
       entity.maxHP.base *= 2
-      // stage.setLootGenerator(entity.id, () => {
-      //   const item = new ClothArmor(stage)
-      //   stage.registerItem(item)
-      //   return [
-      //     { type: LootType.EXP, payload: 100 },
-      //     { type: LootType.Item, payload: item },
-      //   ]
-      // })
+      stage.setLootGenerator(entity.id, () => {
+        const item = new ClothArmor(stage)
+        stage.registerItem(item)
+        return [
+          { type: LootType.EXP, payload: 100 },
+          { type: LootType.Item, payload: item },
+        ]
+      })
     },
   },
 ]

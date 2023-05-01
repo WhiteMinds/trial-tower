@@ -7274,7 +7274,6 @@ __metadata:
     dotenv: ^16.0.0
     express: ^5.0.0-beta.1
     express-jwt: ^6.1.1
-    hedra-engine: "workspace:^"
     jsonwebtoken: ^8.5.1
     lodash: ^4.17.21
     morgan: ^1.10.0
@@ -7282,6 +7281,7 @@ __metadata:
     nodemon: ^2.0.15
     rimraf: ~3.0
     sequelize: ^6.17.0
+    trial-tower-engine: "workspace:^"
     ts-node: ^10.7.0
     tsconfig-paths: ^3.14.1
     tslib: ~2.3.1

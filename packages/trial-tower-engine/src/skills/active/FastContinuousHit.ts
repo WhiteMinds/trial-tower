@@ -1,10 +1,7 @@
+import { Skill, DamageEffect, CombatLog } from 'hedra-engine'
 import { random } from 'lodash'
 import * as R from 'ramda'
-import { Stage } from '../../../stage'
-import { createUniqueId } from '../../../utils'
-import { CombatLog } from '../../combat_log'
-import { DamageEffect } from '../../effect'
-import { Skill } from '../Skill'
+import { createUniqueId } from '../../utils'
 
 export class FastContinuousHit extends Skill {
   get name() {

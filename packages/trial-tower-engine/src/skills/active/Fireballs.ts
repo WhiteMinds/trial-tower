@@ -1,7 +1,5 @@
-import { createUniqueId } from '../../../utils'
-import { CombatLog, Snapshot } from '../../combat_log'
-import { DamageEffect } from '../../effect'
-import { Skill } from '../Skill'
+import { Skill, CombatLog, DamageEffect } from 'hedra-engine'
+import { createUniqueId } from '../../utils'
 
 export class Fireballs extends Skill {
   get name() {

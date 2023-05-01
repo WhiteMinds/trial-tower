@@ -1,9 +1,6 @@
-import { Stage } from '../../../stage'
-import { createUniqueId } from '../../../utils'
-import { EnhanceConstitutionBuff } from '../../buff'
-import { GrantBuffEffect } from '../../effect'
-import { Entity } from '../../entity'
-import { Skill } from '../Skill'
+import { Skill, Entity, GrantBuffEffect } from 'hedra-engine'
+import { createUniqueId } from '../../utils'
+import { EnhanceConstitutionBuff } from '../../buffs'
 
 export class EnhanceConstitution extends Skill {
   get name() {

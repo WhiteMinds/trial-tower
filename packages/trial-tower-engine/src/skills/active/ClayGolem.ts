@@ -1,4 +1,4 @@
-import { Skill } from '../Skill'
+import { Skill } from 'hedra-engine'
 import { PhysicalAttack } from './PhysicalAttack'
 
 export class ClayGolem extends Skill {

@@ -7,7 +7,7 @@ import { WoodenSword } from './equip/WoodenSword'
 
 export * from './ItemTemplateId'
 
-export function registerItemTemplate() {
+export function registerItemTemplates() {
   Object.assign(ItemRegistry, {
     [ItemTemplateId.TomeOfKnowledge]: TomeOfKnowledge,
     [ItemTemplateId.WoodenSword]: WoodenSword,

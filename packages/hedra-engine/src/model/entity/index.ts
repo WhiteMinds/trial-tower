@@ -4,9 +4,12 @@ import { UniqueId } from '../../types'
 import { BooleanT, createUniqueId } from '../../utils'
 import { Buff } from '../buff'
 import { Equip, Item } from '../item'
-import { Skill, SkillTemplateMap } from '../skill'
-import { SkillTemplateId } from '../skill/SkillTemplateId'
+import { Skill, SkillRegistry } from '../skill'
 import { AttrDescriptor, AttrDescriptor$Attack, AttrDescriptor$HealthPoint } from './AttrDescriptor'
+
+export * from './AttrDescriptor'
+
+type SkillTemplateId = number | string
 
 export interface SkillModifier {
   skillTemplateId: SkillTemplateId
@@ -57,7 +60,7 @@ export class Entity {
   addSkillModifier(skillModifier: SkillModifier): void {
     const existedSkill = this.getSkills().find(({ templateId }) => templateId === skillModifier.skillTemplateId)
     if (existedSkill == null) {
-      const skill = new SkillTemplateMap[skillModifier.skillTemplateId](this.stage)
+      const skill = new SkillRegistry[skillModifier.skillTemplateId](this.stage)
       skill.level = skillModifier.upgradeLevel
       this.addSkill(skill)
       return

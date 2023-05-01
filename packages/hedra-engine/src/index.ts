@@ -11,7 +11,10 @@ export * from './model/combat_log'
 export * from './model/item'
 export * from './model/skill'
 export * from './model/buff'
+export * from './model/effect'
 export * from './plugins'
+
+export { createUniqueId, equalUniqueId } from './utils'
 
 export class Engine {
   mainStage: MainStage

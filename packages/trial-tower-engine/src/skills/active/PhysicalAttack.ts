@@ -1,8 +1,5 @@
-import { Stage } from '../../../stage'
-import { createUniqueId } from '../../../utils'
-import { CombatLog } from '../../combat_log'
-import { DamageEffect } from '../../effect'
-import { Skill } from '../Skill'
+import { Skill, CombatLog, DamageEffect } from 'hedra-engine'
+import { createUniqueId } from '../../utils'
 
 export class PhysicalAttack extends Skill {
   get name() {

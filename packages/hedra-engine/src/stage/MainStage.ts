@@ -2,24 +2,11 @@ import { CombatStage } from '.'
 import { CombatLog } from '../model/combat_log'
 import { Entity } from '../model/entity'
 import { Item } from '../model/item'
-import { ClayGolem } from '../model/skill/active/ClayGolem'
-import { Concentrate } from '../model/skill/active/Concentrate'
-import { FastContinuousHit } from '../model/skill/active/FastContinuousHit'
-import { Fireballs } from '../model/skill/active/Fireballs'
-import { PhysicalAttack } from '../model/skill/active/PhysicalAttack'
-import { EnhanceConstitution } from '../model/skill/passivity/EnhanceConstitution'
-import { SoulReaper } from '../model/skill/passivity/SoulReaper'
-import { createRandomEnemy } from '../monster'
 import { EnginePlugin } from '../plugins'
 import { Store } from '../store'
 import { UniqueId } from '../types'
 import { assert } from '../utils'
 import { LootGenerator, LootType, Stage } from './types'
-
-const StoreKey = {
-  Entity: 'Entity',
-  Item: 'Item',
-}
 
 export class MainStage implements Stage {
   constructor(private store: Store, private plugins: EnginePlugin[]) {}
@@ -107,39 +94,6 @@ export class MainStage implements Stage {
 
   getLootGenerator(id: Entity['id']): LootGenerator | null {
     return this.lootTableMap.get(id) ?? null
-  }
-
-  async createNewPlayerEntity(name: string): Promise<Entity> {
-    // TODO: test code
-    const newPlayer = await this.createEntity({
-      name,
-      constitution: 10,
-      maxHP: 10,
-      atk: 2,
-      speed: 10,
-    })
-    newPlayer.addSkill(new PhysicalAttack(this))
-    newPlayer.addSkill(new Concentrate(this))
-    newPlayer.addSkill(new Fireballs(this))
-    newPlayer.addSkill(new ClayGolem(this))
-    const fastContinuousHit = new FastContinuousHit(this)
-    fastContinuousHit.level = 2
-    newPlayer.addSkill(fastContinuousHit)
-    const enhanceConstitution = new EnhanceConstitution(this)
-    enhanceConstitution.level = 2
-    newPlayer.addSkill(enhanceConstitution)
-    const soulReaper = new SoulReaper(this)
-    soulReaper.killCount = 10
-    newPlayer.addSkill(soulReaper)
-    // const sword = await this.registerItem(new FireWand(this))
-    // newPlayer.equip(sword)
-    // const armor = await this.registerItem(new ClothArmor(this))
-    // newPlayer.equip(armor)
-    return newPlayer
-  }
-
-  async createRandomEnemyByPlayerLevel(player: Entity): Promise<Entity> {
-    return createRandomEnemy(this, { level: player.level })
   }
 
   async beginCombat(player: Entity, enemies: Entity[]): Promise<CombatLog[]> {

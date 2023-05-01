@@ -1,4 +1,5 @@
-import { Equip, EquipSlot, EquipRequired, SkillTemplateId } from 'hedra-engine'
+import { Equip, EquipSlot, EquipRequired } from 'hedra-engine'
+import { SkillTemplateId } from '../../skills'
 
 export class FireWand extends Equip {
   get slot(): EquipSlot {

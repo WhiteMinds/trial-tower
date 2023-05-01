@@ -1,9 +1,7 @@
-import R from 'ramda'
 import { Item } from '.'
 import { Entity, SkillModifier } from '../entity'
 import { AttrModifier } from '../entity/AttrDescriptor'
-import { SkillTemplateMap } from '../skill'
-import { SkillTemplateId } from '../skill/SkillTemplateId'
+import { SkillRegistry } from '../skill'
 
 export interface EquipRequired {
   level?: number
@@ -168,6 +166,6 @@ function getAttrBonusTexts(item: Equip): string[] {
 
 function getSkillBonusTexts(item: Equip): string[] {
   return item.skillModifiers.map(
-    modifier => `${new SkillTemplateMap[modifier.skillTemplateId](item.stage).name} +${modifier.upgradeLevel}`,
+    modifier => `${new SkillRegistry[modifier.skillTemplateId](item.stage).name} +${modifier.upgradeLevel}`,
   )
 }

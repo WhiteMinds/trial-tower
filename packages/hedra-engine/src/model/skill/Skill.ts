@@ -1,11 +1,11 @@
-import { SkillTemplateMap } from '.'
+import { SkillRegistry } from '.'
 import { CombatStage, Stage } from '../../stage'
 import { Entity } from '../entity'
-import { SkillTemplateId } from './SkillTemplateId'
+
+type TemplateId = number | string
 
 export class Skill {
-  // 该属性会在初始化时被自动处理，所以都默认给 Base 就行
-  static templateId = SkillTemplateId.Base
+  static templateId: TemplateId = ''
   get templateId() {
     return (this.constructor as typeof Skill).templateId
   }
@@ -47,12 +47,12 @@ export class Skill {
   }
 
   static deserialize(data: Skill.Serialized, stage: Stage): Skill {
-    const hasCustomDeserialize = SkillTemplateMap[data.templateId].deserialize !== this.deserialize
+    const hasCustomDeserialize = SkillRegistry[data.templateId].deserialize !== this.deserialize
     if (hasCustomDeserialize) {
-      return SkillTemplateMap[data.templateId].deserialize(data, stage)
+      return SkillRegistry[data.templateId].deserialize(data, stage)
     }
 
-    const skill = new SkillTemplateMap[data.templateId](stage)
+    const skill = new SkillRegistry[data.templateId](stage)
     skill.level = data.level
     return skill
   }
@@ -100,13 +100,13 @@ export class Skill {
 
 export namespace Skill {
   export interface Serialized {
-    templateId: SkillTemplateId
+    templateId: TemplateId
     level: number
   }
 
   export interface Snapshot {
     snapshotType: 'Skill'
-    templateId: SkillTemplateId
+    templateId: TemplateId
     name: string
     description: string
     level: number
