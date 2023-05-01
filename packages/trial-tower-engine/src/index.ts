@@ -15,6 +15,7 @@ import { SoulReaper } from './skills/passivity/SoulReaper'
 export * from 'hedra-engine'
 export * from './items'
 export * from './skills'
+export * from './plugins'
 
 registerItemTemplates()
 registerSkillTemplates()
